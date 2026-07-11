@@ -61,7 +61,7 @@
         <div class="icon">🔥</div>
         <div>
           <div class="name">Fire Damper Hole Calculator</div>
-          <div class="desc">BSB FSD-C and FSD-TD builder's opening sizes by installation method.</div>
+          <div class="desc">BSB and Actionair builder's opening calculators using product-specific installation methods.</div>
         </div>
         <span class="status-live">Beta</span>
       </button>
@@ -168,21 +168,26 @@
 </svg><div class="brand-copy"><strong>Vent Tools</strong><span>Fire Damper Openings</span></div></div>
   <div class="version-pill">Beta</div>
 </div>
-<div class="page-intro card"><h2>BSB Fire Damper Hole Calculator</h2><p class="sub">Choose the exact series and tested installation method.</p></div>
+<div class="page-intro card"><h2>Fire Damper Hole Calculator</h2><p class="sub">Choose the manufacturer, exact product and tested installation method.</p></div>
 <div class="card">
   <div class="row">
-    <div><label>Manufacturer</label><select id="fdManufacturer"><option selected>BSB</option></select></div>
-    <div><label>Damper series</label><select id="fdSeries"><option value="FSD-TD" selected>FSD-TD — Rectangular / square</option><option value="FSD-C">FSD-C — Circular</option></select></div>
+    <div><label for="fdManufacturer">Manufacturer</label><select id="fdManufacturer"><option value="BSB" selected>BSB</option><option value="ACTIONAIR">Actionair by Swegon</option></select></div>
+    <div><label for="fdSeries">Product / series</label><select id="fdSeries"></select></div>
   </div>
-  <label>Installation method</label><select id="fdMethod"></select>
+  <label for="fdMethod">Installation method</label><select id="fdMethod"></select>
+
   <div id="fdRectInputs"><div class="row">
-    <div><label>Nominal duct width (mm)</label><input id="fdWidth" type="number" value="500" min="1"></div>
-    <div><label>Nominal duct height (mm)</label><input id="fdHeight" type="number" value="300" min="1"></div>
+    <div><label for="fdWidth">Nominal duct width (mm)</label><input id="fdWidth" type="number" value="500" min="1"></div>
+    <div><label for="fdHeight">Nominal duct height (mm)</label><input id="fdHeight" type="number" value="300" min="1"></div>
   </div></div>
+
   <div id="fdCircularInputs" style="display:none">
-    <label>Nominal damper diameter (mm)</label><input id="fdDiameter" type="number" value="250" min="1">
-    <div id="fdBoardWrap" style="display:none"><label>Fire-board thickness lining each side (mm)</label><input id="fdBoardThickness" type="number" value="12.5" min="0" step="0.5"><div class="hint">Drywall cut size includes two board thicknesses plus the nominal finished gap.</div></div>
-    </div>
+    <label for="fdDiameter" id="fdDiameterLabel">Nominal damper diameter (mm)</label><input id="fdDiameter" type="number" value="250" min="1">
+    <div id="fdBoardWrap" style="display:none"><label for="fdBoardThickness">Board thickness lining each edge of the cut aperture (mm)</label><input id="fdBoardThickness" type="number" value="12.5" min="0" step="0.5"><div class="hint">The cut size adds two lining-board thicknesses to the finished opening dimension.</div></div>
+    <div id="fdWallBuildWrap" style="display:none"><label for="fdWallBuild">Plasterboard wall method</label><select id="fdWallBuild"><option value="AA/F13440">AA/F13440 — 1 × Type F board each wall face</option><option value="AA/F12820">AA/F12820 — 2 × Type F boards each wall face</option></select></div>
+    <div id="fdShapeWrap" style="display:none"><label for="fdApertureShape">Aperture shape</label><select id="fdApertureShape"><option value="square">Square opening</option><option value="circular">Circular opening</option></select></div>
+    <div id="fdAllowanceWrap" style="display:none"><label for="fdAllowance">Total clearance added to casing diameter (mm)</label><select id="fdAllowance"></select><div class="hint" id="fdAllowanceHint"></div></div>
+  </div>
 </div>
 <div class="card">
   <svg id="fdDiagram" class="diagram" viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg"><defs><marker id="fdArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#064b82"/></marker></defs><g id="fdDiagramLayer"></g></svg>
@@ -191,9 +196,9 @@
     <div class="tile"><div class="lab">Selected method</div><div class="val fd-method-value" id="fdMethodBig">—</div></div>
   </div>
   <div id="fdMessage" class="msg ok"></div>
-  <div class="fd-detail-grid"><div><strong>Damper:</strong> <span id="fdDamperSummary">—</span></div><div><strong>Rule:</strong> <span id="fdRuleSummary">—</span></div></div>
-  <div class="actions"><button class="action primary" id="fdCopyBtn">Copy result</button><a class="action fd-manual-link" id="fdManualLink" href="#" target="_blank" rel="noopener">View official BSB manual</a><button class="action" id="fdResetBtn">Reset</button></div>
-  <div class="resource-note fd-safety-note">Use the result only for the selected BSB series and installation method. Confirm the damper label, supporting construction and latest official installation manual before forming the opening.</div>
+  <div class="fd-detail-grid"><div><strong>Damper:</strong> <span id="fdDamperSummary">—</span></div><div><strong>Rule:</strong> <span id="fdRuleSummary">—</span></div><div><strong>Reference:</strong> <span id="fdReferenceSummary">—</span></div><div><strong>Guide:</strong> <span id="fdGuideSummary">—</span></div></div>
+  <div class="actions"><button class="action primary" id="fdCopyBtn">Copy result</button><a class="action fd-manual-link" id="fdManualLink" href="#" target="_blank" rel="noopener">View official manufacturer manual</a><button class="action" id="fdResetBtn">Reset</button></div>
+  <div class="resource-note fd-safety-note">Use the result only for the selected manufacturer, product and installation method. Confirm the damper label, supporting construction, permitted aperture range and latest official installation manual before forming the opening.</div>
 </div>
 </section>
 

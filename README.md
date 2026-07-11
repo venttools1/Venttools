@@ -92,3 +92,15 @@ Supports FSD-TD methods M5, M6, M9, M10 and M11, plus FSD-C M9, M10 and M11. Eac
 - FSD-C M10 is fixed at nominal diameter +20 mm; the user-selectable allowance was removed.
 - FSD-C M14 is presented as nominal damper size with a +10 mm trimming tolerance.
 - FSD-TD M5, M6, M9, M10 and M11 opening rules were checked against the official BSB IOM.
+
+
+## v4.2 — Actionair CSS beta
+
+Added a manufacturer-aware fire-damper framework and the first Actionair by Swegon product: CSS.
+
+Supported CSS methods from Actionair CSS Installation Guide LNNN00356 v6.0 dated 27 May 2025:
+- Vertical plasterboard wall: square finished opening casing diameter +10–40 mm; cut size adds two aperture-lining board thicknesses.
+- Vertical masonry wall: square opening casing diameter +10–40 mm, or circular opening +10–30 mm.
+- Horizontal concrete slab: square opening casing diameter +10–30 mm. Circular slab mode is intentionally disabled because the guide prose and drawing show conflicting maximum allowances.
+
+The user selects an allowance within the published permitted range. Default is 20 mm total (10 mm nominal each side). Results display the official drawing reference, guide revision and direct official-manual link.
