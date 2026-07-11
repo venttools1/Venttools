@@ -72,3 +72,11 @@ specific combination is relied upon, because it differs sharply from adjacent si
 - Homepage now separates live tools, tools in development and technical resources.
 - Removed unclear bend-calculator placeholders.
 - Technical resources are described as links to official manuals and guidance rather than copied standards.
+
+
+## Homepage duplication fix
+
+- Removed the duplicated legacy “In development” block.
+- Homepage now contains exactly three sections: Live tools, Coming soon and Technical resources.
+- Removed repeated “Coming soon” badges from cards.
+- Updated the browser title for the live site.

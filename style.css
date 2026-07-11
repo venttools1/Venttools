@@ -192,3 +192,21 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
     padding-right:72px;
   }
 }
+
+.home-hero{
+  padding-top:20px;
+}
+.home-subtitle{
+  font-size:15px;
+  font-weight:750;
+}
+.home-section-title{
+  margin-top:24px;
+}
+.toolbtn-disabled,
+.resource-card{
+  text-align:left;
+}
+.toolbtn-disabled{
+  background:#f8fafc;
+}
