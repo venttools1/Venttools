@@ -104,3 +104,8 @@ Supported CSS methods from Actionair CSS Installation Guide LNNN00356 v6.0 dated
 - Horizontal concrete slab: square opening casing diameter +10–30 mm. Circular slab mode is intentionally disabled because the guide prose and drawing show conflicting maximum allowances.
 
 The user selects an allowance within the published permitted range. Default is 20 mm total (10 mm nominal each side). Results display the official drawing reference, guide revision and direct official-manual link.
+
+
+## v4.3 Actionair DWFX-F beta
+
+Added DWFX-F / DWFX-3F methods from Actionair guide LNNN00354 v6.0 dated 17 March 2026. Inputs use measured overall casing dimensions; SmokeShield width must include the 28 mm PTC shroud. Supported automatic methods include plasterboard wall, plasterboard under slab, masonry under slab, shaftwall and composite panel. Masonry wall and timber-stud methods are link-only until a safe universal opening rule is confirmed from the official sizing tool/drawing.

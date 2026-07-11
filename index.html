@@ -177,9 +177,21 @@
   <label for="fdMethod">Installation method</label><select id="fdMethod"></select>
 
   <div id="fdRectInputs"><div class="row">
-    <div><label for="fdWidth">Nominal duct width (mm)</label><input id="fdWidth" type="number" value="500" min="1"></div>
-    <div><label for="fdHeight">Nominal duct height (mm)</label><input id="fdHeight" type="number" value="300" min="1"></div>
+    <div><label for="fdWidth" id="fdWidthLabel">Nominal duct width (mm)</label><input id="fdWidth" type="number" value="500" min="1"></div>
+    <div><label for="fdHeight" id="fdHeightLabel">Nominal duct height (mm)</label><input id="fdHeight" type="number" value="300" min="1"></div>
   </div></div>
+
+  <div id="fdDwfxWrap" style="display:none">
+    <div class="row">
+      <div><label for="fdDwfxVariant">Damper type</label><select id="fdDwfxVariant"><option value="SMOKE">SmokeShield PTC</option><option value="FIRE">FireShield</option></select></div>
+      <div><label for="fdDwfxBoard">Aperture lining-board thickness (mm)</label><input id="fdDwfxBoard" type="number" value="12.5" min="0" step="0.5"></div>
+    </div>
+    <div id="fdDwfxAllowanceWrap" class="row">
+      <div><label for="fdDwfxWAllowance">Finished-opening width allowance (mm)</label><select id="fdDwfxWAllowance"></select></div>
+      <div><label for="fdDwfxHAllowance">Finished-opening height allowance (mm)</label><select id="fdDwfxHAllowance"></select></div>
+    </div>
+    <div class="hint" id="fdDwfxHint">Enter the measured overall casing size. For SmokeShield, width must include the 28 mm PTC shroud. Do not include the peripheral flange.</div>
+  </div>
 
   <div id="fdCircularInputs" style="display:none">
     <label for="fdDiameter" id="fdDiameterLabel">Nominal damper diameter (mm)</label><input id="fdDiameter" type="number" value="250" min="1">

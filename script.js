@@ -297,6 +297,16 @@ const FD_MANUFACTURERS={
       CSS_DRY:{label:"Vertical — plasterboard wall",type:"css-dry",reference:"AA/F13440 or AA/F12820",min:10,max:40,step:10,defaultAllowance:20},
       CSS_MASONRY:{label:"Vertical — masonry wall",type:"css-masonry",reference:"AA/F12822",squareMin:10,squareMax:40,circleMin:10,circleMax:30,step:10,defaultAllowance:20},
       CSS_SLAB:{label:"Horizontal — concrete slab",type:"css-slab",reference:"AA/F12821",squareMin:10,squareMax:30,step:10,defaultAllowance:20}
+    }},
+    "DWFX-F":{label:"DWFX-F / DWFX-3F — Rectangular",shape:"rect",manual:"https://www.swegon.com/globalassets/digizuite/10506-en-smokeshield_fireshield_dwfx-f_installation_en.pdf",guide:"Actionair DWFX-F Installation Guide",revision:"LNNN00354 v6.0 • 17 March 2026",methods:{
+      DW_DRY_1:{label:"Vertical plasterboard wall — 1 × Type F board each face",type:"dwfx-dry-fixed",referenceSmoke:"AA/F13412",referenceFire:"AA/F13440",w:30,h:30,boardsW:2,boardsH:2},
+      DW_DRY_2:{label:"Vertical plasterboard wall — 2 × Type F boards each face",type:"dwfx-dry-range",referenceSmoke:"AA/F10704",referenceFire:"AA/F10705",smokeW:[10,52],smokeH:[10,40],fireW:[10,40],fireH:[10,40],boardsW:2,boardsH:2},
+      DW_UNDER_DRY:{label:"DWFX-3F plasterboard wall under concrete slab",type:"dwfx-under-dry",referenceSmoke:"AA/F11945",referenceFire:"AA/F11944",smokeW:[10,57],smokeH:[10,30],fireW:[10,60],fireH:[5,30],boardsW:2,boardsH:1},
+      DW_UNDER_MASONRY:{label:"DWFX-3F masonry wall under concrete slab",type:"dwfx-range",referenceSmoke:"AA/F12394",referenceFire:"AA/F12827",smokeW:[10,57],smokeH:[5,30],fireW:[10,80],fireH:[5,40],boardsW:0,boardsH:0},
+      DW_SHAFT:{label:"DWFX-F plasterboard shaftwall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13472",smokeOnly:true,w:30,h:30,boardsW:2,boardsH:2},
+      DW_COMPOSITE:{label:"DWFX-F composite panel wall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13396",smokeOnly:true,w:52,h:60,boardsW:0,boardsH:0},
+      DW_MASONRY_LINK:{label:"DWFX-F masonry wall — use official hole sizer / drawing",type:"dwfx-link",referenceSmoke:"AA/F12493",referenceFire:"AA/F10707"},
+      DW_TIMBER_LINK:{label:"DWFX-F timber stud partition — official drawing required",type:"dwfx-link",referenceSmoke:"AA/F13752",smokeOnly:true}
     }}
   }}
 };
@@ -305,9 +315,24 @@ function currentFD(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man
 function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;s.appendChild(o)});fillFDMethods()}
 function fillFDMethods(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=$("fdMethod");m.innerHTML="";Object.entries(p.methods).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});updateFDInputs()}
 function setAllowanceOptions(min,max,step,def){const sel=$("fdAllowance");sel.innerHTML="";for(let n=min;n<=max;n+=step){const o=document.createElement("option");o.value=n;o.textContent=`${n} mm total (${n/2} mm nominal each side)`;if(n===def)o.selected=true;sel.appendChild(o)}}
-function updateFDInputs(){const {p,m}=currentFD(),circle=p.shape==="circle";
+
+function setNumericOptions(id,min,max,def){const s=$(id);s.innerHTML="";for(let n=min;n<=max;n++){const o=document.createElement("option");o.value=n;o.textContent=n+" mm";if(n===def)o.selected=true;s.appendChild(o)}}
+function configureDwfx(m){const variant=$("fdDwfxVariant").value;const isSmoke=variant==="SMOKE";if(m.smokeOnly&&!isSmoke){$("fdDwfxVariant").value="SMOKE"}
+ const v=$("fdDwfxVariant").value;let wr=null,hr=null;
+ if(m.type==="dwfx-dry-fixed"||m.type==="dwfx-fixed"){wr=[m.w,m.w];hr=[m.h,m.h]}
+ else if(m.type.startsWith("dwfx-")&&m.type!=="dwfx-link"){wr=v==="SMOKE"?m.smokeW:m.fireW;hr=v==="SMOKE"?m.smokeH:m.fireH}
+ if(wr&&hr){setNumericOptions("fdDwfxWAllowance",wr[0],wr[1],Math.round((wr[0]+wr[1])/2));setNumericOptions("fdDwfxHAllowance",hr[0],hr[1],Math.round((hr[0]+hr[1])/2))}
+ $("fdDwfxAllowanceWrap").style.display=m.type==="dwfx-link"?"none":"grid";
+ $("fdDwfxBoard").closest("div").style.display=(m.boardsW||m.boardsH)?"block":"none";
+ const smokeText='For SmokeShield, the entered width must include the 28 mm PTC shroud. Do not include the peripheral flange.';
+ $("fdDwfxHint").textContent=m.type==="dwfx-link"?'This method is listed for reference only because the current guide does not provide one safe universal opening formula. Use the official Actionair hole-sizing tool or installation drawing.':`Enter measured overall casing width × height. ${smokeText}`;
+}
+function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="circle",dwfx=productKey==="DWFX-F";
   $("fdRectInputs").style.display=p.shape==="rect"?"block":"none";
   $("fdCircularInputs").style.display=circle?"block":"none";
+  $("fdDwfxWrap").style.display=dwfx?"block":"none";
+  $("fdWidthLabel").textContent=dwfx?"Measured overall casing width (mm)":"Nominal duct width (mm)";
+  $("fdHeightLabel").textContent=dwfx?"Measured overall casing height (mm)":"Nominal duct height (mm)";
   $("fdBoardWrap").style.display=["bsb-dry","css-dry"].includes(m.type)?"block":"none";
   $("fdWallBuildWrap").style.display=m.type==="css-dry"?"block":"none";
   $("fdShapeWrap").style.display=["css-masonry"].includes(m.type)?"block":"none";
@@ -316,6 +341,7 @@ function updateFDInputs(){const {p,m}=currentFD(),circle=p.shape==="circle";
   if(m.type==="css-dry")setAllowanceOptions(m.min,m.max,m.step,m.defaultAllowance);
   if(m.type==="css-masonry"){const shape=$("fdApertureShape").value;setAllowanceOptions(shape==="square"?m.squareMin:m.circleMin,shape==="square"?m.squareMax:m.circleMax,m.step,m.defaultAllowance)}
   if(m.type==="css-slab")setAllowanceOptions(m.squareMin,m.squareMax,m.step,m.defaultAllowance);
+  if(dwfx)configureDwfx(m);
   calcFD();
 }
 function drawFD(r){const g=$("fdDiagramLayer"),title=`${r.manufacturer} • ${r.product}`;
@@ -323,7 +349,21 @@ function drawFD(r){const g=$("fdDiagramLayer"),title=`${r.manufacturer} • ${r.
  else{const cx=380,cy=150,ro=105,ratio=Math.min(.92,r.dia/(r.visualOpen||r.dia+20)),rd=Math.max(52,ro*ratio);if(r.apertureShape==="square"){g.innerHTML=`<rect x="${cx-ro}" y="${cy-ro}" width="${2*ro}" height="${2*ro}" rx="5" fill="#eef2f6" stroke="#334155" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="${rd}" fill="#cbd5e1" stroke="#064b82" stroke-width="3"/><line x1="${cx-ro}" y1="${cy+ro+30}" x2="${cx+ro}" y2="${cy+ro+30}" stroke="#064b82" stroke-width="2" marker-start="url(#fdArrow)" marker-end="url(#fdArrow)"/><text x="${cx}" y="${cy+ro+55}" text-anchor="middle" font-family="system-ui" font-size="16" font-weight="900" fill="#064b82">${r.opening}</text><text x="${cx}" y="32" text-anchor="middle" font-family="system-ui" font-size="18" font-weight="950" fill="#142033">${title}</text><text x="${cx}" y="${cy+7}" text-anchor="middle" font-family="system-ui" font-size="15" font-weight="900" fill="#142033">Ø ${fmt0(r.dia)} casing</text>`}else{g.innerHTML=`<circle cx="${cx}" cy="${cy}" r="${ro}" fill="#eef2f6" stroke="#334155" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="${rd}" fill="#cbd5e1" stroke="#064b82" stroke-width="3"/><line x1="${cx-ro}" y1="${cy+ro+30}" x2="${cx+ro}" y2="${cy+ro+30}" stroke="#064b82" stroke-width="2" marker-start="url(#fdArrow)" marker-end="url(#fdArrow)"/><text x="${cx}" y="${cy+ro+55}" text-anchor="middle" font-family="system-ui" font-size="16" font-weight="900" fill="#064b82">${r.opening}</text><text x="${cx}" y="32" text-anchor="middle" font-family="system-ui" font-size="18" font-weight="950" fill="#142033">${title}</text><text x="${cx}" y="${cy+7}" text-anchor="middle" font-family="system-ui" font-size="15" font-weight="900" fill="#142033">Ø ${fmt0(r.dia)} casing</text>`}}
 }
 function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,methodKey}=currentFD();let r;
- if(p.shape==="rect"){const W=parseFloat($("fdWidth").value)||0,H=parseFloat($("fdHeight").value)||0;r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W+m.w,openH:H+m.h,opening:`${fmt0(W+m.w)} × ${fmt0(H+m.h)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm`,rule:`Width +${m.w} mm; height +${m.h} mm`,reference:m.reference}}
+ if(p.shape==="rect"){const W=parseFloat($("fdWidth").value)||0,H=parseFloat($("fdHeight").value)||0;
+  if(productKey==="DWFX-F"){
+    const variant=$("fdDwfxVariant").value,board=parseFloat($("fdDwfxBoard").value)||0;
+    if(m.smokeOnly&&variant!=="SMOKE")$("fdDwfxVariant").value="SMOKE";
+    const actualVariant=$("fdDwfxVariant").value;
+    const ref=actualVariant==="SMOKE"?m.referenceSmoke:m.referenceFire;
+    if(m.type==="dwfx-link"){
+      r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Official hole sizer / drawing required",damper:`${fmt0(W)} × ${fmt0(H)} mm casing`,rule:"No universal Vent Tools calculation enabled for this method",reference:ref||"See official guide",isLinkOnly:true};
+    }else{
+      const wa=parseFloat($("fdDwfxWAllowance").value)||0,ha=parseFloat($("fdDwfxHAllowance").value)||0;
+      const openW=W+wa+(m.boardsW||0)*board,openH=H+ha+(m.boardsH||0)*board;
+      r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${(m.boardsW||m.boardsH)?`; cut size also adds ${m.boardsW||0} × board to width and ${m.boardsH||0} × board to height`:""}`,reference:ref,variant:actualVariant};
+    }
+  }else r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W+m.w,openH:H+m.h,opening:`${fmt0(W+m.w)} × ${fmt0(H+m.h)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm`,rule:`Width +${m.w} mm; height +${m.h} mm`,reference:m.reference}
+ }
  else{const dia=parseFloat($("fdDiameter").value)||0;r={shape:"circle",manufacturer:man.label,product:productKey,method:methodKey,dia,damper:`Ø ${fmt0(dia)} mm`,reference:m.reference};
   if(m.type==="bsb-dry"){const b=parseFloat($("fdBoardThickness").value)||0;r.visualOpen=r.openD=dia+20+2*b;r.apertureShape="square";r.opening=`${fmt0(r.openD)} × ${fmt0(r.openD)} mm cut size`;r.rule=`Diameter +20 mm gap + 2 × ${fmt(b)} mm board`}
   else if(m.type==="bsb-masonry"){r.visualOpen=r.openD=dia+20;r.apertureShape="square";r.opening=`${fmt0(r.openD)} mm square or circular`;r.rule="Diameter +20 mm"}
@@ -332,7 +372,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
   else if(m.type==="css-masonry"){const a=parseFloat($("fdAllowance").value)||20,shape=$("fdApertureShape").value,open=dia+a;r.visualOpen=open;r.apertureShape=shape;r.opening=shape==="square"?`${fmt0(open)} × ${fmt0(open)} mm square`:`Ø ${fmt0(open)} mm circular`;r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=shape==="square"?`Permitted square allowance: ${m.squareMin}–${m.squareMax} mm total.`:`Permitted circular allowance: ${m.circleMin}–${m.circleMax} mm total.`}
   else if(m.type==="css-slab"){const a=parseFloat($("fdAllowance").value)||20,open=dia+a;r.visualOpen=open;r.apertureShape="square";r.opening=`${fmt0(open)} × ${fmt0(open)} mm square`;r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=`Supported square-opening allowance: ${m.squareMin}–${m.squareMax} mm total. Circular slab opening is not enabled because the current guide text and drawing conflict.`}
  }
- $("fdOpeningBig").textContent=r.opening;$("fdMethodBig").textContent=`${r.product} • ${r.reference}`;$("fdDamperSummary").textContent=r.damper;$("fdRuleSummary").textContent=r.rule;$("fdReferenceSummary").textContent=r.reference;$("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;$("fdManualLink").href=p.manual;drawFD(r);const range=r.range?` ${r.range}`:"";fdMsg("ok",`✅ Independent Vent Tools result based on ${man.label} published installation guidance.${range} Verify the current official manual before construction.`);return r}
+ $("fdOpeningBig").textContent=r.opening;$("fdMethodBig").textContent=`${r.product} • ${r.reference}`;$("fdDamperSummary").textContent=r.damper;$("fdRuleSummary").textContent=r.rule;$("fdReferenceSummary").textContent=r.reference;$("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;$("fdManualLink").href=p.manual;drawFD(r);const range=r.range?` ${r.range}`:"";if(r.isLinkOnly)fdMsg("warn","⚠ This installation is identified, but no automatic opening is given because the current guide does not provide one safe universal formula. Use the official Actionair hole sizer or drawing.");else fdMsg("ok",`✅ Independent Vent Tools result based on ${man.label} published installation guidance.${range} Verify the current official manual before construction.`);return r}
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nBuilder's opening: ${r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
-function resetFD(){$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdApertureShape").value="square";fillFDProducts()}
-if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",fillFDMethods);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance"].forEach(id=>$(id).addEventListener("change",calcFD));["fdWidth","fdHeight","fdDiameter","fdBoardThickness"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
+function resetFD(){$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
+if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",fillFDMethods);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
