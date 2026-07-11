@@ -1,6 +1,75 @@
-const $=id=>document.getElementById(id);function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');if(id==='offset')calculateOffset();if(id==='ductulator')calculateDuct()}function rad(d){return d*Math.PI/180}function deg(r){return r*180/Math.PI}function fmt(x){return Number.isFinite(x)?(Math.round(x*10)/10).toFixed(1):'—'}function fmt0(x){return Number.isFinite(x)?String(Math.round(x)):'—'}function getAngle(){return $('angle').value==='custom'?(parseFloat($('angleCustom').value)||45):(parseFloat($('angle').value)||45)}function setMsg(type,txt){let m=$('msg');m.className='msg '+type;m.textContent=txt}
+const $=id=>document.getElementById(id);function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');if(id==='offset')calculateOffset();if(id==='ductulator')calculateDuct();if(id==='fireDamper')calcFD()}function rad(d){return d*Math.PI/180}function deg(r){return r*180/Math.PI}function fmt(x){return Number.isFinite(x)?(Math.round(x*10)/10).toFixed(1):'—'}function fmt0(x){return Number.isFinite(x)?String(Math.round(x)):'—'}function getAngle(){return $('angle').value==='custom'?(parseFloat($('angleCustom').value)||45):(parseFloat($('angle').value)||45)}function setMsg(type,txt){let m=$('msg');m.className='msg '+type;m.textContent=txt}
 function ductPath(x1,y1,x2,y2,w){let vx=x2-x1,vy=y2-y1,L=Math.hypot(vx,vy)||1,nx=-vy/L*w/2,ny=vx/L*w/2;return`M ${x1+nx} ${y1+ny} L ${x2+nx} ${y2+ny} L ${x2-nx} ${y2-ny} L ${x1-nx} ${y1-ny} Z`}function spiralLines(x1,y1,x2,y2,w,count){let vx=x2-x1,vy=y2-y1,L=Math.hypot(vx,vy)||1,ux=vx/L,uy=vy/L,nx=-uy,ny=ux,s='';for(let i=1;i<count;i++){let t=i/count*L,cx=x1+ux*t,cy=y1+uy*t,a=18;s+=`<line x1="${cx+nx*w*.42-ux*a}" y1="${cy+ny*w*.42-uy*a}" x2="${cx-nx*w*.42+ux*a}" y2="${cy-ny*w*.42+uy*a}" stroke="#9aa4b2" stroke-width="1.4"/>`}return s}
 function annularSectorPath(cx,cy,rO,rI,a1,a2){const p=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)],A=p(rO,a1),B=p(rO,a2),C=p(rI,a2),D=p(rI,a1),sw=a2>a1?1:0;return `M ${A[0]} ${A[1]} A ${rO} ${rO} 0 0 ${sw} ${B[0]} ${B[1]} L ${C[0]} ${C[1]} A ${rI} ${rI} 0 0 ${1-sw} ${D[0]} ${D[1]} Z`}
+
+// Manufacturer bend take-off l (mm), transcribed from the supplied data sheets.
+// BU pressed 45° covers the smaller sizes. BFU lockseamed tables cover 250–1250 mm.
+const BEND_TAKEOFF_DATA = {
+  BU: {
+    45: {
+      63:41, 80:41, 100:41, 112:81, 125:52, 140:56,
+      150:62, 160:66, 180:76, 200:83, 224:93, 250:103
+    }
+  },
+  BFU: {
+    15: {
+      250:33, 280:37, 300:39, 315:41, 355:47, 400:53, 450:59,
+      500:66, 560:74, 600:79, 630:83, 710:93, 800:105, 900:118,
+      1000:132, 1120:147, 1250:165
+    },
+    30: {
+      250:67, 280:75, 300:80, 315:84, 355:95, 400:107, 450:121,
+      500:134, 560:150, 600:161, 630:169, 710:190, 800:214, 900:241,
+      1000:268, 1120:300, 1250:335
+    },
+    45: {
+      250:104, 280:116, 300:124, 315:130, 355:147, 400:166, 450:186,
+      500:207, 560:232, 600:249, 630:261, 710:294, 800:331, 900:373,
+      1000:414, 1120:464, 1250:518
+    },
+    60: {
+      250:144, 280:162, 300:173, 315:182, 355:205, 400:231, 450:260,
+      500:289, 560:323, 600:346, 630:364, 710:410, 800:462, 900:520,
+      1000:577, 1120:647, 1250:722
+    },
+    90: {
+      250:250, 280:280, 300:300, 315:315, 355:355, 400:400, 450:450,
+      500:500, 560:560, 600:600, 630:630, 710:710, 800:800, 900:900,
+      1000:1000, 1120:1120, 1250:1250
+    }
+  }
+};
+
+function getBendTakeoff(angle, diameter, rmFactor){
+  const roundedAngle = Math.round(angle * 10) / 10;
+  const roundedDiameter = Math.round(diameter);
+
+  // For 45° at 250 mm, use the pressed BU value because the current fitting style
+  // treats 250 mm and below as pressed.
+  if(roundedAngle === 45 && roundedDiameter <= 250){
+    const exact = BEND_TAKEOFF_DATA.BU[45][roundedDiameter];
+    if(Number.isFinite(exact)){
+      return {l:exact, exact:true, family:'BU pressed', source:'Manufacturer table'};
+    }
+  }
+
+  const angleTable = BEND_TAKEOFF_DATA.BFU[roundedAngle];
+  if(angleTable){
+    const exact = angleTable[roundedDiameter];
+    if(Number.isFinite(exact)){
+      return {l:exact, exact:true, family:'BFU lockseamed', source:'Manufacturer table'};
+    }
+  }
+
+  const estimated = (rmFactor * diameter) * Math.tan(rad(angle) / 2);
+  return {
+    l:estimated,
+    exact:false,
+    family:diameter <= 250 ? 'Pressed-style estimate' : 'Lockseamed-style estimate',
+    source:'Geometric estimate: rm × tan(θ/2)'
+  };
+}
+
 function drawOffset(d){
   /*
     Original Vent Tools schematic:
@@ -143,11 +212,89 @@ function drawOffset(d){
     <text x="${v2.x-20}" y="${v2.y+62}" font-size="14" class="label">${fmt(A)}°</text>
     <text x="380" y="30" text-anchor="middle" font-size="18" class="label">Roll ${fmt(d.roll)}°</text>
   `;
+}
+function calculateOffset(){
+  const V=parseFloat($('up').value)||0;
+  const H=parseFloat($('over').value)||0;
+  const A=getAngle();
+  const D=parseFloat($('dia').value)||0;
+  const minS=parseFloat($('minStraight').value)||0;
+  const rmF=parseFloat($('rmFactor').value)||1;
+
+  const th=rad(A);
+  const R=Math.hypot(V,H);
+  const T=Math.sin(th)>0 ? R/Math.sin(th) : NaN;
+  const roll=(V===0&&H===0) ? 0 : deg(Math.atan2(V,H));
+
+  const bend=getBendTakeoff(A,D,rmF);
+  const l=bend.l;
+  const straight=T-(2*l);
+
+  $('straightBig').textContent=fmt(straight)+' mm';
+  $('rollBig').textContent=fmt(roll)+'°';
+
+  const result=`Vent Tools - Offset Calculator
+
+Inputs:
+  Rise / Up (V)          = ${fmt(V)} mm
+  Offset / Over (H)      = ${fmt(H)} mm
+  Bend angle (θ)         = ${fmt(A)}°
+  Duct diameter (D)      = ${fmt(D)} mm
+  Minimum straight       = ${fmt(minS)} mm
+
+Results:
+  Cut straight L         = ${fmt(straight)} mm
+  Roll angle             = ${fmt(roll)}°
+  Resultant offset R     = ${fmt(R)} mm
+  Travel T               = ${fmt(T)} mm
+  Bend take-off l        = ${fmt(l)} mm
+  Bend family            = ${bend.family}
+  Dimension source       = ${bend.source}`;
+
+  $('out').textContent=result;
+  drawOffset({V,H,A,D,straight,roll});
 
   const chip=$('fittingChip');
-  if(chip) chip.textContent=`Fitting style: ${fittingType} • Ø${fmt0(d.D)} mm`;
+  if(chip){
+    chip.textContent=`${bend.family} • Ø${fmt0(D)} mm • ${bend.exact?'Exact table dimension':'Estimated dimension'}`;
+  }
+
+  if(!Number.isFinite(straight)){
+    setMsg('bad','⚠ Check your angle input.');
+  }else if(straight<0){
+    setMsg('bad','❌ Impossible fit: the two bend take-offs overlap. Use a smaller bend angle or increase the available offset.');
+  }else if(straight<minS){
+    setMsg('warn',`⚠ Straight section under ${fmt(minS)} mm. Check bend spigot depths — opposing swedges may meet inside the straight.`);
+  }else if(!bend.exact){
+    setMsg('warn','⚠ Cut length uses an estimated bend take-off because this exact angle/diameter is not in the current manufacturer table.');
+  }else{
+    setMsg('ok','✅ Cut length uses the supplied manufacturer bend take-off. Verify fitting family and site conditions before cutting.');
+  }
+  return result;
 }
-function calculateOffset(){const V=parseFloat($('up').value)||0,H=parseFloat($('over').value)||0,A=getAngle(),D=parseFloat($('dia').value)||0,minS=parseFloat($('minStraight').value)||0,rmF=parseFloat($('rmFactor').value)||1,th=rad(A),R=Math.hypot(V,H),T=Math.sin(th)>0?R/Math.sin(th):NaN,roll=(V===0&&H===0)?0:deg(Math.atan2(V,H)),rm=rmF*D,l=rm*Math.tan(th/2),straight=T-(2*l);$('straightBig').textContent=fmt(straight)+' mm';$('rollBig').textContent=fmt(roll)+'°';const result=`Vent Tools - Offset Calculator\n\nInputs:\n  Rise / Up (V)          = ${fmt(V)} mm\n  Offset / Over (H)      = ${fmt(H)} mm\n  Bend angle (θ)         = ${fmt(A)}°\n  Duct diameter (D)      = ${fmt(D)} mm\n  rm factor              = ${fmt(rmF)}\n  Minimum straight       = ${fmt(minS)} mm\n\nResults:\n  Cut straight L         = ${fmt(straight)} mm\n  Roll angle             = ${fmt(roll)}°\n  Resultant offset R     = ${fmt(R)} mm\n  Travel T               = ${fmt(T)} mm\n  Bend setback l         = ${fmt(l)} mm\n  Drawing fitting style  = ${D<=250?'Pressed':'Segmented / lockseamed'}`;$('out').textContent=result;drawOffset({V,H,A,D,straight,roll});if(!Number.isFinite(straight))setMsg('bad','⚠ Check your angle input.');else if(straight<0)setMsg('bad','❌ Impossible fit: bends overlap. Use smaller angle or increase space.');else if(straight<minS)setMsg('warn',`⚠ Straight section under ${fmt(minS)} mm. Check bend spigot/swedge depths — opposing swedges may meet inside the straight.`);else setMsg('ok','✅ Ready to install — check manufacturer dimensions and site conditions.');return result}
 function angleUI(){let c=$('angle').value==='custom';$('angleCustom').style.display=c?'block':'none';if(!c)$('angleCustom').value=$('angle').value}function resetOffset(){$('up').value=300;$('over').value=250;$('angle').value='45';$('angleCustom').value=45;$('dia').value=315;$('minStraight').value=120;$('rmFactor').value=1;angleUI();calculateOffset()}async function copyOffset(){let r=calculateOffset();try{await navigator.clipboard.writeText(r);setMsg('ok','✅ Result copied.')}catch(e){setMsg('warn','Could not copy automatically. Long-press working text and copy manually.')}}function toggleWorking(){let o=$('out'),show=o.style.display==='block';o.style.display=show?'none':'block';$('workingBtn').textContent=show?'Show working':'Hide working'}['up','over','dia','minStraight','rmFactor','angle','angleCustom'].forEach(id=>{$(id).addEventListener('input',()=>{angleUI();calculateOffset()});$(id).addEventListener('change',()=>{angleUI();calculateOffset()})});$('resetBtn').addEventListener('click',resetOffset);$('copyBtn').addEventListener('click',copyOffset);$('workingBtn').addEventListener('click',toggleWorking);
 const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450,500,560,600,630,710,800,900,1000,1120,1250];function nearestStandard(d){let best=standardSpiral[0];for(const s of standardSpiral){if(Math.abs(s-d)<Math.abs(best-d))best=s}return best}function drawDuctulator(w,h,dia){let layer=$('ductDiagramLayer'),rx=90,ry=60,rw=230,rh=115,cx=560,cy=120,r=65;layer.innerHTML=`<defs><marker id="arrow2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,4 L0,8 Z" fill="#064b82"/></marker></defs><rect x="${rx}" y="${ry}" width="${rw}" height="${rh}" rx="8" fill="#d9dde3" stroke="#111827" stroke-width="3"/><line x1="${rx}" y1="${ry+rh/2}" x2="${rx+rw}" y2="${ry+rh/2}" stroke="#111827" stroke-width="2" stroke-dasharray="7 7"/><text x="${rx+rw/2}" y="${ry+rh+32}" text-anchor="middle" font-family="system-ui" font-size="16" font-weight="900" fill="#064b82">${fmt0(w)} × ${fmt0(h)} mm</text><path d="M350 120 L455 120" stroke="#064b82" stroke-width="4" marker-end="url(#arrow2)"/><circle cx="${cx}" cy="${cy}" r="${r}" fill="#d9dde3" stroke="#111827" stroke-width="3"/><ellipse cx="${cx}" cy="${cy}" rx="${r}" ry="18" fill="none" stroke="#9aa4b2" stroke-width="1.6"/><ellipse cx="${cx}" cy="${cy}" rx="${r*.72}" ry="12" fill="none" stroke="#9aa4b2" stroke-width="1.4"/><line x1="${cx-r}" y1="${cy}" x2="${cx+r}" y2="${cy}" stroke="#111827" stroke-width="2" stroke-dasharray="7 7"/><text x="${cx}" y="${cy+r+34}" text-anchor="middle" font-family="system-ui" font-size="16" font-weight="900" fill="#064b82">Ø ${fmt(dia)} mm</text>`}
 function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($('rectH').value)||0,area=w*h,eq=Math.sqrt((4*area)/Math.PI),near=nearestStandard(eq);$('eqRound').textContent=fmt(eq)+' mm';$('nearestRound').textContent='Ø '+fmt0(near);$('rectArea').textContent=fmt0(area)+' mm²';drawDuctulator(w,h,eq);return `Vent Tools - Rect to Round Ductulator\n\nRectangular duct: ${fmt0(w)} × ${fmt0(h)} mm\nArea: ${fmt0(area)} mm²\nSame-area round: Ø ${fmt(eq)} mm\nNearest standard spiral: Ø ${fmt0(near)} mm`}async function copyDuct(){let r=calculateDuct();try{await navigator.clipboard.writeText(r)}catch(e){}}function resetDuct(){$('rectW').value=600;$('rectH').value=300;calculateDuct()}['rectW','rectH'].forEach(id=>$(id).addEventListener('input',calculateDuct));$('copyDuctBtn').addEventListener('click',copyDuct);$('resetDuctBtn').addEventListener('click',resetDuct);angleUI();calculateOffset();calculateDuct();
+
+
+const FIRE_DAMPER_MANUALS={"FSD-TD":"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf","FSD-C":"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_c_iom_11zon.pdf"};
+const FIRE_DAMPER_METHODS={
+"FSD-TD":{
+"M5":{label:"M5 — Drywall, non-cleated frameless",w:121,h:96},
+"M6":{label:"M6 — Drywall, pattress and cleat",w:156,h:96},
+"M9":{label:"M9 — Drywall, AF Easy Fix angle frame",w:122,h:99},
+"M10":{label:"M10 — Masonry wall, AF Easy Fix angle frame",w:122,h:99},
+"M11":{label:"M11 — Masonry floor, AF Easy Fix angle frame",w:122,h:99}},
+"FSD-C":{
+"M9":{label:"M9 — Drywall partition",type:"dry",note:"Cut size = diameter + 20 mm nominal gap + two wall-board thicknesses."},
+"M10":{label:"M10 — Masonry wall or floor",type:"masonry",note:"Finished aperture = diameter + 20 mm; BSB example: Ø250 damper uses 270 mm square aperture."},
+"M14":{label:"M14 — Flexible fire curtain",type:"ffc",note:"Finished opening is trimmed to damper size, with plus 10 mm tolerance."}
+}};
+function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
+function updateFDMethods(){const s=$("fdSeries").value,m=$("fdMethod");m.innerHTML="";Object.entries(FIRE_DAMPER_METHODS[s]).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});$("fdRectInputs").style.display=s==="FSD-TD"?"block":"none";$("fdCircularInputs").style.display=s==="FSD-C"?"block":"none";updateFDInputs()}
+function updateFDInputs(){const s=$("fdSeries").value,d=FIRE_DAMPER_METHODS[s][$("fdMethod").value];$("fdBoardWrap").style.display=d.type==="dry"?"block":"none";calcFD()}
+function drawFD(r){const g=$("fdDiagramLayer");if(r.shape==="rect"){const ow=420,oh=Math.max(100,Math.min(190,ow*r.openH/r.openW)),x=(760-ow)/2,y=75+(190-oh)/2,gx=28,gy=24;g.innerHTML=`<rect x="${x}" y="${y}" width="${ow}" height="${oh}" rx="6" fill="#eef2f6" stroke="#334155" stroke-width="3"/><rect x="${x+gx}" y="${y+gy}" width="${ow-2*gx}" height="${oh-2*gy}" rx="3" fill="#cbd5e1" stroke="#064b82" stroke-width="3"/><line x1="${x}" y1="${y+oh+28}" x2="${x+ow}" y2="${y+oh+28}" stroke="#064b82" stroke-width="2" marker-start="url(#fdArrow)" marker-end="url(#fdArrow)"/><text x="380" y="${y+oh+52}" text-anchor="middle" font-family="system-ui" font-size="16" font-weight="900" fill="#064b82">${fmt0(r.openW)} × ${fmt0(r.openH)} mm opening</text><text x="380" y="32" text-anchor="middle" font-family="system-ui" font-size="18" font-weight="950" fill="#142033">BSB ${r.series} • ${r.method}</text><text x="380" y="300" text-anchor="middle" font-family="system-ui" font-size="14" font-weight="800" fill="#142033">Nominal damper ${fmt0(r.nomW)} × ${fmt0(r.nomH)} mm</text>`}else{const cx=380,cy=150,ro=105,rd=Math.max(55,ro*r.dia/r.openD);g.innerHTML=`<circle cx="${cx}" cy="${cy}" r="${ro}" fill="#eef2f6" stroke="#334155" stroke-width="3"/><circle cx="${cx}" cy="${cy}" r="${rd}" fill="#cbd5e1" stroke="#064b82" stroke-width="3"/><line x1="${cx-ro}" y1="${cy+ro+30}" x2="${cx+ro}" y2="${cy+ro+30}" stroke="#064b82" stroke-width="2" marker-start="url(#fdArrow)" marker-end="url(#fdArrow)"/><text x="${cx}" y="${cy+ro+55}" text-anchor="middle" font-family="system-ui" font-size="16" font-weight="900" fill="#064b82">Opening ${fmt0(r.openD)} mm</text><text x="${cx}" y="32" text-anchor="middle" font-family="system-ui" font-size="18" font-weight="950" fill="#142033">BSB ${r.series} • ${r.method}</text><text x="${cx}" y="${cy+7}" text-anchor="middle" font-family="system-ui" font-size="15" font-weight="900" fill="#142033">Ø ${fmt0(r.dia)} damper</text>`}}
+function calcFD(){if(!$("fdSeries"))return;const s=$("fdSeries").value,m=$("fdMethod").value,d=FIRE_DAMPER_METHODS[s][m];let r;if(s==="FSD-TD"){const W=parseFloat($("fdWidth").value)||0,H=parseFloat($("fdHeight").value)||0;r={shape:"rect",series:s,method:m,nomW:W,nomH:H,openW:W+d.w,openH:H+d.h};r.opening=`${fmt0(r.openW)} × ${fmt0(r.openH)} mm`;r.damper=`${fmt0(W)} × ${fmt0(H)} mm`;r.rule=`Width +${d.w} mm; height +${d.h} mm`}else{const dia=parseFloat($("fdDiameter").value)||0;if(d.type==="dry"){const b=parseFloat($("fdBoardThickness").value)||0;r={shape:"circle",series:s,method:m,dia,openD:dia+20+2*b};r.opening=`${fmt0(r.openD)} × ${fmt0(r.openD)} mm cut size`;r.rule=`Diameter +20 mm gap + 2 × ${fmt(b)} mm board`}else if(d.type==="masonry"){r={shape:"circle",series:s,method:m,dia,openD:dia+20};r.opening=`${fmt0(r.openD)} mm square or circular`;r.rule=`Diameter +20 mm`}else{r={shape:"circle",series:s,method:m,dia,openD:dia};r.opening=`Ø ${fmt0(dia)} mm nominal (up to +10 mm trim tolerance)`;r.rule=`Trim to damper size; plus 10 mm tolerance`}r.damper=`Ø ${fmt0(dia)} mm`} $("fdOpeningBig").textContent=r.opening;$("fdMethodBig").textContent=`${s} ${m}`;$("fdDamperSummary").textContent=r.damper;$("fdRuleSummary").textContent=r.rule;$("fdManualLink").href=FIRE_DAMPER_MANUALS[s];drawFD(r);fdMsg("ok",`✅ Builder's opening based on BSB ${s} method ${m}. Confirm the current official manual before construction.`);return r}
+async function copyFD(){const r=calcFD();const t=`Vent Tools — BSB Fire Damper Opening\n\nSeries: ${r.series}\nMethod: ${r.method}\nDamper size: ${r.damper}\nBuilder's opening: ${r.opening}\nRule: ${r.rule}\n\nVerify against the current official BSB installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
+function resetFD(){$("fdSeries").value="FSD-TD";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;updateFDMethods()}
+if($("fdSeries")){$("fdSeries").addEventListener("change",updateFDMethods);$("fdMethod").addEventListener("change",updateFDInputs);["fdWidth","fdHeight","fdDiameter","fdBoardThickness"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);updateFDMethods()}
