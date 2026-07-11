@@ -63,3 +63,12 @@ specific combination is relied upon, because it differs sharply from adjacent si
 - Logo mark, tool name and v4 Beta badge remain visible while scrolling.
 - Browser favicon added using the Vent Tools symbol.
 - Footer branding standardised across the site.
+
+
+## Live homepage update
+
+- Removed the “v4 development build” banner.
+- Added professional live-site wording and feature badges.
+- Homepage now separates live tools, tools in development and technical resources.
+- Removed unclear bend-calculator placeholders.
+- Technical resources are described as links to official manuals and guidance rather than copied standards.

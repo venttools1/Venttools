@@ -11,7 +11,84 @@
 </head>
 <body>
 <div class="wrap">
-<section id="home" class="page active"><div class="dev-banner">V4 DEVELOPMENT BUILD — live v3 remains unchanged</div><div class="card center"><svg class="logo" viewBox="0 0 500 500"><polygon points="250,35 305,190 470,190 337,287 388,448 250,350 112,448 163,287 30,190 195,190" fill="none" stroke="#064b82" stroke-width="28" stroke-linejoin="round"/><circle cx="250" cy="250" r="104" fill="white" stroke="#064b82" stroke-width="18"/><g fill="#064b82"><path d="M250 170C305 170 322 220 292 245C275 260 246 256 230 237C216 220 222 188 250 170Z"/><path d="M330 250C330 305 280 322 255 292C240 275 244 246 263 230C280 216 312 222 330 250Z"/><path d="M250 330C195 330 178 280 208 255C225 240 254 244 270 263C284 280 278 312 250 330Z"/><path d="M170 250C170 195 220 178 245 208C260 225 256 254 237 270C220 284 188 278 170 250Z"/></g><circle cx="250" cy="250" r="39" fill="#064b82"/><text x="250" y="275" text-anchor="middle" font-family="Arial Black,Arial" font-size="82" fill="white">K</text></svg><h1>Vent Tools</h1><p class="sub">HVAC & ductwork calculators • v4 development</p><div class="sectionTitle">Available now</div><div class="toolgrid"><button class="toolbtn" onclick="showPage('offset')"><div class="icon">📐</div><div><div class="name">Offset Calculator</div><div class="desc">Straight & rolled offsets using spiral pressed bend geometry.</div></div><div class="badge">Site tested</div></button><button class="toolbtn" onclick="showPage('ductulator')"><div class="icon">⭕</div><div><div class="name">Rect to Round Ductulator</div><div class="desc">Convert rectangular duct area to equivalent round spiral size.</div></div><div class="badge">Beta</div></button></div><div class="sectionTitle">In development</div><div class="toolgrid"><div class="toolbtn soon"><div class="icon">🔥</div><div><div class="name">Fire Damper Hole Calculator</div><div class="desc">Builder's opening sizes by damper and installation type.</div></div><div class="badge grey">Coming soon</div></div><div class="toolbtn soon"><div class="icon">📦</div><div><div class="name">Ductwrap Shape Calculator</div><div class="desc">Wrap lengths and marking guides for duct fittings.</div></div><div class="badge grey">Coming soon</div></div><div class="toolbtn soon"><div class="icon">📏</div><div><div class="name">Transition Calculator</div><div class="desc">Square, rectangular and offset transition measurements.</div></div><div class="badge grey">Planned</div></div><div class="toolbtn soon"><div class="icon">💨</div><div><div class="name">Airflow & Velocity</div><div class="desc">Quick l/s, m³/h, CFM and velocity calculations.</div></div><div class="badge grey">Planned</div></div></div></div><div class="footer">© 2026 VentTools. All rights reserved.<br>Prototype for site testing — verify against manufacturer dimensions and site conditions.</div></section>
+<section id="home" class="page active"><div class="card center"><svg class="logo" viewBox="0 0 500 500"><polygon points="250,35 305,190 470,190 337,287 388,448 250,350 112,448 163,287 30,190 195,190" fill="none" stroke="#064b82" stroke-width="28" stroke-linejoin="round"/><circle cx="250" cy="250" r="104" fill="white" stroke="#064b82" stroke-width="18"/><g fill="#064b82"><path d="M250 170C305 170 322 220 292 245C275 260 246 256 230 237C216 220 222 188 250 170Z"/><path d="M330 250C330 305 280 322 255 292C240 275 244 246 263 230C280 216 312 222 330 250Z"/><path d="M250 330C195 330 178 280 208 255C225 240 254 244 270 263C284 280 278 312 250 330Z"/><path d="M170 250C170 195 220 178 245 208C260 225 256 254 237 270C220 284 188 278 170 250Z"/></g><circle cx="250" cy="250" r="39" fill="#064b82"/><text x="250" y="275" text-anchor="middle" font-family="Arial Black,Arial" font-size="82" fill="white">K</text></svg><h1>Vent Tools</h1><p class="sub">Professional HVAC ductwork calculators and site tools</p><div class="sectionTitle">Available now</div>
+<div class="home-tagline">Built for fast, practical use on site.</div>
+
+<div class="home-badges" aria-label="Vent Tools features">
+  <span>Manufacturer bend data</span>
+  <span>Mobile optimised</span>
+  <span>Free to use</span>
+  <span>v4 Beta</span>
+</div>
+
+<h2 class="home-section-title">Live tools</h2>
+<div class="toolgrid">
+  <button class="toolbtn" onclick="showPage('offset')">
+    <div class="icon">📐</div>
+    <div>
+      <div class="name">Offset Calculator</div>
+      <div class="desc">Straight and rolled offsets using supported manufacturer bend take-offs.</div>
+    </div>
+    <span class="status-live">Live</span>
+  </button>
+
+  <button class="toolbtn" onclick="showPage('ductulator')">
+    <div class="icon">⭕</div>
+    <div>
+      <div class="name">Rect to Round Ductulator</div>
+      <div class="desc">Same-area rectangular to round spiral conversion.</div>
+    </div>
+    <span class="status-live">Live</span>
+  </button>
+</div>
+
+<h2 class="home-section-title">In development</h2>
+<div class="toolgrid">
+  <div class="toolbtn toolbtn-disabled" aria-disabled="true">
+    <div class="icon">🔥</div>
+    <div>
+      <div class="name">Fire Damper Hole Calculator</div>
+      <div class="desc">Model-specific builder's opening sizes linked to official installation data.</div>
+    </div>
+    <span class="status-soon">Coming soon</span>
+  </div>
+
+  <div class="toolbtn toolbtn-disabled" aria-disabled="true">
+    <div class="icon">📦</div>
+    <div>
+      <div class="name">Ductwrap Shape Calculator</div>
+      <div class="desc">Wrap measurements and marking guides for common duct fittings.</div>
+    </div>
+    <span class="status-soon">Coming soon</span>
+  </div>
+</div>
+
+<h2 class="home-section-title">Technical resources</h2>
+<div class="toolgrid">
+  <div class="toolbtn resource-card">
+    <div class="icon">📚</div>
+    <div>
+      <div class="name">Manufacturer Manuals</div>
+      <div class="desc">Official fire damper manuals, product data and fitting information.</div>
+    </div>
+    <span class="status-soon">Building</span>
+  </div>
+
+  <div class="toolbtn resource-card">
+    <div class="icon">🛠️</div>
+    <div>
+      <div class="name">Useful Ventilation Tools</div>
+      <div class="desc">A curated list of reliable supplier tools and technical resources.</div>
+    </div>
+    <span class="status-soon">Building</span>
+  </div>
+
+  <div class="resource-note">
+    Technical resources will link to official manufacturer documents and standards guidance.
+    Vent Tools will not reproduce full paid standards or replace manufacturer installation instructions.
+  </div>
+</div>
+<div class="sectionTitle">In development</div><div class="toolgrid"><div class="toolbtn soon"><div class="icon">🔥</div><div><div class="name">Fire Damper Hole Calculator</div><div class="desc">Builder's opening sizes by damper and installation type.</div></div><div class="badge grey">Coming soon</div></div><div class="toolbtn soon"><div class="icon">📦</div><div><div class="name">Ductwrap Shape Calculator</div><div class="desc">Wrap lengths and marking guides for duct fittings.</div></div><div class="badge grey">Coming soon</div></div><div class="toolbtn soon"><div class="icon">📏</div><div><div class="name">Transition Calculator</div><div class="desc">Square, rectangular and offset transition measurements.</div></div><div class="badge grey">Planned</div></div><div class="toolbtn soon"><div class="icon">💨</div><div><div class="name">Airflow & Velocity</div><div class="desc">Quick l/s, m³/h, CFM and velocity calculations.</div></div><div class="badge grey">Planned</div></div></div></div><div class="footer">© 2026 VentTools. All rights reserved.<br>Prototype for site testing — verify against manufacturer dimensions and site conditions.</div></section>
 <section id="offset" class="page">
 <div class="app-header">
   <button class="back" onclick="showPage('home')" aria-label="Back to home">← Home</button>
@@ -56,7 +133,7 @@
   </div>
   <div class="version-pill">v4 Beta</div>
 </div>
-<div class="page-intro card"><h2>Rect to Round Ductulator</h2><p class="sub">Same-area conversion for quick spiral size check</p></div><div class="card"><svg id="ductDiagram" class="diagram" viewBox="0 0 760 260"><g id="ductDiagramLayer"></g></svg></div><div class="card"><div class="row"><div><label>Rect width (mm)</label><input id="rectW" type="number" value="600" min="1" step="1"></div><div><label>Rect height (mm)</label><input id="rectH" type="number" value="300" min="1" step="1"></div></div><div class="hint">Same-area equivalent, not full equal-friction duct design.</div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Equivalent round</div><div class="val" id="eqRound">—</div></div><div class="tile"><div class="lab">Nearest spiral</div><div class="val" id="nearestRound">—</div></div></div><div class="tile" style="margin-top:10px"><div class="lab">Rectangular area</div><div class="val" id="rectArea">—</div></div><div class="actions"><button class="action primary" id="copyDuctBtn">Copy result</button><button class="action" id="resetDuctBtn">Reset</button></div><div class="hint">Standard sizes used: 80, 100, 125, 150, 160, 180, 200, 224, 250, 280, 300, 315, 355, 400, 450, 500, 560, 600, 630, 710, 800, 900, 1000, 1120, 1250 mm.</div></div></section><div class="footer">© 2026 VentTools. All rights reserved.<br><span class="footer-meta">v4 Beta • Designed for site use</span></div></div>
+<div class="page-intro card"><h2>Rect to Round Ductulator</h2><p class="sub">Same-area conversion for quick spiral size check</p></div><div class="card"><svg id="ductDiagram" class="diagram" viewBox="0 0 760 260"><g id="ductDiagramLayer"></g></svg></div><div class="card"><div class="row"><div><label>Rect width (mm)</label><input id="rectW" type="number" value="600" min="1" step="1"></div><div><label>Rect height (mm)</label><input id="rectH" type="number" value="300" min="1" step="1"></div></div><div class="hint">Same-area equivalent, not full equal-friction duct design.</div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Equivalent round</div><div class="val" id="eqRound">—</div></div><div class="tile"><div class="lab">Nearest spiral</div><div class="val" id="nearestRound">—</div></div></div><div class="tile" style="margin-top:10px"><div class="lab">Rectangular area</div><div class="val" id="rectArea">—</div></div><div class="actions"><button class="action primary" id="copyDuctBtn">Copy result</button><button class="action" id="resetDuctBtn">Reset</button></div><div class="hint">Standard sizes used: 80, 100, 125, 150, 160, 180, 200, 224, 250, 280, 300, 315, 355, 400, 450, 500, 560, 600, 630, 710, 800, 900, 1000, 1120, 1250 mm.</div></div></section><div class="footer">© 2026 VentTools. All rights reserved.<br><span class="footer-meta">v4 Beta • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>
