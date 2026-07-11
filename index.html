@@ -1,0 +1,62 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="theme-color" content="#064b82">
+  <meta name="description" content="Vent Tools HVAC and ductwork calculators for installers.">
+  <title>Vent Tools v4 Development</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,4 61,37 96,37 68,57 79,91 50,70 21,91 32,57 4,37 39,37' fill='none' stroke='%23064b82' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='21' fill='%23064b82'/%3E%3Ctext x='50' y='59' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3EK%3C/text%3E%3C/svg%3E">
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+<div class="wrap">
+<section id="home" class="page active"><div class="dev-banner">V4 DEVELOPMENT BUILD — live v3 remains unchanged</div><div class="card center"><svg class="logo" viewBox="0 0 500 500"><polygon points="250,35 305,190 470,190 337,287 388,448 250,350 112,448 163,287 30,190 195,190" fill="none" stroke="#064b82" stroke-width="28" stroke-linejoin="round"/><circle cx="250" cy="250" r="104" fill="white" stroke="#064b82" stroke-width="18"/><g fill="#064b82"><path d="M250 170C305 170 322 220 292 245C275 260 246 256 230 237C216 220 222 188 250 170Z"/><path d="M330 250C330 305 280 322 255 292C240 275 244 246 263 230C280 216 312 222 330 250Z"/><path d="M250 330C195 330 178 280 208 255C225 240 254 244 270 263C284 280 278 312 250 330Z"/><path d="M170 250C170 195 220 178 245 208C260 225 256 254 237 270C220 284 188 278 170 250Z"/></g><circle cx="250" cy="250" r="39" fill="#064b82"/><text x="250" y="275" text-anchor="middle" font-family="Arial Black,Arial" font-size="82" fill="white">K</text></svg><h1>Vent Tools</h1><p class="sub">HVAC & ductwork calculators • v4 development</p><div class="sectionTitle">Available now</div><div class="toolgrid"><button class="toolbtn" onclick="showPage('offset')"><div class="icon">📐</div><div><div class="name">Offset Calculator</div><div class="desc">Straight & rolled offsets using spiral pressed bend geometry.</div></div><div class="badge">Site tested</div></button><button class="toolbtn" onclick="showPage('ductulator')"><div class="icon">⭕</div><div><div class="name">Rect to Round Ductulator</div><div class="desc">Convert rectangular duct area to equivalent round spiral size.</div></div><div class="badge">Beta</div></button></div><div class="sectionTitle">In development</div><div class="toolgrid"><div class="toolbtn soon"><div class="icon">🔥</div><div><div class="name">Fire Damper Hole Calculator</div><div class="desc">Builder's opening sizes by damper and installation type.</div></div><div class="badge grey">Coming soon</div></div><div class="toolbtn soon"><div class="icon">📦</div><div><div class="name">Ductwrap Shape Calculator</div><div class="desc">Wrap lengths and marking guides for duct fittings.</div></div><div class="badge grey">Coming soon</div></div><div class="toolbtn soon"><div class="icon">📏</div><div><div class="name">Transition Calculator</div><div class="desc">Square, rectangular and offset transition measurements.</div></div><div class="badge grey">Planned</div></div><div class="toolbtn soon"><div class="icon">💨</div><div><div class="name">Airflow & Velocity</div><div class="desc">Quick l/s, m³/h, CFM and velocity calculations.</div></div><div class="badge grey">Planned</div></div></div></div><div class="footer">© 2026 VentTools. All rights reserved.<br>Prototype for site testing — verify against manufacturer dimensions and site conditions.</div></section>
+<section id="offset" class="page">
+<div class="app-header">
+  <button class="back" onclick="showPage('home')" aria-label="Back to home">← Home</button>
+  <div class="brand-lockup">
+    <svg class="brand-mark" viewBox="0 0 500 500" aria-hidden="true">
+  <polygon points="250,35 305,190 470,190 337,287 388,448 250,350 112,448 163,287 30,190 195,190"
+    fill="none" stroke="currentColor" stroke-width="28" stroke-linejoin="round"/>
+  <circle cx="250" cy="250" r="104" fill="white" stroke="currentColor" stroke-width="18"/>
+  <g fill="currentColor">
+    <path d="M250 170C305 170 322 220 292 245C275 260 246 256 230 237C216 220 222 188 250 170Z"/>
+    <path d="M330 250C330 305 280 322 255 292C240 275 244 246 263 230C280 216 312 222 330 250Z"/>
+    <path d="M250 330C195 330 178 280 208 255C225 240 254 244 270 263C284 280 278 312 250 330Z"/>
+    <path d="M170 250C170 195 220 178 245 208C260 225 256 254 237 270C220 284 188 278 170 250Z"/>
+  </g>
+  <circle cx="250" cy="250" r="39" fill="currentColor"/>
+  <text x="250" y="275" text-anchor="middle" font-family="Arial Black,Arial" font-size="82" fill="white">K</text>
+</svg>
+    <div class="brand-copy"><strong>Vent Tools</strong><span>Offset Calculator</span></div>
+  </div>
+  <div class="version-pill">v4 Beta</div>
+</div>
+<div class="page-intro card"><h2>Offset Calculator</h2><p class="sub">Diagram → inputs → cut size</p></div><div class="card"><svg id="diagram" class="diagram" viewBox="0 0 760 360"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,4 L0,8 Z" fill="#334155"/></marker><linearGradient id="ductGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f3f4f6"/><stop offset="50%" stop-color="#cfd5dd"/><stop offset="100%" stop-color="#f8fafc"/></linearGradient></defs><g id="diagramLayer"></g></svg><div class="note">Schematic centreline diagram — rolled offsets are 3D, so check orientation on site.</div>
+<div class="fitting-chip" id="fittingChip">Fitting style: —</div></div><div class="card"><div class="row"><div><label>Rise / Up (mm)</label><input id="up" type="number" value="300" min="0" step="1"></div><div><label>Offset / Over (mm)</label><input id="over" type="number" value="250" min="0" step="1"></div></div><div class="row"><div><label>Bend angle</label><select id="angle"><option value="15">15°</option><option value="22.5">22.5°</option><option value="30">30°</option><option value="45" selected>45°</option><option value="60">60°</option><option value="90">90°</option><option value="custom">Custom…</option></select><input id="angleCustom" type="number" value="45" min="1" max="89" step="0.1" style="display:none;margin-top:10px"></div><div><label>Duct diameter (mm)</label><input id="dia" type="number" value="315" min="0" step="1"></div></div><div class="row"><div><label>Minimum straight / swedge limit (mm)</label><input id="minStraight" type="number" value="120" min="0" step="1"><div class="hint">Warns when opposing bend spigots/swages may meet inside the straight.</div></div><div><label>rm factor</label><input id="rmFactor" type="number" value="1.0" min="0" step="0.01"><div class="hint">Known manufacturer bend take-offs are used for supported diameters at 15°, 30°, 45°, 60° and 90°. Other sizes or angles use rm × tan(θ/2) as an estimate.</div></div></div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Cut straight L</div><div class="val" id="straightBig">—</div></div><div class="tile"><div class="lab">Roll angle</div><div class="val" id="rollBig">—</div></div></div><div id="msg" class="msg ok"></div><div class="actions"><button class="action primary" id="copyBtn">Copy result</button><button class="action" id="workingBtn">Show working</button><button class="action" id="resetBtn">Reset</button></div><div class="out" id="out"></div></div></section>
+<section id="ductulator" class="page">
+<div class="app-header">
+  <button class="back" onclick="showPage('home')" aria-label="Back to home">← Home</button>
+  <div class="brand-lockup">
+    <svg class="brand-mark" viewBox="0 0 500 500" aria-hidden="true">
+  <polygon points="250,35 305,190 470,190 337,287 388,448 250,350 112,448 163,287 30,190 195,190"
+    fill="none" stroke="currentColor" stroke-width="28" stroke-linejoin="round"/>
+  <circle cx="250" cy="250" r="104" fill="white" stroke="currentColor" stroke-width="18"/>
+  <g fill="currentColor">
+    <path d="M250 170C305 170 322 220 292 245C275 260 246 256 230 237C216 220 222 188 250 170Z"/>
+    <path d="M330 250C330 305 280 322 255 292C240 275 244 246 263 230C280 216 312 222 330 250Z"/>
+    <path d="M250 330C195 330 178 280 208 255C225 240 254 244 270 263C284 280 278 312 250 330Z"/>
+    <path d="M170 250C170 195 220 178 245 208C260 225 256 254 237 270C220 284 188 278 170 250Z"/>
+  </g>
+  <circle cx="250" cy="250" r="39" fill="currentColor"/>
+  <text x="250" y="275" text-anchor="middle" font-family="Arial Black,Arial" font-size="82" fill="white">K</text>
+</svg>
+    <div class="brand-copy"><strong>Vent Tools</strong><span>Rect to Round</span></div>
+  </div>
+  <div class="version-pill">v4 Beta</div>
+</div>
+<div class="page-intro card"><h2>Rect to Round Ductulator</h2><p class="sub">Same-area conversion for quick spiral size check</p></div><div class="card"><svg id="ductDiagram" class="diagram" viewBox="0 0 760 260"><g id="ductDiagramLayer"></g></svg></div><div class="card"><div class="row"><div><label>Rect width (mm)</label><input id="rectW" type="number" value="600" min="1" step="1"></div><div><label>Rect height (mm)</label><input id="rectH" type="number" value="300" min="1" step="1"></div></div><div class="hint">Same-area equivalent, not full equal-friction duct design.</div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Equivalent round</div><div class="val" id="eqRound">—</div></div><div class="tile"><div class="lab">Nearest spiral</div><div class="val" id="nearestRound">—</div></div></div><div class="tile" style="margin-top:10px"><div class="lab">Rectangular area</div><div class="val" id="rectArea">—</div></div><div class="actions"><button class="action primary" id="copyDuctBtn">Copy result</button><button class="action" id="resetDuctBtn">Reset</button></div><div class="hint">Standard sizes used: 80, 100, 125, 150, 160, 180, 200, 224, 250, 280, 300, 315, 355, 400, 450, 500, 560, 600, 630, 710, 800, 900, 1000, 1120, 1250 mm.</div></div></section><div class="footer">© 2026 VentTools. All rights reserved.<br><span class="footer-meta">v4 Beta • Designed for site use</span></div></div>
+<script src="script.js"></script>
+</body>
+</html>
