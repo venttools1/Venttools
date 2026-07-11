@@ -193,6 +193,14 @@
     <div class="hint" id="fdDwfxHint">Enter the measured overall casing size. For SmokeShield, width must include the 28 mm PTC shroud. Do not include the peripheral flange.</div>
   </div>
 
+  <div id="fdHevacWrap" style="display:none">
+    <div class="row">
+      <div><label for="fdHevacVariant">Damper type</label><select id="fdHevacVariant"><option value="SMOKE">SmokeShield PTC</option><option value="FIRE">FireShield</option></select></div>
+      <div><label for="fdHevacGap">Clear mortar gap all round</label><select id="fdHevacGap"></select></div>
+    </div>
+    <div class="hint">Enter the measured outside width and height of the installation-frame upstand. Do not include building ties. The official drawing permits 5–75 mm from the frame upstand to the aperture face all round.</div>
+  </div>
+
   <div id="fdCircularInputs" style="display:none">
     <label for="fdDiameter" id="fdDiameterLabel">Nominal damper diameter (mm)</label><input id="fdDiameter" type="number" value="250" min="1">
     <div id="fdBoardWrap" style="display:none"><label for="fdBoardThickness">Board thickness lining each edge of the cut aperture (mm)</label><input id="fdBoardThickness" type="number" value="12.5" min="0" step="0.5"><div class="hint">The cut size adds two lining-board thicknesses to the finished opening dimension.</div></div>

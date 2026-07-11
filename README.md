@@ -109,3 +109,14 @@ The user selects an allowance within the published permitted range. Default is 2
 ## v4.3 Actionair DWFX-F beta
 
 Added DWFX-F / DWFX-3F methods from Actionair guide LNNN00354 v6.0 dated 17 March 2026. Inputs use measured overall casing dimensions; SmokeShield width must include the 28 mm PTC shroud. Supported automatic methods include plasterboard wall, plasterboard under slab, masonry under slab, shaftwall and composite panel. Masonry wall and timber-stud methods are link-only until a safe universal opening rule is confirmed from the official sizing tool/drawing.
+
+
+## v4.4 — Actionair HEVAC/HVCA Installation Frame beta
+
+- Vertical installation frame in masonry wall:
+  - SmokeShield PTC — AA/F10702
+  - FireShield — AA/F10703
+- Horizontal installation frame in concrete slab:
+  - FireShield — AA/F10701
+
+Enter the measured outside dimensions of the installation-frame upstand, excluding building ties. The official drawing permits a 5–75 mm clear mortar gap on every side, so the result adds twice the selected side gap to both frame dimensions.

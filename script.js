@@ -307,6 +307,10 @@ const FD_MANUFACTURERS={
       DW_COMPOSITE:{label:"DWFX-F composite panel wall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13396",smokeOnly:true,w:52,h:60,boardsW:0,boardsH:0},
       DW_MASONRY_LINK:{label:"DWFX-F masonry wall — use official hole sizer / drawing",type:"dwfx-link",referenceSmoke:"AA/F12493",referenceFire:"AA/F10707"},
       DW_TIMBER_LINK:{label:"DWFX-F timber stud partition — official drawing required",type:"dwfx-link",referenceSmoke:"AA/F13752",smokeOnly:true}
+    }},
+    "HEVAC-IF":{label:"HEVAC / HVCA Installation Frame — Rectangular",shape:"rect",manual:"https://www.swegon.com/globalassets/digizuite/10508-en-smokeshield_hevac_hvca_installation_en.pdf",guide:"Actionair I/F Installation Guide",revision:"LNNN00352 v5.1 • 26 May 2022",methods:{
+      HEVAC_WALL:{label:"Vertical installation frame in masonry wall",type:"hevac-frame",referenceSmoke:"AA/F10702",referenceFire:"AA/F10703"},
+      HEVAC_SLAB:{label:"Horizontal installation frame in concrete slab — FireShield only",type:"hevac-frame",referenceFire:"AA/F10701",fireOnly:true}
     }}
   }}
 };
@@ -327,12 +331,13 @@ function configureDwfx(m){const variant=$("fdDwfxVariant").value;const isSmoke=v
  const smokeText='For SmokeShield, the entered width must include the 28 mm PTC shroud. Do not include the peripheral flange.';
  $("fdDwfxHint").textContent=m.type==="dwfx-link"?'This method is listed for reference only because the current guide does not provide one safe universal opening formula. Use the official Actionair hole-sizing tool or installation drawing.':`Enter measured overall casing width × height. ${smokeText}`;
 }
-function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="circle",dwfx=productKey==="DWFX-F";
+function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="circle",dwfx=productKey==="DWFX-F",hevac=productKey==="HEVAC-IF";
   $("fdRectInputs").style.display=p.shape==="rect"?"block":"none";
   $("fdCircularInputs").style.display=circle?"block":"none";
   $("fdDwfxWrap").style.display=dwfx?"block":"none";
-  $("fdWidthLabel").textContent=dwfx?"Measured overall casing width (mm)":"Nominal duct width (mm)";
-  $("fdHeightLabel").textContent=dwfx?"Measured overall casing height (mm)":"Nominal duct height (mm)";
+  $("fdHevacWrap").style.display=hevac?"block":"none";
+  $("fdWidthLabel").textContent=dwfx?"Measured overall casing width (mm)":hevac?"Measured outside frame width (mm)":"Nominal duct width (mm)";
+  $("fdHeightLabel").textContent=dwfx?"Measured overall casing height (mm)":hevac?"Measured outside frame height (mm)":"Nominal duct height (mm)";
   $("fdBoardWrap").style.display=["bsb-dry","css-dry"].includes(m.type)?"block":"none";
   $("fdWallBuildWrap").style.display=m.type==="css-dry"?"block":"none";
   $("fdShapeWrap").style.display=["css-masonry"].includes(m.type)?"block":"none";
@@ -342,6 +347,12 @@ function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="c
   if(m.type==="css-masonry"){const shape=$("fdApertureShape").value;setAllowanceOptions(shape==="square"?m.squareMin:m.circleMin,shape==="square"?m.squareMax:m.circleMax,m.step,m.defaultAllowance)}
   if(m.type==="css-slab")setAllowanceOptions(m.squareMin,m.squareMax,m.step,m.defaultAllowance);
   if(dwfx)configureDwfx(m);
+  if(hevac){
+    const g=$("fdHevacGap");g.innerHTML="";
+    for(let n=5;n<=75;n+=5){const o=document.createElement("option");o.value=n;o.textContent=`${n} mm each side`;if(n===25)o.selected=true;g.appendChild(o)}
+    $("fdHevacVariant").querySelector('option[value="SMOKE"]').disabled=!!m.fireOnly;
+    if(m.fireOnly)$("fdHevacVariant").value="FIRE";
+  }
   calcFD();
 }
 function drawFD(r){const g=$("fdDiagramLayer"),title=`${r.manufacturer} • ${r.product}`;
@@ -362,6 +373,12 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
       const openW=W+wa+(m.boardsW||0)*board,openH=H+ha+(m.boardsH||0)*board;
       r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${(m.boardsW||m.boardsH)?`; cut size also adds ${m.boardsW||0} × board to width and ${m.boardsH||0} × board to height`:""}`,reference:ref,variant:actualVariant};
     }
+  }else if(productKey==="HEVAC-IF"){
+    const gap=parseFloat($("fdHevacGap").value)||25;
+    let variant=$("fdHevacVariant").value;if(m.fireOnly)variant="FIRE";
+    const ref=variant==="SMOKE"?m.referenceSmoke:m.referenceFire;
+    const openW=W+2*gap,openH=H+2*gap;
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`Installation frame ${fmt0(W)} × ${fmt0(H)} mm`,rule:`Measured frame size + 2 × ${fmt0(gap)} mm clear mortar gap`,reference:ref,range:"Official drawing permits 5–75 mm from the installation-frame upstand to the aperture face all round."};
   }else r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W+m.w,openH:H+m.h,opening:`${fmt0(W+m.w)} × ${fmt0(H+m.h)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm`,rule:`Width +${m.w} mm; height +${m.h} mm`,reference:m.reference}
  }
  else{const dia=parseFloat($("fdDiameter").value)||0;r={shape:"circle",manufacturer:man.label,product:productKey,method:methodKey,dia,damper:`Ø ${fmt0(dia)} mm`,reference:m.reference};
@@ -375,4 +392,4 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
  $("fdOpeningBig").textContent=r.opening;$("fdMethodBig").textContent=`${r.product} • ${r.reference}`;$("fdDamperSummary").textContent=r.damper;$("fdRuleSummary").textContent=r.rule;$("fdReferenceSummary").textContent=r.reference;$("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;$("fdManualLink").href=p.manual;drawFD(r);const range=r.range?` ${r.range}`:"";if(r.isLinkOnly)fdMsg("warn","⚠ This installation is identified, but no automatic opening is given because the current guide does not provide one safe universal formula. Use the official Actionair hole sizer or drawing.");else fdMsg("ok",`✅ Independent Vent Tools result based on ${man.label} published installation guidance.${range} Verify the current official manual before construction.`);return r}
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nBuilder's opening: ${r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
 function resetFD(){$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
-if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",fillFDMethods);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
+if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",fillFDMethods);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);calcFD()});$("fdHevacVariant").addEventListener("change",calcFD);["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
