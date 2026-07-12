@@ -222,16 +222,35 @@ function calculateOffset(){
   const rmF=parseFloat($('rmFactor').value)||1;
 
   const th=rad(A);
+  const sinA=Math.sin(th);
   const R=Math.hypot(V,H);
-  const T=Math.sin(th)>0 ? R/Math.sin(th) : NaN;
+  const T=sinA>0 ? R/sinA : NaN;
   const roll=(V===0&&H===0) ? 0 : deg(Math.atan2(V,H));
 
   const bend=getBendTakeoff(A,D,rmF);
   const l=bend.l;
   const straight=T-(2*l);
 
+  // Work backwards from the selected minimum straight.
+  // Required resultant offset R = sin(angle) × (minimum straight + two bend take-offs).
+  const requiredR=sinA>0 ? sinA*(minS+(2*l)) : NaN;
+  const minRise=Number.isFinite(requiredR) ? Math.sqrt(Math.max(0,(requiredR*requiredR)-(H*H))) : NaN;
+  const riseChange=Number.isFinite(minRise) ? Math.max(0,minRise-V) : NaN;
+
   $('straightBig').textContent=fmt(straight)+' mm';
   $('rollBig').textContent=fmt(roll)+'°';
+  if($('minRiseBig')) $('minRiseBig').textContent=fmt(minRise)+' mm';
+  if($('riseChangeBig')) $('riseChangeBig').textContent=riseChange>0 ? '+'+fmt(riseChange)+' mm' : 'No increase';
+  if($('minRiseSub')){
+    $('minRiseSub').textContent=H>=requiredR
+      ? `Your ${fmt(H)} mm offset already provides enough resultant distance, even with zero rise.`
+      : `Minimum rise needed with ${fmt(H)} mm offset / over.`;
+  }
+  if($('riseChangeSub')){
+    $('riseChangeSub').textContent=riseChange>0
+      ? `Increase the rise from ${fmt(V)} mm to at least ${fmt(minRise)} mm.`
+      : `Current rise of ${fmt(V)} mm already achieves at least ${fmt(minS)} mm straight.`;
+  }
 
   const result=`Vent Tools - Offset Calculator
 
@@ -248,6 +267,8 @@ Results:
   Resultant offset R     = ${fmt(R)} mm
   Travel T               = ${fmt(T)} mm
   Bend take-off l        = ${fmt(l)} mm
+  Minimum rise required  = ${fmt(minRise)} mm
+  Rise increase required = ${fmt(riseChange)} mm
   Bend family            = ${bend.family}
   Dimension source       = ${bend.source}`;
 
@@ -262,13 +283,13 @@ Results:
   if(!Number.isFinite(straight)){
     setMsg('bad','⚠ Check your angle input.');
   }else if(straight<0){
-    setMsg('bad','❌ Impossible fit: the two bend take-offs overlap. Use a smaller bend angle or increase the available offset.');
+    setMsg('bad',`❌ Impossible fit. Increase the rise to at least ${fmt(minRise)} mm for a ${fmt(minS)} mm straight, or reduce the offset / bend angle.`);
   }else if(straight<minS){
-    setMsg('warn',`⚠ Straight section under ${fmt(minS)} mm. Check bend spigot depths — opposing swedges may meet inside the straight.`);
+    setMsg('warn',`⚠ Straight is ${fmt(straight)} mm. Increase rise by ${fmt(riseChange)} mm to at least ${fmt(minRise)} mm for a ${fmt(minS)} mm straight.`);
   }else if(!bend.exact){
     setMsg('warn','⚠ Cut length uses an estimated bend take-off because this exact angle/diameter is not in the current manufacturer table.');
   }else{
-    setMsg('ok','✅ Cut length uses the supplied manufacturer bend take-off. Verify fitting family and site conditions before cutting.');
+    setMsg('ok',`✅ Straight is ${fmt(straight)} mm, which meets the selected ${fmt(minS)} mm minimum.`);
   }
   return result;
 }
@@ -402,3 +423,11 @@ function updateFDManualButtonLabel(){
     ? '<span aria-hidden="true">📄</span> Open Official BSB Installation Manual'
     : '<span aria-hidden="true">📄</span> Open Official Actionair Installation Guide';
 }
+
+
+['up','over','dia','minStraight','rmFactor','angleCustom'].forEach(id=>{
+  const el=$(id);
+  if(el) el.addEventListener('input',calculateOffset);
+});
+if($('angle')) $('angle').addEventListener('change',()=>{angleUI();calculateOffset()});
+

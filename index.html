@@ -160,7 +160,20 @@
   <div class="version-pill">V5 Beta</div>
 </div>
 <div class="page-intro card"><h2>Offset Calculator</h2><p class="sub">Diagram → inputs → cut size</p></div><div class="card"><svg id="diagram" class="diagram" viewBox="0 0 760 360"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,4 L0,8 Z" fill="#334155"/></marker><linearGradient id="ductGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f3f4f6"/><stop offset="50%" stop-color="#cfd5dd"/><stop offset="100%" stop-color="#f8fafc"/></linearGradient></defs><g id="diagramLayer"></g></svg><div class="note">Schematic centreline diagram — rolled offsets are 3D, so check orientation on site.</div>
-<div class="fitting-chip" id="fittingChip">Fitting style: —</div></div><div class="card"><div class="row"><div><label>Rise / Up (mm)</label><input id="up" type="number" value="300" min="0" step="1"></div><div><label>Offset / Over (mm)</label><input id="over" type="number" value="250" min="0" step="1"></div></div><div class="row"><div><label>Bend angle</label><select id="angle"><option value="15">15°</option><option value="22.5">22.5°</option><option value="30">30°</option><option value="45" selected>45°</option><option value="60">60°</option><option value="90">90°</option><option value="custom">Custom…</option></select><input id="angleCustom" type="number" value="45" min="1" max="89" step="0.1" style="display:none;margin-top:10px"></div><div><label>Duct diameter (mm)</label><input id="dia" type="number" value="315" min="0" step="1"></div></div><div class="row"><div><label>Minimum straight / swedge limit (mm)</label><input id="minStraight" type="number" value="120" min="0" step="1"><div class="hint">Warns when opposing bend spigots/swages may meet inside the straight.</div></div><div><label>rm factor</label><input id="rmFactor" type="number" value="1.0" min="0" step="0.01"><div class="hint">Known manufacturer bend take-offs are used for supported diameters at 15°, 30°, 45°, 60° and 90°. Other sizes or angles use rm × tan(θ/2) as an estimate.</div></div></div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Cut straight L</div><div class="val" id="straightBig">—</div></div><div class="tile"><div class="lab">Roll angle</div><div class="val" id="rollBig">—</div></div></div><div id="msg" class="msg ok"></div><div class="actions"><button class="action primary" id="copyBtn">Copy result</button><button class="action" id="workingBtn">Show working</button><button class="action" id="resetBtn">Reset</button></div><div class="out" id="out"></div></div></section>
+<div class="fitting-chip" id="fittingChip">Fitting style: —</div></div><div class="card"><div class="row"><div><label>Rise / Up (mm)</label><input id="up" type="number" value="300" min="0" step="1"></div><div><label>Offset / Over (mm)</label><input id="over" type="number" value="250" min="0" step="1"></div></div><div class="row"><div><label>Bend angle</label><select id="angle"><option value="15">15°</option><option value="22.5">22.5°</option><option value="30">30°</option><option value="45" selected>45°</option><option value="60">60°</option><option value="90">90°</option><option value="custom">Custom…</option></select><input id="angleCustom" type="number" value="45" min="1" max="89" step="0.1" style="display:none;margin-top:10px"></div><div><label>Duct diameter (mm)</label><input id="dia" type="number" value="315" min="0" step="1"></div></div><div class="row"><div><label>Minimum straight / swedge limit (mm)</label><input id="minStraight" type="number" value="120" min="0" step="1"><div class="hint">Warns when opposing bend spigots/swages may meet inside the straight.</div></div><div><label>rm factor</label><input id="rmFactor" type="number" value="1.0" min="0" step="0.01"><div class="hint">Known manufacturer bend take-offs are used for supported diameters at 15°, 30°, 45°, 60° and 90°. Other sizes or angles use rm × tan(θ/2) as an estimate.</div></div></div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Cut straight L</div><div class="val" id="straightBig">—</div></div><div class="tile"><div class="lab">Roll angle</div><div class="val" id="rollBig">—</div></div></div>
+<div class="offset-min-grid">
+  <div class="offset-min-card">
+    <div class="offset-min-label">Minimum rise for selected straight</div>
+    <div class="offset-min-value" id="minRiseBig">—</div>
+    <div class="offset-min-sub" id="minRiseSub">Based on the current offset / over measurement.</div>
+  </div>
+  <div class="offset-min-card">
+    <div class="offset-min-label">Rise adjustment</div>
+    <div class="offset-min-value" id="riseChangeBig">—</div>
+    <div class="offset-min-sub" id="riseChangeSub">No adjustment calculated yet.</div>
+  </div>
+</div>
+<div id="msg" class="msg ok"></div><div class="actions"><button class="action primary" id="copyBtn">Copy result</button><button class="action" id="workingBtn">Show working</button><button class="action" id="resetBtn">Reset</button></div><div class="out" id="out"></div></div></section>
 <section id="ductulator" class="page">
 <div class="app-header">
   <button class="back" onclick="showPage('home')" aria-label="Back to home">← Home</button>
@@ -255,7 +268,7 @@
 </div>
 </section>
 
-<div class="footer"><div class="footer-live-note">VentTools V5 Beta • Designed and developed in Northern Ireland</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">V5 Beta • Built for ductwork installers</span></div></div>
+<div class="footer"><div class="footer-live-note">VentTools V5 Beta • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">V5 Beta • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>

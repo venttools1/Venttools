@@ -420,3 +420,40 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
   font-weight:850;
   color:#64748b;
 }
+
+.offset-min-grid{
+  display:grid;
+  grid-template-columns:1fr 1fr;
+  gap:12px;
+  margin-top:12px;
+}
+.offset-min-card{
+  border:1px solid #bfdbfe;
+  border-radius:14px;
+  background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  padding:14px;
+  box-shadow:0 6px 18px rgba(6,75,130,.08);
+}
+.offset-min-label{
+  color:#064b82;
+  font-size:11px;
+  font-weight:950;
+  text-transform:uppercase;
+  letter-spacing:.6px;
+}
+.offset-min-value{
+  margin-top:6px;
+  color:#0f172a;
+  font-size:26px;
+  font-weight:950;
+  line-height:1.1;
+}
+.offset-min-sub{
+  margin-top:7px;
+  color:#64748b;
+  font-size:12px;
+  line-height:1.4;
+}
+@media(max-width:620px){
+  .offset-min-grid{grid-template-columns:1fr}
+}

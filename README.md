@@ -175,3 +175,12 @@ This package is ready for the development branch and includes:
 - Root directory: `/`
 
 The `wrangler.jsonc` file supplies the Worker name, compatibility date and static-assets directory.
+
+
+## V5.1 offset improvement
+
+- Added automatic minimum-rise calculation for the selected minimum straight between bends.
+- Shows the exact rise needed with the current offset/over measurement.
+- Shows how much the current rise must increase.
+- Warning messages now give a practical target instead of requiring trial and error.
+- Removed the Northern Ireland wording from the homepage/footer.
