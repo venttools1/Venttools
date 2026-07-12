@@ -129,3 +129,28 @@ Enter the measured outside dimensions of the installation-frame upstand, excludi
 - Copy Result and New Calculation buttons use clearer labels and icons.
 - Builder's Opening result card is more visually prominent.
 - Mobile action buttons stack vertically for easier site use.
+
+
+## VentTools V5 visual identity build
+
+- Rebuilt the homepage as a professional mobile-first HVAC dashboard.
+- Replaced generic emoji-only cards with real installation photography supplied by the site owner.
+- Added real spiral offset, segmented bend, branch and full-system imagery.
+- Ductwrap now uses a round segmented bend image rather than a rectangular fitting.
+- Removed remaining V4 labels and changed the visible release badge to V5 Beta.
+- Added latest updates, supported manufacturers and an authentic “built by a duct fitter” section.
+- Existing calculators and calculations remain intact.
+
+
+## V5 mobile-upload package
+
+All homepage photographs are now embedded directly into the website files as data URIs.
+
+This means GitHub mobile users only need to upload four files:
+
+- index.html
+- style.css
+- script.js
+- README.md
+
+No assets folder is required.
