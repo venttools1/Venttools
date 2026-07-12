@@ -431,3 +431,56 @@ function updateFDManualButtonLabel(){
 });
 if($('angle')) $('angle').addEventListener('change',()=>{angleUI();calculateOffset()});
 
+
+// VentTools install-to-home-screen support.
+let deferredInstallPrompt=null;
+const installBtn=document.getElementById('installVentToolsBtn');
+const installModal=document.getElementById('installHelpModal');
+const installHelpText=document.getElementById('installHelpText');
+
+function isIOSDevice(){
+  return /iphone|ipad|ipod/i.test(navigator.userAgent);
+}
+function isStandaloneMode(){
+  return window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone===true;
+}
+function closeInstallModal(){
+  if(installModal) installModal.hidden=true;
+}
+
+window.addEventListener('beforeinstallprompt',(event)=>{
+  event.preventDefault();
+  deferredInstallPrompt=event;
+  if(installBtn && !isStandaloneMode()) installBtn.hidden=false;
+});
+
+window.addEventListener('appinstalled',()=>{
+  deferredInstallPrompt=null;
+  if(installBtn) installBtn.hidden=true;
+});
+
+if(installBtn){
+  if(isIOSDevice() && !isStandaloneMode()) installBtn.hidden=false;
+  installBtn.addEventListener('click',async()=>{
+    if(deferredInstallPrompt){
+      deferredInstallPrompt.prompt();
+      await deferredInstallPrompt.userChoice;
+      deferredInstallPrompt=null;
+      installBtn.hidden=true;
+      return;
+    }
+    if(isIOSDevice()){
+      installHelpText.textContent='In Safari, tap the Share button, then choose “Add to Home Screen”.';
+    }else{
+      installHelpText.textContent='Open your browser menu and choose “Install app” or “Add to Home screen”.';
+    }
+    installModal.hidden=false;
+  });
+}
+document.getElementById('closeInstallHelp')?.addEventListener('click',closeInstallModal);
+document.getElementById('installHelpOkay')?.addEventListener('click',closeInstallModal);
+installModal?.addEventListener('click',(event)=>{if(event.target===installModal)closeInstallModal()});
+
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
+}

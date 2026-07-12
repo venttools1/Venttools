@@ -8,6 +8,17 @@
   <title>VentTools V5 — Professional HVAC Installation Tools</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,4 61,37 96,37 68,57 79,91 50,70 21,91 32,57 4,37 39,37' fill='none' stroke='%23064b82' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='21' fill='%23064b82'/%3E%3Ctext x='50' y='59' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3EK%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
+
+  <link rel="manifest" href="manifest.webmanifest">
+  <link rel="apple-touch-icon" href="icon-192.png">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <meta name="apple-mobile-web-app-title" content="VentTools">
+  <meta property="og:title" content="VentTools — Professional HVAC Installation Tools">
+  <meta property="og:description" content="Practical HVAC calculators for duct fitters, including offsets, duct sizing and fire damper builder’s openings.">
+  <meta property="og:type" content="website">
+  <meta property="og:url" content="https://venttools.com/">
+
 </head>
 <body>
 <div class="wrap">
@@ -44,6 +55,7 @@
       <div class="v5-hero-actions">
         <button onclick="showPage('fireDamper')" class="v5-primary">Open Fire Damper Calculator</button>
         <button onclick="showPage('offset')" class="v5-secondary">Open Offset Calculator</button>
+        <button id="installVentToolsBtn" class="v5-install" hidden>📱 Install VentTools</button>
       </div>
     </div>
   </section>
@@ -267,6 +279,17 @@
   <div class="resource-note fd-safety-note">Use the result only for the selected manufacturer, product and installation method. Confirm the damper label, supporting construction, permitted aperture range and latest official installation manual before forming the opening.</div>
 </div>
 </section>
+
+
+<div id="installHelpModal" class="install-modal" hidden>
+  <div class="install-modal-card" role="dialog" aria-modal="true" aria-labelledby="installHelpTitle">
+    <button id="closeInstallHelp" class="install-close" aria-label="Close">×</button>
+    <div class="install-icon">📱</div>
+    <h2 id="installHelpTitle">Install VentTools</h2>
+    <p id="installHelpText">Add VentTools to your home screen for quick site access.</p>
+    <button id="installHelpOkay" class="v5-primary">Got it</button>
+  </div>
+</div>
 
 <div class="footer"><div class="footer-live-note">VentTools V5 Beta • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">V5 Beta • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
