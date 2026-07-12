@@ -184,3 +184,14 @@ The `wrangler.jsonc` file supplies the Worker name, compatibility date and stati
 - Shows how much the current rise must increase.
 - Warning messages now give a practical target instead of requiring trial and error.
 - Removed the Northern Ireland wording from the homepage/footer.
+
+
+## V5.2 Professional Web / PWA release
+
+- Added installable web app manifest.
+- Added 192 px and 512 px VentTools app icons.
+- Added Install VentTools button with Android install prompt support.
+- Added iPhone/iPad Add to Home Screen instructions.
+- Added service worker for offline access to the core app.
+- Added robots.txt and sitemap.xml.
+- Added Open Graph sharing metadata.

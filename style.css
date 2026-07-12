@@ -457,3 +457,38 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 @media(max-width:620px){
   .offset-min-grid{grid-template-columns:1fr}
 }
+
+.v5-install{
+  background:#ffffff;
+  color:#06121f;
+  border:1px solid rgba(255,255,255,.85);
+  border-radius:12px;
+  padding:13px 17px;
+  font-weight:950;
+  cursor:pointer;
+}
+.v5-install:hover{transform:translateY(-1px)}
+.install-modal{
+  position:fixed;inset:0;z-index:9999;
+  background:rgba(2,10,18,.78);
+  display:grid;place-items:center;
+  padding:18px;
+}
+.install-modal[hidden]{display:none}
+.install-modal-card{
+  position:relative;
+  width:min(420px,100%);
+  background:#fff;color:#0f172a;
+  border-radius:18px;
+  padding:26px 22px 22px;
+  box-shadow:0 24px 70px rgba(0,0,0,.35);
+  text-align:center;
+}
+.install-close{
+  position:absolute;right:12px;top:9px;
+  border:0;background:transparent;
+  font-size:30px;line-height:1;cursor:pointer;color:#64748b;
+}
+.install-icon{font-size:42px}
+.install-modal-card h2{margin:8px 0 10px}
+.install-modal-card p{color:#475569;line-height:1.55}
