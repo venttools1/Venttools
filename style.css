@@ -414,3 +414,9 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
   .v5-manufacturer-grid{grid-template-columns:1fr}
   .v5-authentic{margin:0 14px 20px;align-items:flex-start;flex-direction:column}
 }
+
+.footer-live-note{
+  margin-bottom:6px;
+  font-weight:850;
+  color:#64748b;
+}

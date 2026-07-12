@@ -1,4 +1,4 @@
-# Vent Tools v4 development
+# VentTools V5 development
 
 This is the first split-file build:
 
@@ -60,14 +60,14 @@ specific combination is relied upon, because it differs sharply from adjacent si
 ## Branding update
 
 - Compact Vent Tools brand header added to every calculator page.
-- Logo mark, tool name and v4 Beta badge remain visible while scrolling.
+- Logo mark, tool name and V5 Beta badge remain visible while scrolling.
 - Browser favicon added using the Vent Tools symbol.
 - Footer branding standardised across the site.
 
 
 ## Live homepage update
 
-- Removed the “v4 development build” banner.
+- Removed the “V5 Beta build” banner.
 - Added professional live-site wording and feature badges.
 - Homepage now separates live tools, tools in development and technical resources.
 - Removed unclear bend-calculator placeholders.
@@ -94,7 +94,7 @@ Supports FSD-TD methods M5, M6, M9, M10 and M11, plus FSD-C M9, M10 and M11. Eac
 - FSD-TD M5, M6, M9, M10 and M11 opening rules were checked against the official BSB IOM.
 
 
-## v4.2 — Actionair CSS beta
+## V5 — Actionair CSS beta
 
 Added a manufacturer-aware fire-damper framework and the first Actionair by Swegon product: CSS.
 
@@ -106,12 +106,12 @@ Supported CSS methods from Actionair CSS Installation Guide LNNN00356 v6.0 dated
 The user selects an allowance within the published permitted range. Default is 20 mm total (10 mm nominal each side). Results display the official drawing reference, guide revision and direct official-manual link.
 
 
-## v4.3 Actionair DWFX-F beta
+## V5 Actionair DWFX-F beta
 
 Added DWFX-F / DWFX-3F methods from Actionair guide LNNN00354 v6.0 dated 17 March 2026. Inputs use measured overall casing dimensions; SmokeShield width must include the 28 mm PTC shroud. Supported automatic methods include plasterboard wall, plasterboard under slab, masonry under slab, shaftwall and composite panel. Masonry wall and timber-stud methods are link-only until a safe universal opening rule is confirmed from the official sizing tool/drawing.
 
 
-## v4.4 — Actionair HEVAC/HVCA Installation Frame beta
+## V5 — Actionair HEVAC/HVCA Installation Frame beta
 
 - Vertical installation frame in masonry wall:
   - SmokeShield PTC — AA/F10702
@@ -154,3 +154,24 @@ This means GitHub mobile users only need to upload four files:
 - README.md
 
 No assets folder is required.
+
+
+## VentTools V5 live-ready package
+
+This package is ready for the development branch and includes:
+
+- Full VentTools V5 visual homepage
+- Embedded site photography, so no assets folder is required
+- BSB and Actionair fire damper calculators
+- CSS, DWFX-F / DWFX-3F and HEVAC / HVCA support
+- Prominent official-manual buttons
+- All visible version labels standardised to V5 Beta
+- Cloudflare Workers configuration in `wrangler.jsonc`
+
+### Cloudflare build settings
+
+- Build command: none
+- Deploy command: `npx wrangler deploy`
+- Root directory: `/`
+
+The `wrangler.jsonc` file supplies the Worker name, compatibility date and static-assets directory.
