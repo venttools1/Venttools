@@ -228,3 +228,59 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 #fdDwfxWrap .row{margin-top:0}
 
 #fdHevacWrap{margin-top:12px;padding:12px;border:1px solid #dbe4ee;border-radius:14px;background:#f8fafc}
+
+/* Vent Tools v5 polish pass 1 */
+.actions{
+  display:grid;
+  grid-template-columns:repeat(3,minmax(0,1fr));
+  gap:10px;
+  margin-top:14px;
+}
+.actions .action{
+  min-height:46px;
+  border-radius:13px;
+  font-weight:900;
+  letter-spacing:.1px;
+  box-shadow:0 4px 12px rgba(15,23,42,.08);
+}
+.manual-button{
+  background:#064b82;
+  color:#fff !important;
+  border:1px solid #064b82 !important;
+  text-decoration:none !important;
+}
+.manual-button:hover{
+  background:#053d69;
+  transform:translateY(-1px);
+}
+.reset-button{
+  background:#f8fafc;
+  border:1px solid #cbd5e1;
+}
+.results .tile:first-child{
+  border:2px solid #bfdbfe;
+  background:linear-gradient(180deg,#eff6ff 0%,#ffffff 100%);
+  box-shadow:0 8px 24px rgba(6,75,130,.10);
+}
+.result-label{
+  text-transform:uppercase;
+  letter-spacing:.7px;
+  color:#064b82 !important;
+  font-size:11px !important;
+  font-weight:950 !important;
+}
+#fdOpeningBig{
+  color:#0f172a;
+  font-size:clamp(28px,7vw,46px);
+  line-height:1.05;
+}
+.fd-manual-link{
+  display:inline-flex;
+  align-items:center;
+  justify-content:center;
+  gap:7px;
+}
+@media(max-width:620px){
+  .actions{grid-template-columns:1fr}
+  .actions .action{width:100%}
+}

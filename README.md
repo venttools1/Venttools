@@ -120,3 +120,12 @@ Added DWFX-F / DWFX-3F methods from Actionair guide LNNN00354 v6.0 dated 17 Marc
   - FireShield — AA/F10701
 
 Enter the measured outside dimensions of the installation-frame upstand, excluding building ties. The official drawing permits a 5–75 mm clear mortar gap on every side, so the result adds twice the selected side gap to both frame dimensions.
+
+
+## Vent Tools v5 polish pass 1
+
+- Official manufacturer manual link is now a prominent blue button.
+- Button text changes automatically between BSB and Actionair.
+- Copy Result and New Calculation buttons use clearer labels and icons.
+- Builder's Opening result card is more visually prominent.
+- Mobile action buttons stack vertically for easier site use.
