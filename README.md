@@ -94,11 +94,11 @@ Supports FSD-TD methods M5, M6, M9, M10 and M11, plus FSD-C M9, M10 and M11. Eac
 - FSD-TD M5, M6, M9, M10 and M11 opening rules were checked against the official BSB IOM.
 
 
-## V5 — Swegon Actionair CSS beta
+## V5 — Actionair CSS beta
 
-Added a manufacturer-aware fire-damper framework and the first Swegon — Actionair products product: CSS.
+Added a manufacturer-aware fire-damper framework and the first Actionair by Swegon product: CSS.
 
-Supported CSS methods from Swegon Actionair CSS Installation Guide LNNN00356 v6.0 dated 27 May 2025:
+Supported CSS methods from Actionair CSS Installation Guide LNNN00356 v6.0 dated 27 May 2025:
 - Vertical plasterboard wall: square finished opening casing diameter +10–40 mm; cut size adds two aperture-lining board thicknesses.
 - Vertical masonry wall: square opening casing diameter +10–40 mm, or circular opening +10–30 mm.
 - Horizontal concrete slab: square opening casing diameter +10–30 mm. Circular slab mode is intentionally disabled because the guide prose and drawing show conflicting maximum allowances.
@@ -106,7 +106,7 @@ Supported CSS methods from Swegon Actionair CSS Installation Guide LNNN00356 v6.
 The user selects an allowance within the published permitted range. Default is 20 mm total (10 mm nominal each side). Results display the official drawing reference, guide revision and direct official-manual link.
 
 
-## V5 Swegon Actionair DWFX-F beta
+## V5 Actionair DWFX-F beta
 
 Added DWFX-F / DWFX-3F methods from Actionair guide LNNN00354 v6.0 dated 17 March 2026. Inputs use measured overall casing dimensions; SmokeShield width must include the 28 mm PTC shroud. Supported automatic methods include plasterboard wall, plasterboard under slab, masonry under slab, shaftwall and composite panel. Masonry wall and timber-stud methods are link-only until a safe universal opening rule is confirmed from the official sizing tool/drawing.
 
@@ -209,11 +209,6 @@ The `wrangler.jsonc` file supplies the Worker name, compatibility date and stati
 - No Actionair spreadsheet layout, images or branded presentation are reproduced.
 
 
-## VentTools V5.4 — Professional Release
+## V5.4 corrected image build
 
-- Removed all public Beta and development labels.
-- Standardised the visible release wording to V5.4.
-- Grouped Actionair product ranges clearly under Swegon.
-- Retained product names such as CSS, DWFX-F, HEVAC and SPAN.
-- Kept all V5.3 calculations, PWA installation, sitemap and search files.
-- Updated the service-worker cache so installed users receive the new release.
+The first V5.4 package accidentally altered characters inside the embedded base64 photographs while removing old version labels. This corrected build starts from V5.3 and changes only known visible labels, leaving every embedded image untouched.

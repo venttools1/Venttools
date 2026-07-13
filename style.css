@@ -501,10 +501,5 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
   background:#f8fafc;
 }
 
-/* VentTools V5.4 professional release */
-.v5-version{
-  background:rgba(245,130,32,.08);
-}
-.footer-live-note{
-  color:#475569;
-}
+/* VentTools V5.4 corrected professional release */
+.v5-version{background:rgba(245,130,32,.08)}
