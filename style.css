@@ -492,3 +492,14 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .install-icon{font-size:42px}
 .install-modal-card h2{margin:8px 0 10px}
 .install-modal-card p{color:#475569;line-height:1.55}
+
+#fdSpanWrap{
+  margin-top:12px;
+  padding:12px;
+  border:1px solid #dbe4ee;
+  border-radius:14px;
+  background:#f8fafc;
+}
+
+/* VentTools V5.4 corrected professional release */
+.v5-version{background:rgba(245,130,32,.08)}

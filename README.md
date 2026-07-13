@@ -195,3 +195,20 @@ The `wrangler.jsonc` file supplies the Worker name, compatibility date and stati
 - Added service worker for offline access to the core app.
 - Added robots.txt and sitemap.xml.
 - Added Open Graph sharing metadata.
+
+
+## V5.3 Actionair opening-data phase 1
+
+- CSS now defaults to the official mean opening allowance of +30 mm.
+- CSS retains minimum/mean/maximum choices where the installation method permits them.
+- Added Actionair SmokeShield SPAN calculator:
+  - SmokeShield 501 PTC rectangular
+  - SmokeShield 601 PTC circular
+- SPAN shows recommended opening plus permitted minimum and maximum range.
+- Calculations were independently coded from factual dimensions in the uploaded Actionair Builders Work Opening Calculator V5.
+- No Actionair spreadsheet layout, images or branded presentation are reproduced.
+
+
+## V5.4 corrected image build
+
+The first V5.4 package accidentally altered characters inside the embedded base64 photographs while removing old version labels. This corrected build starts from V5.3 and changes only known visible labels, leaving every embedded image untouched.

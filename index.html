@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#064b82">
   <meta name="description" content="VentTools V5 provides practical HVAC calculators for duct fitters, including offsets, duct sizing and manufacturer-specific fire damper builder’s openings.">
-  <title>VentTools V5 — Professional HVAC Installation Tools</title>
+  <title>VentTools — Professional HVAC Installation Tools</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,4 61,37 96,37 68,57 79,91 50,70 21,91 32,57 4,37 39,37' fill='none' stroke='%23064b82' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='21' fill='%23064b82'/%3E%3Ctext x='50' y='59' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3EK%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
 
@@ -43,7 +43,7 @@
         <div class="v5-brand-sub">Professional HVAC tools</div>
       </div>
     </div>
-    <div class="v5-version">V5 Beta</div>
+    <div class="v5-version">V5.4</div>
   </header>
 
   <section class="v5-hero">
@@ -135,7 +135,7 @@
       <div class="v5-panel-title"><span>🏭</span><h2>Supported manufacturers</h2></div>
       <div class="v5-manufacturer-grid">
         <div><strong>BSB</strong><span>FSD-TD • FSD-C</span><em>Active</em></div>
-        <div><strong>Actionair by Swegon</strong><span>CSS • DWFX-F • HEVAC</span><em>Active</em></div>
+        <div><strong>Swegon — Actionair products</strong><span>CSS • DWFX-F • HEVAC</span><em>Active</em></div>
         <div class="muted"><strong>More manufacturers</strong><span>Added carefully from current IOMs</span><em>Planned</em></div>
       </div>
     </div>
@@ -229,7 +229,7 @@
 <div class="page-intro card"><h2>Fire Damper Hole Calculator</h2><p class="sub">Choose the manufacturer, exact product and tested installation method.</p></div>
 <div class="card">
   <div class="row">
-    <div><label for="fdManufacturer">Manufacturer</label><select id="fdManufacturer"><option value="BSB" selected>BSB</option><option value="ACTIONAIR">Actionair by Swegon</option></select></div>
+    <div><label for="fdManufacturer">Manufacturer</label><select id="fdManufacturer"><option value="BSB" selected>BSB</option><option value="ACTIONAIR">Swegon — Actionair products</option></select></div>
     <div><label for="fdSeries">Product / series</label><select id="fdSeries"></select></div>
   </div>
   <label for="fdMethod">Installation method</label><select id="fdMethod"></select>
@@ -257,6 +257,36 @@
       <div><label for="fdHevacGap">Clear mortar gap all round</label><select id="fdHevacGap"></select></div>
     </div>
     <div class="hint">Enter the measured outside width and height of the installation-frame upstand. Do not include building ties. The official drawing permits 5–75 mm from the frame upstand to the aperture face all round.</div>
+  </div>
+
+
+  <div id="fdSpanWrap" style="display:none">
+    <div class="row">
+      <div>
+        <label for="fdSpanVariant">Damper format</label>
+        <select id="fdSpanVariant">
+          <option value="501">SmokeShield 501 PTC — rectangular</option>
+          <option value="601">SmokeShield 601 PTC — circular</option>
+        </select>
+      </div>
+      <div id="fdSpanWidthWrap">
+        <label for="fdSpanWidth">Duct width (mm)</label>
+        <input id="fdSpanWidth" type="number" value="250" min="100" max="1000" step="1">
+      </div>
+    </div>
+    <div class="row">
+      <div id="fdSpanHeightWrap">
+        <label for="fdSpanHeight">Duct height (mm)</label>
+        <input id="fdSpanHeight" type="number" value="200" min="100" max="1000" step="1">
+      </div>
+      <div id="fdSpanDiameterWrap" style="display:none">
+        <label for="fdSpanDiameter">Duct diameter (mm)</label>
+        <input id="fdSpanDiameter" type="number" value="500" min="100" max="1000" step="1">
+      </div>
+    </div>
+    <div class="hint">
+      VentTools calculates the recommended SPAN builder's opening and shows the manufacturer's permitted minimum and maximum range.
+    </div>
   </div>
 
   <div id="fdCircularInputs" style="display:none">
@@ -291,7 +321,7 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V5 Beta • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">V5 Beta • Built for ductwork installers</span></div></div>
+<div class="footer"><div class="footer-live-note">VentTools V5.4 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>
