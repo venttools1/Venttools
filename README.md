@@ -232,3 +232,16 @@ The first V5.4 package accidentally altered characters inside the embedded base6
 ## V5.5 Lindab selector correction
 
 The Lindab calculation data was present in the first V5.5 build, but the visible manufacturer dropdown still contained only BSB and Swegon/Actionair. This corrected package adds Lindab to the manufacturer selector and refreshes the PWA cache.
+
+
+## VentTools V5.6 — Official Lindab booklet links
+
+- Added the exact official Lindab installation booklet link for:
+  - FNC1
+  - WH25
+  - WH45
+  - WK25
+  - WK45
+  - WKS25
+- The manual button now names the selected Lindab product.
+- The service-worker cache was updated so installed users receive the new links.

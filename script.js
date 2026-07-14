@@ -338,29 +338,29 @@ const FD_MANUFACTURERS={
     }}
   }},
   LINDAB:{label:"Lindab",products:{
-    "FNC1":{label:"FNC1 — Circular 300 Pa",shape:"circle",manual:"https://www.lindab.com",guide:"Lindab FNC1 Installation Booklet",revision:"1MUBFNC1EN-LIND rev 20-12",minSize:100,maxSize:400,methods:{
+    "FNC1":{label:"FNC1 — Circular 300 Pa",shape:"circle",manual:"https://www.lindab.com/globalassets/commerce/lindabwebproductsdoc/assets/production/ywe3nwrhmtqtmgmwoc00njm2ltliotatywzjzjiwmty0otdh/5249534188784331220/fnc1_booklet_document_en_l.pdf?v=1783815510",guide:"Lindab FNC1 Installation Booklet",revision:"1MUBFNC1EN-LIND rev 20-12",minSize:100,maxSize:400,methods:{
       FNC1_WET30:{label:"Rigid/flexible wall — wet or rock wool seal",type:"lindab-circle-fixed",reference:"EI 60 S",add:30,openingShape:"circle",note:"Wall minimum thickness 95 mm."},
       FNC1_DRY10:{label:"Rigid/flexible wall — acrylic dry seal",type:"lindab-circle-fixed",reference:"EI 60 S",add:10,openingShape:"circle",note:"Wall minimum thickness 95 mm."},
       FNC1_FLOOR:{label:"Floor — mortar/plaster/rock wool seal",type:"lindab-circle-range",reference:"EI 60 S",minAdd:30,maxAdd:55,recommendedAdd:30,openingShape:"circle",note:"Floor minimum thickness 100 mm; density 550 kg/m³."}
     }},
-    "WH25":{label:"WH25 — Circular 500 Pa",shape:"circle",manual:"https://www.lindab.com",guide:"Lindab WH25 Installation Booklet",revision:"1MUBWH25EN-LIND rev 20-10",minSize:100,maxSize:315,methods:{
+    "WH25":{label:"WH25 — Circular 500 Pa",shape:"circle",manual:"https://www.lindab.com/globalassets/commerce/lindabwebproductsdoc/assets/production/ntaxztfkngitmzcwny00n2yxlwflodutzmm4mtqyowvlyju0/5249534188948240062/wh25_booklet_document_en_l.pdf?v=1783815573",guide:"Lindab WH25 Installation Booklet",revision:"1MUBWH25EN-LIND rev 20-10",minSize:100,maxSize:315,methods:{
       WH25_RIGID_WET:{label:"Rigid wall — mortar/plaster seal",type:"lindab-circle-range",reference:"EI 120 S",minAdd:25,maxAdd:440,recommendedAdd:25,openingShape:"circle",note:"Wall minimum thickness 100 mm; density 550 kg/m³."},
       WH25_RIGID_DRY:{label:"Rigid wall — plasterboard and rock wool",type:"lindab-circle-square-range",reference:"EI 90 S",minAdd:50,maxAdd:70,recommendedAdd:50,note:"Square opening. Wall minimum thickness 100 mm."},
       WH25_FLOOR:{label:"Floor — mortar seal",type:"lindab-circle-range",reference:"EI 90/120 S",minAdd:25,maxAdd:35,recommendedAdd:25,openingShape:"circle",note:"Floor minimum thickness 100 mm for EI90 or 150 mm for EI120."}
     }},
-    "WH45":{label:"WH45 — Circular 500 Pa",shape:"circle",manual:"https://www.lindab.com",guide:"Lindab WH45 Installation Booklet",revision:"1MUBWH45EN-LIND rev 20-10",minSize:200,maxSize:800,methods:{
+    "WH45":{label:"WH45 — Circular 500 Pa",shape:"circle",manual:"https://www.lindab.com/globalassets/commerce/lindabwebproductsdoc/assets/production/ytgxowu4ytgtmwviyi00otk0lwe4mzqtyjjhmja0ymqwmgy4/5249534189216862126/wh45_booklet_document_en_l.pdf?v=1783815574",guide:"Lindab WH45 Installation Booklet",revision:"1MUBWH45EN-LIND rev 20-10",minSize:200,maxSize:800,methods:{
       WH45_RIGID_DRY:{label:"Rigid/flexible wall — plasterboard and rock wool",type:"lindab-circle-square-range",reference:"EI 90 S",minAdd:35,maxAdd:50,recommendedAdd:35,note:"Square opening. Wall minimum thickness 100 mm."},
       WH45_RIGID_WET:{label:"Rigid/flexible wall — mortar or plaster",type:"lindab-circle-range",reference:"EI 120 S",minAdd:25,maxAdd:580,recommendedAdd:25,openingShape:"circle",note:"Wall minimum thickness 100 mm."},
       WH45_FLOOR:{label:"Floor — mortar seal",type:"lindab-circle-range",reference:"EI 90/120/180 S",minAdd:40,maxAdd:55,recommendedAdd:40,openingShape:"circle",note:"Floor minimum thickness 100 or 150 mm depending on classification."}
     }},
-    "WK25":{label:"WK25 — Rectangular 500 Pa",shape:"rect",manual:"https://www.lindab.com",guide:"Lindab WK25 Installation Booklet",revision:"1MUBWK25EN-LIND rev 25-03",methods:{
+    "WK25":{label:"WK25 — Rectangular 500 Pa",shape:"rect",manual:"https://www.lindab.com/globalassets/commerce/lindabwebproductsdoc/assets/production/mme2zdgzzjuty2u2ns00ndu4ltgzzwmtzjrjyzu4zmfmm2y3/5250840905260342233/wk25_booklet_document_en_l.pdf?v=1783821298",guide:"Lindab WK25 Installation Booklet",revision:"1MUBWK25EN-LIND rev 25-03",methods:{
       WK25_GUIDE:{label:"Installation method selection — official drawing check",type:"lindab-link",reference:"WK25 manual",note:"The WK25 booklet contains numerous wall, floor, paired and remote methods. VentTools logs the model but does not apply one universal opening rule."}
     }},
-    "WK45":{label:"WK45 — Rectangular 500/300 Pa",shape:"rect",manual:"https://www.lindab.com",guide:"Lindab WK45 Installation Booklet",revision:"1MUBWK45EN-LIND rev 25-12",methods:{
+    "WK45":{label:"WK45 — Rectangular 500/300 Pa",shape:"rect",manual:"https://www.lindab.com/globalassets/commerce/lindabwebproductsdoc/assets/production/yzk1nduxndytztk1my00odhlltlkztutztdkyweymta3zti5/5250833076614407765/wk45_booklet_document_en_l.pdf?v=1783821283",guide:"Lindab WK45 Installation Booklet",revision:"1MUBWK45EN-LIND rev 25-12",methods:{
       WK45_LIGHT_DRY:{label:"Light wall — plasterboard and rock wool",type:"lindab-rect-range",reference:"EI method",minW:75,maxW:95,minH:75,maxH:95,recommendedW:75,recommendedH:75,note:"Wall opening range stated in the installation booklet."},
       WK45_LIGHT_WET:{label:"Light wall — mortar or plaster",type:"lindab-rect-range",reference:"EI method",minW:100,maxW:580,minH:100,maxH:580,recommendedW:100,recommendedH:100,note:"Wall opening range stated in the installation booklet."}
     }},
-    "WKS25":{label:"WKS25 — Slim rectangular 500 Pa",shape:"rect",manual:"https://www.lindab.com",guide:"Lindab WKS25 Installation Booklet",revision:"1MUBWKS25EN-LIND rev 25-03",methods:{
+    "WKS25":{label:"WKS25 — Slim rectangular 500 Pa",shape:"rect",manual:"https://www.lindab.com/globalassets/commerce/lindabwebproductsdoc/assets/production/mgqwzwe0zdmtm2vmni00nzfklwiwmgitn2zhywi0ntfhnmiy/5250833079139246718/wks25_booklet_document_en_l.pdf?v=1783821283",guide:"Lindab WKS25 Installation Booklet",revision:"1MUBWKS25EN-LIND rev 25-03",methods:{
       WKS25_RIGID:{label:"Vertical rigid wall",type:"lindab-rect-fixed",reference:"EI 120 S",w:50,h:50,note:"Wall minimum thickness 100 mm; density 550 kg/m³."},
       WKS25_LIGHT:{label:"Vertical light wall — plasterboard",type:"lindab-rect-fixed",reference:"EI 60/120 S",w:75,h:75,note:"Wall minimum thickness 100 mm."},
       WKS25_GYPSUM:{label:"Solid gypsum block wall",type:"lindab-rect-fixed",reference:"EI 90/120 S",w:50,h:50,note:"Wall minimum thickness 70 or 100 mm; density 995 kg/m³."},
@@ -544,16 +544,17 @@ else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-sp
 else fdMsg("ok",`✅ Independent VentTools result based on ${man.label} published installation guidance.${range} Verify the current official manual before construction.`);return r}
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nBuilder's opening: ${r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
 function resetFD(){$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
-if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",fillFDMethods);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);calcFD()});$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
+if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",()=>{fillFDMethods();updateFDManualButtonLabel()});$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);calcFD()});$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
 
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");
   if(!link) return;
   const manufacturer=$("fdManufacturer").value;
+  const product=$("fdSeries")?.value||"";
   link.innerHTML=manufacturer==="BSB"
     ? '<span aria-hidden="true">📄</span> Open Official BSB Installation Manual'
     : manufacturer==="LINDAB"
-      ? '<span aria-hidden="true">📄</span> Open Official Lindab Product Information'
+      ? `<span aria-hidden="true">📄</span> Open Official ${product} Installation Booklet`
       : '<span aria-hidden="true">📄</span> Open Official Swegon / Actionair Installation Guide';
 }
 
