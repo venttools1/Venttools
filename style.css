@@ -760,3 +760,12 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 @media(max-width:560px){
   .fd-venttools-actions{grid-template-columns:1fr}
 }
+
+/* VentTools V5.9 — Lindab Professional */
+.fd-lindab-note{
+  margin:14px 0;padding:13px 15px;border:1px solid #93c5fd;
+  border-left:5px solid #0b5ea8;border-radius:14px;background:#eff6ff;
+  color:#16324a;flex-direction:column;gap:5px
+}
+.fd-lindab-note strong{font-size:.95rem}
+.fd-lindab-note span{font-size:.88rem;line-height:1.42}

@@ -321,3 +321,15 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Made the official manufacturer installation manual the primary full-width button.
 - Kept Copy Result and New Calculation as secondary VentTools actions.
 - Updated service-worker cache for clean deployment.
+
+
+## VentTools V5.9 — Lindab Professional
+
+- Upgraded Lindab results to the VentTools Professional traceability standard.
+- Added professional calculation stages and critical-rule checklists for circular and rectangular Lindab dampers.
+- Expanded WK45 with certified options for rigid walls, light walls, safety walls, gypsum blocks, sandwich walls and floors.
+- Included wet, dry and Fire Batt/Weichschott installation routes where published.
+- Preserved the detailed WK25 single/paired wizard.
+- Added a visible Lindab method-selection notice.
+- Kept official Lindab installation booklets as the primary resource buttons.
+- No manufacturer-owned photographs or installation drawings are embedded.
