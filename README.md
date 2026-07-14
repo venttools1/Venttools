@@ -245,3 +245,26 @@ The Lindab calculation data was present in the first V5.5 build, but the visible
   - WKS25
 - The manual button now names the selected Lindab product.
 - The service-worker cache was updated so installed users receive the new links.
+
+
+## VentTools V5.7 — WK25 Professional
+Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairing eligibility, orientation checks, minimum distances and official references.
+
+
+## VentTools V5.7.3 — Clean test build
+
+- Starts from the working V5.7 WK25 Professional package.
+- Adds a visible life-safety notice inside the Fire Damper page.
+- Highlights that the section is for people competent in fire damper work, or those under their direct supervision.
+- Adds a visible final-verification panel above the result actions.
+- Adds a concise independent-tool disclaimer.
+- Updates the service-worker cache so the development build does not reuse an older interface.
+
+
+## VentTools V5.7.4 — Clean upload build
+
+- Moved the Fire Damper Safety Notice below the calculator heading.
+- Shortened the notice so it does not dominate the page.
+- Removed the Beta badge from the Fire Damper page.
+- Kept the WK25 Professional wizard, final-verification panel and professional disclaimer.
+- Updated the service-worker cache.
