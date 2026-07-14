@@ -533,7 +533,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
         const breakdown=automatic
           ?`Nominal duct ${fmt0(W)} × ${fmt0(H)} mm. Spigot ${fmt0(spigotW)} × ${fmt0(spigotH)} mm. Base casing ${fmt0(baseCasingW)} × ${fmt0(baseCasingH)} mm. PTC shroud adds 28 mm on the actuator side, giving the opening-measurement casing ${fmt0(casingW)} × ${fmt0(casingH)} mm. Overall peripheral flange ${fmt0(flangeW)} × ${fmt0(flangeH)} mm (not included in the opening calculation). Minimum actuator removal clearance: 120 mm.`
           :`Measured casing used directly: ${fmt0(casingW)} × ${fmt0(casingH)} mm${actualVariant==="SMOKE"?" including the PTC shroud":""}, excluding the peripheral flange.`;
-        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm${hasBoards?" cut size":""}`,damper:automatic?`${fmt0(W)} × ${fmt0(H)} mm nominal duct`:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening ${fmt0(finishedW)} × ${fmt0(finishedH)} mm: casing +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${hasBoards?`; cut size adds ${m.boardsW||0} × ${fmt0(board)} mm board to width and ${m.boardsH||0} × ${fmt0(board)} mm board to height`:""}`,reference:ref,variant:actualVariant,range:`${breakdown} Minimum separation: 200 mm between dampers in separate ducts and 75 mm from a damper to an adjacent wall or floor.`};
+        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm${hasBoards?" cut size":""}`,damper:automatic?`${fmt0(W)} × ${fmt0(H)} mm nominal duct`:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening ${fmt0(finishedW)} × ${fmt0(finishedH)} mm: casing +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${hasBoards?`; cut size adds ${m.boardsW||0} × ${fmt0(board)} mm board to width and ${m.boardsH||0} × ${fmt0(board)} mm board to height`:""}`,reference:ref,variant:actualVariant,range:`${breakdown} Minimum separation: 200 mm between dampers in separate ducts and 75 mm from a damper to an adjacent wall or floor.`,nominalStage:automatic?`${fmt0(W)} × ${fmt0(H)} mm`:"Measured casing input",casingStage:automatic?`${fmt0(casingW)} × ${fmt0(casingH)} mm incl. PTC shroud`:`${fmt0(casingW)} × ${fmt0(casingH)} mm measured`,finishedStage:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm`,cutStage:`${fmt0(cutW)} × ${fmt0(cutH)} mm`,sourceStatus:automatic?"Derived from published manufacturer dimensions":"Manual casing measurement required",statusType:automatic?"derived":"manual",criticalRules:[`Permitted finished-opening allowance selected: +${fmt0(wa)} mm width and +${fmt0(ha)} mm height.`,`Include the 28 mm PTC shroud in the casing width; exclude the peripheral flange.`,hasBoards?`Structural cut includes the certified board build-up (${m.boardsW||0} board thicknesses in width and ${m.boardsH||0} in height).`:"No additional board build-up is applied by this selected method.",`Minimum spacing: 200 mm between separate dampers and 75 mm from adjacent wall/floor for this Actionair method.`,`Allow at least 120 mm actuator removal clearance.`]};
       }
     }
   }else if(productKey==="HEVAC-IF"){
@@ -589,7 +589,40 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     r.invalidSize=true;
   }
  }
- $("fdOpeningBig").textContent=r.opening;$("fdMethodBig").textContent=`${r.product} • ${r.reference}`;$("fdDamperSummary").textContent=r.damper;$("fdRuleSummary").textContent=r.rule;$("fdReferenceSummary").textContent=r.reference;$("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;$("fdManualLink").href=p.manual;drawFD(r);const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
+ 
+ const nominalStage=r.nominalStage||(r.shape==="circle"?r.damper:(r.damper||"—"));
+ const casingStage=r.casingStage||(r.damper||"—");
+ const finishedStage=r.finishedStage||(r.opening||"—");
+ const cutStage=r.cutStage||(r.opening||"—");
+ let sourceStatus=r.sourceStatus;
+ let statusType=r.statusType;
+ if(!sourceStatus){
+   if(r.isLinkOnly){sourceStatus="Official drawing or manual input required";statusType="manual";}
+   else if(r.invalidSize){sourceStatus="Outside recorded manufacturer range";statusType="warning";}
+   else{sourceStatus="Calculated from selected manufacturer method";statusType="verified";}
+ }
+ const genericRules=[
+   r.range||"Verify the permitted opening and supporting construction in the current manufacturer document.",
+   "The selected wall/floor construction, sealing system and accessories must match the tested installation method.",
+   "Do not substitute materials or alter the tested arrangement without manufacturer approval."
+ ].filter(Boolean);
+ const criticalRules=(r.criticalRules&&r.criticalRules.length?r.criticalRules:genericRules);
+ $("fdOpeningBig").textContent=r.opening;
+ $("fdMethodBig").textContent=`${r.product} • ${r.reference}`;
+ $("fdDamperSummary").textContent=r.damper;
+ $("fdRuleSummary").textContent=r.rule;
+ $("fdReferenceSummary").textContent=r.reference;
+ $("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;
+ $("fdNominalStage").textContent=nominalStage;
+ $("fdCasingStage").textContent=casingStage;
+ $("fdFinishedStage").textContent=finishedStage;
+ $("fdCutStage").textContent=cutStage;
+ const statusEl=$("fdResultStatus");
+ statusEl.textContent=sourceStatus;
+ statusEl.className=`fd-result-status ${statusType||"verified"}`;
+ $("fdCriticalRules").innerHTML=`<ul>${criticalRules.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+ $("fdManualLink").href=p.manual;
+ drawFD(r);const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
 else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);
 else fdMsg("ok",`✅ Independent VentTools result based on ${man.label} published installation guidance.${range} Verify the current official manual before construction.`);return r}
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nBuilder's opening: ${r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}

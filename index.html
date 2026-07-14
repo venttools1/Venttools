@@ -322,12 +322,66 @@
 </div>
 <div class="card">
   <svg id="fdDiagram" class="diagram" viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg"><defs><marker id="fdArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#064b82"/></marker></defs><g id="fdDiagramLayer"></g></svg>
-  <div class="results" style="margin-top:12px">
-    <div class="tile"><div class="lab result-label">Builder's Opening</div><div class="val" id="fdOpeningBig">—</div></div>
-    <div class="tile"><div class="lab">Selected method</div><div class="val fd-method-value" id="fdMethodBig">—</div></div>
+  <div class="fd-professional-result" style="margin-top:12px">
+    <div class="fd-opening-hero">
+      <div class="result-label">Structural hole to cut</div>
+      <div class="fd-opening-value" id="fdOpeningBig">—</div>
+      <div class="fd-result-status" id="fdResultStatus">Waiting for calculation</div>
+    </div>
+
+    <div class="fd-certified-method">
+      <div class="fd-section-kicker">Certified installation method</div>
+      <div class="fd-method-value" id="fdMethodBig">—</div>
+    </div>
+
+    <div class="fd-build-flow" aria-label="Installation calculation breakdown">
+      <div class="fd-flow-card">
+        <span class="fd-flow-label">Nominal duct</span>
+        <strong id="fdNominalStage">—</strong>
+      </div>
+      <span class="fd-flow-arrow" aria-hidden="true">→</span>
+      <div class="fd-flow-card">
+        <span class="fd-flow-label">Damper assembly</span>
+        <strong id="fdCasingStage">—</strong>
+      </div>
+      <span class="fd-flow-arrow" aria-hidden="true">→</span>
+      <div class="fd-flow-card">
+        <span class="fd-flow-label">Finished opening</span>
+        <strong id="fdFinishedStage">—</strong>
+      </div>
+      <span class="fd-flow-arrow" aria-hidden="true">→</span>
+      <div class="fd-flow-card fd-flow-final">
+        <span class="fd-flow-label">Hole to cut</span>
+        <strong id="fdCutStage">—</strong>
+      </div>
+    </div>
   </div>
+
   <div id="fdMessage" class="msg ok"></div>
-  <div class="fd-detail-grid"><div><strong>Damper:</strong> <span id="fdDamperSummary">—</span></div><div><strong>Rule:</strong> <span id="fdRuleSummary">—</span></div><div><strong>Reference:</strong> <span id="fdReferenceSummary">—</span></div><div><strong>Guide:</strong> <span id="fdGuideSummary">—</span></div></div>
+
+  <div class="fd-traceability-grid">
+    <div class="fd-trace-card">
+      <span>Product / damper</span>
+      <strong id="fdDamperSummary">—</strong>
+    </div>
+    <div class="fd-trace-card">
+      <span>Calculation rule</span>
+      <strong id="fdRuleSummary">—</strong>
+    </div>
+    <div class="fd-trace-card">
+      <span>Manufacturer reference</span>
+      <strong id="fdReferenceSummary">—</strong>
+    </div>
+    <div class="fd-trace-card">
+      <span>Source document</span>
+      <strong id="fdGuideSummary">—</strong>
+    </div>
+  </div>
+
+  <div class="fd-critical-rules">
+    <div class="fd-section-kicker">Critical installation rules</div>
+    <div id="fdCriticalRules">Select a product and certified installation method.</div>
+  </div>
   
 <div class="fd-final-check" role="note">
   <strong>⚠ Final verification required</strong>
@@ -350,7 +404,7 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V5.7.5 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
+<div class="footer"><div class="footer-live-note">VentTools V5.8 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>
