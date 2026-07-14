@@ -336,6 +336,36 @@ const FD_MANUFACTURERS={
       HEVAC_WALL:{label:"Vertical installation frame in masonry wall",type:"hevac-frame",referenceSmoke:"AA/F10702",referenceFire:"AA/F10703"},
       HEVAC_SLAB:{label:"Horizontal installation frame in concrete slab — FireShield only",type:"hevac-frame",referenceFire:"AA/F10701",fireOnly:true}
     }}
+  }},
+  LINDAB:{label:"Lindab",products:{
+    "FNC1":{label:"FNC1 — Circular 300 Pa",shape:"circle",manual:"https://www.lindab.com",guide:"Lindab FNC1 Installation Booklet",revision:"1MUBFNC1EN-LIND rev 20-12",minSize:100,maxSize:400,methods:{
+      FNC1_WET30:{label:"Rigid/flexible wall — wet or rock wool seal",type:"lindab-circle-fixed",reference:"EI 60 S",add:30,openingShape:"circle",note:"Wall minimum thickness 95 mm."},
+      FNC1_DRY10:{label:"Rigid/flexible wall — acrylic dry seal",type:"lindab-circle-fixed",reference:"EI 60 S",add:10,openingShape:"circle",note:"Wall minimum thickness 95 mm."},
+      FNC1_FLOOR:{label:"Floor — mortar/plaster/rock wool seal",type:"lindab-circle-range",reference:"EI 60 S",minAdd:30,maxAdd:55,recommendedAdd:30,openingShape:"circle",note:"Floor minimum thickness 100 mm; density 550 kg/m³."}
+    }},
+    "WH25":{label:"WH25 — Circular 500 Pa",shape:"circle",manual:"https://www.lindab.com",guide:"Lindab WH25 Installation Booklet",revision:"1MUBWH25EN-LIND rev 20-10",minSize:100,maxSize:315,methods:{
+      WH25_RIGID_WET:{label:"Rigid wall — mortar/plaster seal",type:"lindab-circle-range",reference:"EI 120 S",minAdd:25,maxAdd:440,recommendedAdd:25,openingShape:"circle",note:"Wall minimum thickness 100 mm; density 550 kg/m³."},
+      WH25_RIGID_DRY:{label:"Rigid wall — plasterboard and rock wool",type:"lindab-circle-square-range",reference:"EI 90 S",minAdd:50,maxAdd:70,recommendedAdd:50,note:"Square opening. Wall minimum thickness 100 mm."},
+      WH25_FLOOR:{label:"Floor — mortar seal",type:"lindab-circle-range",reference:"EI 90/120 S",minAdd:25,maxAdd:35,recommendedAdd:25,openingShape:"circle",note:"Floor minimum thickness 100 mm for EI90 or 150 mm for EI120."}
+    }},
+    "WH45":{label:"WH45 — Circular 500 Pa",shape:"circle",manual:"https://www.lindab.com",guide:"Lindab WH45 Installation Booklet",revision:"1MUBWH45EN-LIND rev 20-10",minSize:200,maxSize:800,methods:{
+      WH45_RIGID_DRY:{label:"Rigid/flexible wall — plasterboard and rock wool",type:"lindab-circle-square-range",reference:"EI 90 S",minAdd:35,maxAdd:50,recommendedAdd:35,note:"Square opening. Wall minimum thickness 100 mm."},
+      WH45_RIGID_WET:{label:"Rigid/flexible wall — mortar or plaster",type:"lindab-circle-range",reference:"EI 120 S",minAdd:25,maxAdd:580,recommendedAdd:25,openingShape:"circle",note:"Wall minimum thickness 100 mm."},
+      WH45_FLOOR:{label:"Floor — mortar seal",type:"lindab-circle-range",reference:"EI 90/120/180 S",minAdd:40,maxAdd:55,recommendedAdd:40,openingShape:"circle",note:"Floor minimum thickness 100 or 150 mm depending on classification."}
+    }},
+    "WK25":{label:"WK25 — Rectangular 500 Pa",shape:"rect",manual:"https://www.lindab.com",guide:"Lindab WK25 Installation Booklet",revision:"1MUBWK25EN-LIND rev 25-03",methods:{
+      WK25_GUIDE:{label:"Installation method selection — official drawing check",type:"lindab-link",reference:"WK25 manual",note:"The WK25 booklet contains numerous wall, floor, paired and remote methods. VentTools logs the model but does not apply one universal opening rule."}
+    }},
+    "WK45":{label:"WK45 — Rectangular 500/300 Pa",shape:"rect",manual:"https://www.lindab.com",guide:"Lindab WK45 Installation Booklet",revision:"1MUBWK45EN-LIND rev 25-12",methods:{
+      WK45_LIGHT_DRY:{label:"Light wall — plasterboard and rock wool",type:"lindab-rect-range",reference:"EI method",minW:75,maxW:95,minH:75,maxH:95,recommendedW:75,recommendedH:75,note:"Wall opening range stated in the installation booklet."},
+      WK45_LIGHT_WET:{label:"Light wall — mortar or plaster",type:"lindab-rect-range",reference:"EI method",minW:100,maxW:580,minH:100,maxH:580,recommendedW:100,recommendedH:100,note:"Wall opening range stated in the installation booklet."}
+    }},
+    "WKS25":{label:"WKS25 — Slim rectangular 500 Pa",shape:"rect",manual:"https://www.lindab.com",guide:"Lindab WKS25 Installation Booklet",revision:"1MUBWKS25EN-LIND rev 25-03",methods:{
+      WKS25_RIGID:{label:"Vertical rigid wall",type:"lindab-rect-fixed",reference:"EI 120 S",w:50,h:50,note:"Wall minimum thickness 100 mm; density 550 kg/m³."},
+      WKS25_LIGHT:{label:"Vertical light wall — plasterboard",type:"lindab-rect-fixed",reference:"EI 60/120 S",w:75,h:75,note:"Wall minimum thickness 100 mm."},
+      WKS25_GYPSUM:{label:"Solid gypsum block wall",type:"lindab-rect-fixed",reference:"EI 90/120 S",w:50,h:50,note:"Wall minimum thickness 70 or 100 mm; density 995 kg/m³."},
+      WKS25_SHAFT:{label:"Shaft wall",type:"lindab-rect-fixed",reference:"EI 120 S",w:90,h:90,note:"Do not exceed the stated opening by more than 10 mm."}
+    }}
   }}
 };
 function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
@@ -468,6 +498,14 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     const ref=variant==="SMOKE"?m.referenceSmoke:m.referenceFire;
     const openW=W+2*gap,openH=H+2*gap;
     r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`Installation frame ${fmt0(W)} × ${fmt0(H)} mm`,rule:`Measured frame size + 2 × ${fmt0(gap)} mm clear mortar gap`,reference:ref,range:"Official drawing permits 5–75 mm from the installation-frame upstand to the aperture face all round."};
+  }else if(m.type==="lindab-rect-fixed"){
+    const openW=W+m.w,openH=H+m.h;
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal`,rule:`Nominal width +${m.w} mm; nominal height +${m.h} mm`,reference:m.reference,range:m.note};
+  }else if(m.type==="lindab-rect-range"){
+    const openW=W+m.recommendedW,openH=H+m.recommendedH;
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm recommended`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal`,rule:`Recommended: width +${m.recommendedW} mm; height +${m.recommendedH} mm`,reference:m.reference,range:`Permitted range: width +${m.minW} to +${m.maxW} mm; height +${m.minH} to +${m.maxH} mm. ${m.note||""}`};
+  }else if(m.type==="lindab-link"){
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Select official installation method",damper:`${fmt0(W)} × ${fmt0(H)} mm nominal`,rule:"No single universal builder's opening applies to every WK25 installation.",reference:m.reference,isLinkOnly:true,range:m.note};
   }else r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W+m.w,openH:H+m.h,opening:`${fmt0(W+m.w)} × ${fmt0(H+m.h)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm`,rule:`Width +${m.w} mm; height +${m.h} mm`,reference:m.reference}
  }
  else if(productKey!=="SPAN"){const dia=parseFloat($("fdDiameter").value)||0;r={shape:"circle",manufacturer:man.label,product:productKey,method:methodKey,dia,damper:`Ø ${fmt0(dia)} mm`,reference:m.reference};
@@ -477,8 +515,33 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
   else if(m.type==="css-dry"){const a=parseFloat($("fdAllowance").value)||30,b=parseFloat($("fdBoardThickness").value)||12.5,finished=dia+a,cut=finished+2*b;r.visualOpen=cut;r.apertureShape="square";r.opening=`${fmt0(cut)} × ${fmt0(cut)} mm cut size`;r.rule=`Finished square opening Ø casing +${fmt0(a)} mm; cut size +2 × ${fmt(b)} mm board`;r.reference=$("fdWallBuild").value;r.range=`Permitted finished-opening allowance: ${m.min}–${m.max} mm total.`}
   else if(m.type==="css-masonry"){const a=parseFloat($("fdAllowance").value)||30,shape=$("fdApertureShape").value,open=dia+a;r.visualOpen=open;r.apertureShape=shape;r.opening=shape==="square"?`${fmt0(open)} × ${fmt0(open)} mm square`:`Ø ${fmt0(open)} mm circular`;r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=shape==="square"?`Permitted square allowance: ${m.squareMin}–${m.squareMax} mm total.`:`Permitted circular allowance: ${m.circleMin}–${m.circleMax} mm total.`}
   else if(m.type==="css-slab"){const a=parseFloat($("fdAllowance").value)||30,open=dia+a;r.visualOpen=open;r.apertureShape="square";r.opening=`${fmt0(open)} × ${fmt0(open)} mm square`;r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=`Supported square-opening allowance: ${m.squareMin}–${m.squareMax} mm total. Circular slab opening is not enabled because the current guide text and drawing conflict.`}
+  else if(m.type==="lindab-circle-fixed"){
+    const open=dia+m.add;r.visualOpen=open;r.apertureShape=m.openingShape||"circle";r.openD=open;
+    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm`:`${fmt0(open)} × ${fmt0(open)} mm square`;
+    r.rule=`Nominal diameter +${m.add} mm`;r.range=m.note;
+  }
+  else if(m.type==="lindab-circle-range"){
+    const open=dia+m.recommendedAdd;r.visualOpen=open;r.apertureShape=m.openingShape||"circle";r.openD=open;
+    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm recommended`:`${fmt0(open)} × ${fmt0(open)} mm recommended`;
+    r.rule=`Recommended opening: nominal diameter +${m.recommendedAdd} mm`;
+    r.range=`Permitted allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
+  }
+  else if(m.type==="lindab-circle-square-range"){
+    const open=dia+m.recommendedAdd;r.visualOpen=open;r.apertureShape="square";r.openD=open;
+    r.opening=`${fmt0(open)} × ${fmt0(open)} mm square recommended`;
+    r.rule=`Recommended square opening: nominal diameter +${m.recommendedAdd} mm`;
+    r.range=`Permitted square allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
+  }
+  if(man.label==="Lindab" && (dia<p.minSize || dia>p.maxSize)){
+    r.opening="Size outside manual range";
+    r.rule=`Supported nominal range: Ø${p.minSize}–${p.maxSize} mm`;
+    r.range="Check the current Lindab manual before proceeding.";
+    r.invalidSize=true;
+  }
  }
- $("fdOpeningBig").textContent=r.opening;$("fdMethodBig").textContent=`${r.product} • ${r.reference}`;$("fdDamperSummary").textContent=r.damper;$("fdRuleSummary").textContent=r.rule;$("fdReferenceSummary").textContent=r.reference;$("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;$("fdManualLink").href=p.manual;drawFD(r);const range=r.range?` ${r.range}`:"";if(r.isLinkOnly)fdMsg("warn","⚠ This installation is identified, but no automatic opening is given because the current guide does not provide one safe universal formula. Use the official Actionair hole sizer or drawing.");else fdMsg("ok",`✅ Independent Vent Tools result based on ${man.label} published installation guidance.${range} Verify the current official manual before construction.`);return r}
+ $("fdOpeningBig").textContent=r.opening;$("fdMethodBig").textContent=`${r.product} • ${r.reference}`;$("fdDamperSummary").textContent=r.damper;$("fdRuleSummary").textContent=r.rule;$("fdReferenceSummary").textContent=r.reference;$("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;$("fdManualLink").href=p.manual;drawFD(r);const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
+else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);
+else fdMsg("ok",`✅ Independent VentTools result based on ${man.label} published installation guidance.${range} Verify the current official manual before construction.`);return r}
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nBuilder's opening: ${r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
 function resetFD(){$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
 if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",fillFDMethods);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);calcFD()});$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
@@ -489,7 +552,9 @@ function updateFDManualButtonLabel(){
   const manufacturer=$("fdManufacturer").value;
   link.innerHTML=manufacturer==="BSB"
     ? '<span aria-hidden="true">📄</span> Open Official BSB Installation Manual'
-    : '<span aria-hidden="true">📄</span> Open Official Swegon / Actionair Installation Guide';
+    : manufacturer==="LINDAB"
+      ? '<span aria-hidden="true">📄</span> Open Official Lindab Product Information'
+      : '<span aria-hidden="true">📄</span> Open Official Swegon / Actionair Installation Guide';
 }
 
 

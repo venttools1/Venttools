@@ -212,3 +212,18 @@ The `wrangler.jsonc` file supplies the Worker name, compatibility date and stati
 ## V5.4 corrected image build
 
 The first V5.4 package accidentally altered characters inside the embedded base64 photographs while removing old version labels. This corrected build starts from V5.3 and changes only known visible labels, leaving every embedded image untouched.
+
+
+## VentTools V5.5 — Lindab phase 1
+
+- Removed the homepage version badge; the release number is now shown only in the footer.
+- Added Lindab as a manufacturer.
+- Logged and coded first-phase opening rules for:
+  - FNC1
+  - WH25
+  - WH45
+  - WK45
+  - WKS25
+- Logged WK25 but left it as an official-method check because its booklet contains many installation-specific rules and no safe universal opening formula.
+- Added range warnings and nominal-size checks for circular Lindab products.
+- Results remain independent calculations and must be verified against the current official Lindab installation booklet.
