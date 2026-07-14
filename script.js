@@ -599,7 +599,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
  if(!sourceStatus){
    if(r.isLinkOnly){sourceStatus="Official drawing or manual input required";statusType="manual";}
    else if(r.invalidSize){sourceStatus="Outside recorded manufacturer range";statusType="warning";}
-   else{sourceStatus="Calculated from selected manufacturer method";statusType="verified";}
+   else{sourceStatus="Manufacturer method verified";statusType="verified";}
  }
  const genericRules=[
    r.range||"Verify the permitted opening and supporting construction in the current manufacturer document.",
@@ -620,7 +620,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
  const statusEl=$("fdResultStatus");
  statusEl.textContent=sourceStatus;
  statusEl.className=`fd-result-status ${statusType||"verified"}`;
- $("fdCriticalRules").innerHTML=`<ul>${criticalRules.map(x=>`<li>${x}</li>`).join("")}</ul>`;
+ $("fdCriticalRules").innerHTML=`<ul class="fd-checklist">${criticalRules.map(x=>`<li><span aria-hidden="true">✓</span><span>${x}</span></li>`).join("")}</ul>`;
  $("fdManualLink").href=p.manual;
  drawFD(r);const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
 else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);

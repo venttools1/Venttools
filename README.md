@@ -308,3 +308,16 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
   - hole to cut
 - Copy Result now includes every calculation stage and traceability status.
 - No manufacturer image or drawing is embedded; image spaces remain a future permission-based enhancement.
+
+
+## VentTools V5.8.1 — Live polish
+
+- Removed duplicate Product/Damper and Manufacturer Reference cards.
+- Renamed Calculation Rule to Calculation Summary.
+- Reduced Source Document to a compact source strip.
+- Converted Critical Installation Rules into a clear checklist.
+- Shortened traceability badges.
+- Added a dedicated Official Manufacturer Resources section.
+- Made the official manufacturer installation manual the primary full-width button.
+- Kept Copy Result and New Calculation as secondary VentTools actions.
+- Updated service-worker cache for clean deployment.

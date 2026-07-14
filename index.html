@@ -359,24 +359,17 @@
 
   <div id="fdMessage" class="msg ok"></div>
 
-  <div class="fd-traceability-grid">
+  <div class="fd-traceability-grid compact">
     <div class="fd-trace-card">
-      <span>Product / damper</span>
-      <strong id="fdDamperSummary">—</strong>
-    </div>
-    <div class="fd-trace-card">
-      <span>Calculation rule</span>
+      <span>Calculation summary</span>
       <strong id="fdRuleSummary">—</strong>
     </div>
-    <div class="fd-trace-card">
-      <span>Manufacturer reference</span>
-      <strong id="fdReferenceSummary">—</strong>
-    </div>
-    <div class="fd-trace-card">
-      <span>Source document</span>
-      <strong id="fdGuideSummary">—</strong>
-    </div>
   </div>
+  <div class="fd-source-compact">
+    <strong>Source:</strong> <span id="fdGuideSummary">—</span>
+  </div>
+  <span id="fdDamperSummary" class="sr-only">—</span>
+  <span id="fdReferenceSummary" class="sr-only">—</span>
 
   <div class="fd-critical-rules">
     <div class="fd-section-kicker">Critical installation rules</div>
@@ -388,7 +381,16 @@
   <span>Verify all dimensions, wall or floor construction, certified sealing system, spacing and installation method against the current manufacturer installation booklet before installation.</span>
 </div>
 <p class="fd-professional-disclaimer"><strong>VentTools</strong> is an independent HVAC installation reference and calculation aid. It does not replace manufacturer instructions, project specifications, applicable legislation or professional judgement. The installer remains responsible for compliance.</p>
-<div class="actions"><button class="action primary" id="fdCopyBtn"><span aria-hidden="true">📋</span> Copy Result</button><a class="action fd-manual-link" id="fdManualLink" href="#" target="_blank" rel="noopener">View official manufacturer manual</a><button class="action reset-button" id="fdResetBtn"><span aria-hidden="true">↻</span> New Calculation</button></div>
+<div class="fd-official-resources">
+  <div class="fd-section-kicker">Official manufacturer resources</div>
+  <p class="fd-resource-note">Always verify the installation against the manufacturer's latest published guidance.</p>
+  <a class="action fd-manual-primary" id="fdManualLink" href="#" target="_blank" rel="noopener">📖 Open Official Manufacturer Installation Manual</a>
+</div>
+<div class="fd-venttools-actions">
+  <div class="fd-section-kicker">VentTools actions</div>
+  <button class="action fd-copy-secondary" id="fdCopyBtn"><span aria-hidden="true">📋</span> Copy Result</button>
+  <button class="action reset-button" id="fdResetBtn"><span aria-hidden="true">↻</span> New Calculation</button>
+</div>
   <div class="resource-note fd-safety-note">Use the result only for the selected manufacturer, product and installation method. Confirm the damper label, supporting construction, permitted aperture range and latest official installation manual before forming the opening.</div>
 </div>
 </section>
@@ -404,7 +406,7 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V5.8 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
+<div class="footer"><div class="footer-live-note">VentTools V5.8.1 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>
