@@ -209,15 +209,6 @@
 <div class="page-intro card"><h2>Rect to Round Ductulator</h2><p class="sub">Same-area conversion for quick spiral size check</p></div><div class="card"><svg id="ductDiagram" class="diagram" viewBox="0 0 760 260"><g id="ductDiagramLayer"></g></svg></div><div class="card"><div class="row"><div><label>Rect width (mm)</label><input id="rectW" type="number" value="600" min="1" step="1"></div><div><label>Rect height (mm)</label><input id="rectH" type="number" value="300" min="1" step="1"></div></div><div class="hint">Same-area equivalent, not full equal-friction duct design.</div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Equivalent round</div><div class="val" id="eqRound">—</div></div><div class="tile"><div class="lab">Nearest spiral</div><div class="val" id="nearestRound">—</div></div></div><div class="tile" style="margin-top:10px"><div class="lab">Rectangular area</div><div class="val" id="rectArea">—</div></div><div class="actions"><button class="action primary" id="copyDuctBtn">Copy result</button><button class="action" id="resetDuctBtn">Reset</button></div><div class="hint">Standard sizes used: 80, 100, 125, 150, 160, 180, 200, 224, 250, 280, 300, 315, 355, 400, 450, 500, 560, 600, 630, 710, 800, 900, 1000, 1120, 1250 mm.</div></div></section>
 
 <section id="fireDamper" class="page">
-<div class="fd-safety-notice" role="note" aria-label="Fire damper safety notice">
-  <div class="fd-safety-icon" aria-hidden="true">⚠</div>
-  <div>
-    <h2>Fire Damper Safety Notice</h2>
-    <p><strong>Fire dampers are life-safety devices.</strong></p>
-    <p><strong>This section is intended only for persons competent in fire damper installation, inspection, testing and maintenance, or those working under their direct supervision.</strong></p>
-    <p>Always follow the manufacturer's current installation instructions, the project fire strategy and all applicable legislation and standards.</p>
-  </div>
-</div>
 <div class="app-header">
   <button class="back" onclick="showPage('home')">← Home</button>
   <div class="brand-lockup"><svg class="brand-mark" viewBox="0 0 500 500" aria-hidden="true">
@@ -233,9 +224,18 @@
   <circle cx="250" cy="250" r="39" fill="currentColor"/>
   <text x="250" y="275" text-anchor="middle" font-family="Arial Black,Arial" font-size="82" fill="white">K</text>
 </svg><div class="brand-copy"><strong>Vent Tools</strong><span>Fire Damper Openings</span></div></div>
-  <div class="version-pill">Beta</div>
+  
 </div>
 <div class="page-intro card"><h2>Fire Damper Hole Calculator</h2><p class="sub">Choose the manufacturer, exact product and tested installation method.</p></div>
+<div class="fd-safety-notice compact" role="note" aria-label="Fire damper safety notice">
+  <div class="fd-safety-icon" aria-hidden="true">⚠</div>
+  <div>
+    <h2>Fire Damper Safety Notice</h2>
+    <p><strong>Fire dampers are life-safety devices.</strong></p>
+    <p>This calculator is intended only for persons competent in fire damper installation, inspection, testing and maintenance, or those working under their direct supervision.</p>
+    <p>Always follow the manufacturer's current installation instructions and the project fire strategy.</p>
+  </div>
+</div>
 <div class="card">
   <div class="row">
     <div><label for="fdManufacturer">Manufacturer</label><select id="fdManufacturer"><option value="BSB" selected>BSB</option><option value="ACTIONAIR">Swegon — Actionair products</option><option value="LINDAB">Lindab</option></select></div>
@@ -343,7 +343,7 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V5.7.3 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
+<div class="footer"><div class="footer-live-note">VentTools V5.7.4 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>

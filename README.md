@@ -259,3 +259,12 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Adds a visible final-verification panel above the result actions.
 - Adds a concise independent-tool disclaimer.
 - Updates the service-worker cache so the development build does not reuse an older interface.
+
+
+## VentTools V5.7.4 — Clean upload build
+
+- Moved the Fire Damper Safety Notice below the calculator heading.
+- Shortened the notice so it does not dominate the page.
+- Removed the Beta badge from the Fire Damper page.
+- Kept the WK25 Professional wizard, final-verification panel and professional disclaimer.
+- Updated the service-worker cache.

@@ -546,3 +546,12 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 @media (max-width:640px){
   .fd-safety-notice{margin:12px 10px;padding:14px}
 }
+
+/* VentTools V5.7.4 — compact notice below calculator heading */
+.fd-safety-notice.compact{
+  margin:14px 0 18px;
+  max-width:none;
+  padding:14px 15px;
+}
+.fd-safety-notice.compact h2{font-size:1rem}
+.fd-safety-notice.compact p{font-size:.95rem}
