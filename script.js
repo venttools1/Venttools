@@ -397,8 +397,16 @@ function configureDwfx(m){const variant=$("fdDwfxVariant").value;const isSmoke=v
  if(wr&&hr){setNumericOptions("fdDwfxWAllowance",wr[0],wr[1],Math.round((wr[0]+wr[1])/2));setNumericOptions("fdDwfxHAllowance",hr[0],hr[1],Math.round((hr[0]+hr[1])/2))}
  $("fdDwfxAllowanceWrap").style.display=m.type==="dwfx-link"?"none":"grid";
  $("fdDwfxBoard").closest("div").style.display=(m.boardsW||m.boardsH)?"block":"none";
- const smokeText='For SmokeShield, the entered width must include the 28 mm PTC shroud. Do not include the peripheral flange.';
- $("fdDwfxHint").textContent=m.type==="dwfx-link"?'This method is listed for reference only because the current guide does not provide one safe universal opening formula. Use the official Actionair hole-sizing tool or installation drawing.':`Enter measured overall casing width × height. ${smokeText}`;
+ const basis=$("fdDwfxInputBasis")?.value||"NOMINAL";
+ const isAuto=isSmoke&&basis==="NOMINAL";
+ $("fdDwfxInputBasis").querySelector('option[value="NOMINAL"]').disabled=!isSmoke;
+ if(!isSmoke&&basis==="NOMINAL")$("fdDwfxInputBasis").value="MEASURED";
+ $("fdDwfxDimensionKey").style.display=isAuto?"flex":"none";
+ $("fdDwfxHint").textContent=m.type==="dwfx-link"
+   ?'This method is listed for reference only because the current guide does not provide one safe universal opening formula. Use the official Actionair hole-sizing tool or installation drawing.'
+   :isAuto
+     ?'Enter the ordered nominal duct width and height. VentTools calculates the rectangular SmokeShield casing, adds the separate 28 mm PTC interface shroud on the actuator side, then applies the selected certified opening allowance.'
+     :'Enter the measured overall casing width and height. For SmokeShield, the measured width must include the 28 mm PTC shroud. Do not include the peripheral flange.';
 }
 function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="circle",dwfx=productKey==="DWFX-F",hevac=productKey==="HEVAC-IF",span=productKey==="SPAN",wk25=productKey==="WK25";
   $("fdRectInputs").style.display=p.shape==="rect"?"block":"none";
@@ -408,8 +416,9 @@ function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="c
   $("fdSpanWrap").style.display=span?"block":"none";
   $("fdWk25Wrap").style.display=wk25?"block":"none";
   const wkConfig=$("fdWk25Config")?.value||"single";
-  $("fdWidthLabel").textContent=dwfx?"Measured overall casing width (mm)":hevac?"Measured outside frame width (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly width (mm)":"Nominal duct width (mm)";
-  $("fdHeightLabel").textContent=dwfx?"Measured overall casing height (mm)":hevac?"Measured outside frame height (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly height (mm)":"Nominal duct height (mm)";
+  const dwBasis=$("fdDwfxInputBasis")?.value||"NOMINAL",dwSmoke=$("fdDwfxVariant")?.value==="SMOKE",dwAuto=dwfx&&dwSmoke&&dwBasis==="NOMINAL";
+  $("fdWidthLabel").textContent=dwfx?(dwAuto?"Nominal duct width (mm)":"Measured overall casing width (mm)"):hevac?"Measured outside frame width (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly width (mm)":"Nominal duct width (mm)";
+  $("fdHeightLabel").textContent=dwfx?(dwAuto?"Nominal duct height (mm)":"Measured overall casing height (mm)"):hevac?"Measured outside frame height (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly height (mm)":"Nominal duct height (mm)";
   $("fdBoardWrap").style.display=["bsb-dry","css-dry"].includes(m.type)?"block":"none";
   $("fdWallBuildWrap").style.display=m.type==="css-dry"?"block":"none";
   $("fdShapeWrap").style.display=["css-masonry"].includes(m.type)?"block":"none";
@@ -506,8 +515,26 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
       r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Official hole sizer / drawing required",damper:`${fmt0(W)} × ${fmt0(H)} mm casing`,rule:"No universal Vent Tools calculation enabled for this method",reference:ref||"See official guide",isLinkOnly:true};
     }else{
       const wa=parseFloat($("fdDwfxWAllowance").value)||0,ha=parseFloat($("fdDwfxHAllowance").value)||0;
-      const openW=W+wa+(m.boardsW||0)*board,openH=H+ha+(m.boardsH||0)*board;
-      r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${(m.boardsW||m.boardsH)?`; cut size also adds ${m.boardsW||0} × board to width and ${m.boardsH||0} × board to height`:""}`,reference:ref,variant:actualVariant};
+      const basis=$("fdDwfxInputBasis")?.value||"NOMINAL";
+      const automatic=actualVariant==="SMOKE"&&basis==="NOMINAL";
+      if(automatic&&(W<200||H<200||W>1000||H>1000)){
+        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Use measured casing mode",damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:"Automatic casing conversion is enabled for rectangular SmokeShield PTC sizes from 200 × 200 mm to 1000 × 1000 mm. Smaller dimensional bands use fixed-width casing arrangements and should be physically measured.",reference:ref,isLinkOnly:true,range:"Select “Measured overall casing size” and enter the casing including the 28 mm PTC shroud, excluding the peripheral flange."};
+      }else{
+        let casingW=W,casingH=H,baseCasingW=null,baseCasingH=null,spigotW=null,spigotH=null,flangeW=null,flangeH=null;
+        if(automatic){
+          spigotW=W-5; spigotH=H-5;
+          baseCasingW=W+50; baseCasingH=H+100;
+          casingW=baseCasingW+28; casingH=baseCasingH;
+          flangeW=W+198; flangeH=H+195;
+        }
+        const finishedW=casingW+wa,finishedH=casingH+ha;
+        const cutW=finishedW+(m.boardsW||0)*board,cutH=finishedH+(m.boardsH||0)*board;
+        const hasBoards=(m.boardsW||m.boardsH);
+        const breakdown=automatic
+          ?`Nominal duct ${fmt0(W)} × ${fmt0(H)} mm. Spigot ${fmt0(spigotW)} × ${fmt0(spigotH)} mm. Base casing ${fmt0(baseCasingW)} × ${fmt0(baseCasingH)} mm. PTC shroud adds 28 mm on the actuator side, giving the opening-measurement casing ${fmt0(casingW)} × ${fmt0(casingH)} mm. Overall peripheral flange ${fmt0(flangeW)} × ${fmt0(flangeH)} mm (not included in the opening calculation). Minimum actuator removal clearance: 120 mm.`
+          :`Measured casing used directly: ${fmt0(casingW)} × ${fmt0(casingH)} mm${actualVariant==="SMOKE"?" including the PTC shroud":""}, excluding the peripheral flange.`;
+        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm${hasBoards?" cut size":""}`,damper:automatic?`${fmt0(W)} × ${fmt0(H)} mm nominal duct`:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening ${fmt0(finishedW)} × ${fmt0(finishedH)} mm: casing +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${hasBoards?`; cut size adds ${m.boardsW||0} × ${fmt0(board)} mm board to width and ${m.boardsH||0} × ${fmt0(board)} mm board to height`:""}`,reference:ref,variant:actualVariant,range:`${breakdown} Minimum separation: 200 mm between dampers in separate ducts and 75 mm from a damper to an adjacent wall or floor.`};
+      }
     }
   }else if(productKey==="HEVAC-IF"){
     const gap=parseFloat($("fdHevacGap").value)||25;
@@ -569,7 +596,8 @@ async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools
 function resetFD(){$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
 if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",()=>{fillFDMethods();updateFDManualButtonLabel()});
 $("fdWk25Config")?.addEventListener("change",updateFDInputs);
-$("fdWk25Axis")?.addEventListener("change",calcFD);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);calcFD()});$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
+$("fdWk25Axis")?.addEventListener("change",calcFD);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
+$("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
 
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");

@@ -268,3 +268,19 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Removed the Beta badge from the Fire Damper page.
 - Kept the WK25 Professional wizard, final-verification panel and professional disclaimer.
 - Updated the service-worker cache.
+
+
+## VentTools V5.7.5 — Actionair SmokeShield nominal-size workflow
+
+- Added a nominal-duct input mode to the Actionair DWFX-F SmokeShield PTC calculator.
+- For rectangular SmokeShield sizes from 200 × 200 to 1000 × 1000 mm, VentTools now explains and calculates:
+  - ordered nominal duct size
+  - 5 mm undersize spigot
+  - base damper casing
+  - separate 28 mm PTC shroud projection
+  - casing dimension used for the opening calculation
+  - overall peripheral flange
+  - finished opening and lined cut size
+- Added a measured-casing fallback for small, older or unusual units.
+- FireShield remains on measured-casing input because the SmokeShield PTC conversion must not be applied to it.
+- Added 120 mm actuator-removal clearance and 200/75 mm separation reminders.

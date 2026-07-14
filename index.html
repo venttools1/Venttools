@@ -258,7 +258,14 @@
   <div id="fdDwfxWrap" style="display:none">
     <div class="row">
       <div><label for="fdDwfxVariant">Damper type</label><select id="fdDwfxVariant"><option value="SMOKE">SmokeShield PTC</option><option value="FIRE">FireShield</option></select></div>
+      <div><label for="fdDwfxInputBasis">Dimensions entered</label><select id="fdDwfxInputBasis"><option value="NOMINAL">Nominal duct size — calculate SmokeShield casing</option><option value="MEASURED">Measured overall casing size</option></select></div>
+    </div>
+    <div class="row">
       <div><label for="fdDwfxBoard">Aperture lining-board thickness (mm)</label><input id="fdDwfxBoard" type="number" value="12.5" min="0" step="0.5"></div>
+      <div class="fd-dimension-key" id="fdDwfxDimensionKey">
+        <strong>SmokeShield automatic dimensions</strong>
+        <span>Nominal duct → casing → 28 mm PTC shroud → finished opening.</span>
+      </div>
     </div>
     <div id="fdDwfxAllowanceWrap" class="row">
       <div><label for="fdDwfxWAllowance">Finished-opening width allowance (mm)</label><select id="fdDwfxWAllowance"></select></div>
@@ -343,7 +350,7 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V5.7.4 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
+<div class="footer"><div class="footer-live-note">VentTools V5.7.5 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>

@@ -555,3 +555,19 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 }
 .fd-safety-notice.compact h2{font-size:1rem}
 .fd-safety-notice.compact p{font-size:.95rem}
+
+/* VentTools V5.7.5 — Actionair SmokeShield dimension breakdown */
+.fd-dimension-key{
+  display:flex;
+  flex-direction:column;
+  justify-content:center;
+  gap:4px;
+  min-height:48px;
+  padding:10px 12px;
+  border:1px solid rgba(6,75,130,.2);
+  border-radius:12px;
+  background:rgba(6,75,130,.055);
+  color:#14324a;
+  font-size:.9rem;
+}
+.fd-dimension-key strong{font-size:.92rem}
