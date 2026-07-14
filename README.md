@@ -333,3 +333,15 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Added a visible Lindab method-selection notice.
 - Kept official Lindab installation booklets as the primary resource buttons.
 - No manufacturer-owned photographs or installation drawings are embedded.
+
+
+## VentTools V6.0 — BSB Professional
+
+- Added AT-FSD, FD-C, FSD-C, FSD-TD and MFD-IC product routes.
+- Standardised BSB results with Actionair and Lindab Professional layouts.
+- Separates nominal size, finished aperture and structural cut.
+- Applies drywall lining only where the selected BSB method requires it.
+- Explicitly marks MFD-IC M9 as an unlined drywall opening.
+- Adds tested support, sealing, spacing, edge-distance and access requirements.
+- Keeps AT-FSD as official-drawing-required rather than inventing a universal formula.
+- No BSB-owned images or drawings are embedded.

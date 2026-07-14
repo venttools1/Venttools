@@ -769,3 +769,6 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 }
 .fd-lindab-note strong{font-size:.95rem}
 .fd-lindab-note span{font-size:.88rem;line-height:1.42}
+
+/* VentTools V6.0 — BSB Professional */
+.fd-bsb-note{margin:14px 0;padding:13px 15px;border:1px solid #fdba74;border-left:5px solid #c2410c;border-radius:14px;background:#fff7ed;color:#431407;flex-direction:column;gap:5px}.fd-bsb-note strong{font-size:.95rem}.fd-bsb-note span{font-size:.88rem;line-height:1.42}

@@ -1,4 +1,4 @@
-const CACHE='venttools-v5-9-lindab-professional';
+const CACHE='venttools-v6-0-bsb-professional';
 const ASSETS=['/','/index.html','/style.css','/script.js','/manifest.webmanifest','/icon-192.png','/icon-512.png'];
 self.addEventListener('install',e=>e.waitUntil(caches.open(CACHE).then(c=>c.addAll(ASSETS))));
 self.addEventListener('activate',e=>e.waitUntil(caches.keys().then(keys=>Promise.all(keys.filter(k=>k!==CACHE).map(k=>caches.delete(k))))));
