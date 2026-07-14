@@ -258,7 +258,14 @@
   <div id="fdDwfxWrap" style="display:none">
     <div class="row">
       <div><label for="fdDwfxVariant">Damper type</label><select id="fdDwfxVariant"><option value="SMOKE">SmokeShield PTC</option><option value="FIRE">FireShield</option></select></div>
+      <div><label for="fdDwfxInputBasis">Dimensions entered</label><select id="fdDwfxInputBasis"><option value="NOMINAL">Nominal duct size — calculate SmokeShield casing</option><option value="MEASURED">Measured overall casing size</option></select></div>
+    </div>
+    <div class="row">
       <div><label for="fdDwfxBoard">Aperture lining-board thickness (mm)</label><input id="fdDwfxBoard" type="number" value="12.5" min="0" step="0.5"></div>
+      <div class="fd-dimension-key" id="fdDwfxDimensionKey">
+        <strong>SmokeShield automatic dimensions</strong>
+        <span>Nominal duct → casing → 28 mm PTC shroud → finished opening.</span>
+      </div>
     </div>
     <div id="fdDwfxAllowanceWrap" class="row">
       <div><label for="fdDwfxWAllowance">Finished-opening width allowance (mm)</label><select id="fdDwfxWAllowance"></select></div>
@@ -315,19 +322,75 @@
 </div>
 <div class="card">
   <svg id="fdDiagram" class="diagram" viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg"><defs><marker id="fdArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#064b82"/></marker></defs><g id="fdDiagramLayer"></g></svg>
-  <div class="results" style="margin-top:12px">
-    <div class="tile"><div class="lab result-label">Builder's Opening</div><div class="val" id="fdOpeningBig">—</div></div>
-    <div class="tile"><div class="lab">Selected method</div><div class="val fd-method-value" id="fdMethodBig">—</div></div>
+  <div class="fd-professional-result" style="margin-top:12px">
+    <div class="fd-opening-hero">
+      <div class="result-label">Structural hole to cut</div>
+      <div class="fd-opening-value" id="fdOpeningBig">—</div>
+      <div class="fd-result-status" id="fdResultStatus">Waiting for calculation</div>
+    </div>
+
+    <div class="fd-certified-method">
+      <div class="fd-section-kicker">Certified installation method</div>
+      <div class="fd-method-value" id="fdMethodBig">—</div>
+    </div>
+
+    <div class="fd-build-flow" aria-label="Installation calculation breakdown">
+      <div class="fd-flow-card">
+        <span class="fd-flow-label">Nominal duct</span>
+        <strong id="fdNominalStage">—</strong>
+      </div>
+      <span class="fd-flow-arrow" aria-hidden="true">→</span>
+      <div class="fd-flow-card">
+        <span class="fd-flow-label">Damper assembly</span>
+        <strong id="fdCasingStage">—</strong>
+      </div>
+      <span class="fd-flow-arrow" aria-hidden="true">→</span>
+      <div class="fd-flow-card">
+        <span class="fd-flow-label">Finished opening</span>
+        <strong id="fdFinishedStage">—</strong>
+      </div>
+      <span class="fd-flow-arrow" aria-hidden="true">→</span>
+      <div class="fd-flow-card fd-flow-final">
+        <span class="fd-flow-label">Hole to cut</span>
+        <strong id="fdCutStage">—</strong>
+      </div>
+    </div>
   </div>
+
   <div id="fdMessage" class="msg ok"></div>
-  <div class="fd-detail-grid"><div><strong>Damper:</strong> <span id="fdDamperSummary">—</span></div><div><strong>Rule:</strong> <span id="fdRuleSummary">—</span></div><div><strong>Reference:</strong> <span id="fdReferenceSummary">—</span></div><div><strong>Guide:</strong> <span id="fdGuideSummary">—</span></div></div>
+
+  <div class="fd-traceability-grid compact">
+    <div class="fd-trace-card">
+      <span>Calculation summary</span>
+      <strong id="fdRuleSummary">—</strong>
+    </div>
+  </div>
+  <div class="fd-source-compact">
+    <strong>Source:</strong> <span id="fdGuideSummary">—</span>
+  </div>
+  <span id="fdDamperSummary" class="sr-only">—</span>
+  <span id="fdReferenceSummary" class="sr-only">—</span>
+
+  <div class="fd-critical-rules">
+    <div class="fd-section-kicker">Critical installation rules</div>
+    <div id="fdCriticalRules">Select a product and certified installation method.</div>
+  </div>
   
 <div class="fd-final-check" role="note">
   <strong>⚠ Final verification required</strong>
   <span>Verify all dimensions, wall or floor construction, certified sealing system, spacing and installation method against the current manufacturer installation booklet before installation.</span>
 </div>
 <p class="fd-professional-disclaimer"><strong>VentTools</strong> is an independent HVAC installation reference and calculation aid. It does not replace manufacturer instructions, project specifications, applicable legislation or professional judgement. The installer remains responsible for compliance.</p>
-<div class="actions"><button class="action primary" id="fdCopyBtn"><span aria-hidden="true">📋</span> Copy Result</button><a class="action fd-manual-link" id="fdManualLink" href="#" target="_blank" rel="noopener">View official manufacturer manual</a><button class="action reset-button" id="fdResetBtn"><span aria-hidden="true">↻</span> New Calculation</button></div>
+<div class="fd-official-resources">
+  <div class="fd-section-kicker">Official manufacturer resources</div>
+  <p class="fd-resource-note">Always verify the installation against the manufacturer's latest published guidance.</p>
+  <a class="action fd-manual-primary" id="fdManualLink" href="#" target="_blank" rel="noopener">📖 Open Official Manufacturer Installation Manual</a>
+</div>
+<div class="fd-venttools-actions">
+  <div class="fd-section-kicker">VentTools actions</div>
+  <button class="action fd-copy-secondary" id="fdCopyBtn"><span aria-hidden="true">📋</span> Copy Result</button>
+  <button class="action reset-button" id="fdResetBtn"><span aria-hidden="true">↻</span> New Calculation</button>
+</div>
   <div class="resource-note fd-safety-note">Use the result only for the selected manufacturer, product and installation method. Confirm the damper label, supporting construction, permitted aperture range and latest official installation manual before forming the opening.</div>
 </div>
 </section>
@@ -343,7 +406,7 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V5.7.4 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
+<div class="footer"><div class="footer-live-note">VentTools V5.8.1 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>

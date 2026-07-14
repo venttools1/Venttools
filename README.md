@@ -268,3 +268,56 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Removed the Beta badge from the Fire Damper page.
 - Kept the WK25 Professional wizard, final-verification panel and professional disclaimer.
 - Updated the service-worker cache.
+
+
+## VentTools V5.7.5 — Actionair SmokeShield nominal-size workflow
+
+- Added a nominal-duct input mode to the Actionair DWFX-F SmokeShield PTC calculator.
+- For rectangular SmokeShield sizes from 200 × 200 to 1000 × 1000 mm, VentTools now explains and calculates:
+  - ordered nominal duct size
+  - 5 mm undersize spigot
+  - base damper casing
+  - separate 28 mm PTC shroud projection
+  - casing dimension used for the opening calculation
+  - overall peripheral flange
+  - finished opening and lined cut size
+- Added a measured-casing fallback for small, older or unusual units.
+- FireShield remains on measured-casing input because the SmokeShield PTC conversion must not be applied to it.
+- Added 120 mm actuator-removal clearance and 200/75 mm separation reminders.
+
+
+## VentTools V5.8 — Fire Damper Professional Standard
+
+- Rebuilt the fire-damper result hierarchy around:
+  1. structural hole to cut
+  2. certified installation method
+  3. nominal duct
+  4. damper assembly
+  5. finished opening
+  6. structural cut size
+- Added traceability status:
+  - calculated from selected manufacturer method
+  - derived from published manufacturer dimensions
+  - manual measurement / official drawing required
+- Added manufacturer-specific critical installation rules.
+- The Actionair SmokeShield PTC DWFX-F result now clearly separates:
+  - nominal duct
+  - casing including the 28 mm PTC shroud
+  - finished opening
+  - board build-up
+  - hole to cut
+- Copy Result now includes every calculation stage and traceability status.
+- No manufacturer image or drawing is embedded; image spaces remain a future permission-based enhancement.
+
+
+## VentTools V5.8.1 — Live polish
+
+- Removed duplicate Product/Damper and Manufacturer Reference cards.
+- Renamed Calculation Rule to Calculation Summary.
+- Reduced Source Document to a compact source strip.
+- Converted Critical Installation Rules into a clear checklist.
+- Shortened traceability badges.
+- Added a dedicated Official Manufacturer Resources section.
+- Made the official manufacturer installation manual the primary full-width button.
+- Kept Copy Result and New Calculation as secondary VentTools actions.
+- Updated service-worker cache for clean deployment.
