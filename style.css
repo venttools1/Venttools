@@ -503,3 +503,6 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 
 /* VentTools V5.4 corrected professional release */
 .v5-version{background:rgba(245,130,32,.08)}
+
+/* V5.5: version is shown only in the footer */
+.v5-topbar{justify-content:flex-start}

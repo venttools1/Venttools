@@ -227,3 +227,8 @@ The first V5.4 package accidentally altered characters inside the embedded base6
 - Logged WK25 but left it as an official-method check because its booklet contains many installation-specific rules and no safe universal opening formula.
 - Added range warnings and nominal-size checks for circular Lindab products.
 - Results remain independent calculations and must be verified against the current official Lindab installation booklet.
+
+
+## V5.5 Lindab selector correction
+
+The Lindab calculation data was present in the first V5.5 build, but the visible manufacturer dropdown still contained only BSB and Swegon/Actionair. This corrected package adds Lindab to the manufacturer selector and refreshes the PWA cache.
