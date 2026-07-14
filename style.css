@@ -508,3 +508,41 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .v5-topbar{justify-content:flex-start}
 
 #fdWk25Wrap{margin:16px 0;padding:16px;border:1px solid rgba(245,130,32,.32);border-radius:16px;background:rgba(245,130,32,.055)}
+
+/* VentTools V5.7.3 — professional fire-damper safety */
+.fd-safety-notice{
+  display:flex;
+  gap:14px;
+  margin:16px auto;
+  padding:16px;
+  max-width:1100px;
+  border:1px solid rgba(190,24,24,.28);
+  border-left:5px solid #b91c1c;
+  border-radius:16px;
+  background:#fff7f7;
+  color:#3f1212;
+}
+.fd-safety-notice h2{margin:0 0 8px;font-size:1.05rem}
+.fd-safety-notice p{margin:5px 0;line-height:1.45}
+.fd-safety-icon{font-size:1.45rem;line-height:1;padding-top:2px}
+.fd-final-check{
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+  margin:16px 0 10px;
+  padding:13px 14px;
+  border:1px solid rgba(180,83,9,.28);
+  border-radius:14px;
+  background:#fffaf0;
+  color:#5b2d05;
+  line-height:1.42;
+}
+.fd-professional-disclaimer{
+  margin:8px 0 14px;
+  color:#475569;
+  font-size:.9rem;
+  line-height:1.45;
+}
+@media (max-width:640px){
+  .fd-safety-notice{margin:12px 10px;padding:14px}
+}

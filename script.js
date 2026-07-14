@@ -493,14 +493,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
      $("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;
      $("fdManualLink").href=p.manual;
      fdMsg("bad","⚠ "+r.error);
-     
-// VentTools V5.7.2 safety reminder
-if(r && !r.isLinkOnly){
-  const extra='\n\n⚠ Final verification required: Verify all dimensions, wall/floor construction, certified sealing system and installation method against the current manufacturer installation booklet before installation.';
-  r.range=(r.range||'')+extra;
-}
-
-return r;
+     return r;
    }
  }
  else if(p.shape==="rect"){const W=parseFloat($("fdWidth").value)||0,H=parseFloat($("fdHeight").value)||0;
