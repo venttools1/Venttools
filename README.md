@@ -245,3 +245,7 @@ The Lindab calculation data was present in the first V5.5 build, but the visible
   - WKS25
 - The manual button now names the selected Lindab product.
 - The service-worker cache was updated so installed users receive the new links.
+
+
+## VentTools V5.7 — WK25 Professional
+Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairing eligibility, orientation checks, minimum distances and official references.

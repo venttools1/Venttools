@@ -506,3 +506,5 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 
 /* V5.5: version is shown only in the footer */
 .v5-topbar{justify-content:flex-start}
+
+#fdWk25Wrap{margin:16px 0;padding:16px;border:1px solid rgba(245,130,32,.32);border-radius:16px;background:rgba(245,130,32,.055)}

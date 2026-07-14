@@ -354,8 +354,23 @@ const FD_MANUFACTURERS={
       WH45_FLOOR:{label:"Floor — mortar seal",type:"lindab-circle-range",reference:"EI 90/120/180 S",minAdd:40,maxAdd:55,recommendedAdd:40,openingShape:"circle",note:"Floor minimum thickness 100 or 150 mm depending on classification."}
     }},
     "WK25":{label:"WK25 — Rectangular 500 Pa",shape:"rect",manual:"https://www.lindab.com/globalassets/commerce/lindabwebproductsdoc/assets/production/mme2zdgzzjuty2u2ns00ndu4ltgzzwmtzjrjyzu4zmfmm2y3/5250840905260342233/wk25_booklet_document_en_l.pdf?v=1783821298",guide:"Lindab WK25 Installation Booklet",revision:"1MUBWK25EN-LIND rev 25-03",methods:{
-      WK25_GUIDE:{label:"Installation method selection — official drawing check",type:"lindab-link",reference:"WK25 manual",note:"The WK25 booklet contains numerous wall, floor, paired and remote methods. VentTools logs the model but does not apply one universal opening rule."}
-    }},
+WK25_RIGID_WET:{label:"Rigid wall — inside — mortar/plaster",type:"wk25-range",reference:"EI 120 S • 500 Pa • page 26",minW:50,maxW:440,minH:50,maxH:440,recommendedW:50,recommendedH:50,wall:"Rigid wall, minimum 100 mm, 550 kg/m³",seal:"Mortar or plaster putty",spacingA:44,spacingB:75,pairAllowed:true,note:"Single or approved paired assembly."},
+WK25_RIGID_DRY:{label:"Rigid wall — inside — rock wool/plasterboard",type:"wk25-range",reference:"EI 120 S • 500 Pa • page 26",minW:50,maxW:70,minH:50,maxH:70,recommendedW:50,recommendedH:50,wall:"Rigid wall, minimum 100 mm, 550 kg/m³",seal:"100 kg/m³ rock wool with plasterboard or calcium silicate",spacingA:44,spacingB:75,pairAllowed:true,note:"Single or approved paired assembly."},
+WK25_RIGID_WEICH:{label:"Rigid wall — inside — Fire Batt / Weichschott",type:"wk25-fixed",reference:"EI 120 S • 300 Pa • page 27",w:800,h:800,wall:"Rigid wall, minimum 100 mm, 550 kg/m³",seal:"140 kg/m³ rock-wool boards with approved coating/sealant",spacingA:44,spacingB:50,pairAllowed:true,note:"Fixed square opening allowance."},
+WK25_RIGID_ON:{label:"Rigid wall — face mounted — KITFP",type:"wk25-fixed",reference:"EI 90 S • 300 Pa • page 28",w:50,h:50,wall:"Rigid wall, minimum 100 mm",seal:"Factory-fitted face-wall kit with mortar wall seal",spacingA:165,spacingB:80,pairAllowed:false,note:"KITFP must be factory assembled."},
+WK25_RIGID_REMOTE_WET:{label:"Rigid wall — remote — mortar/plaster",type:"wk25-range",reference:"EI 90/120 S • page 29",minW:50,maxW:440,minH:50,maxH:440,recommendedW:50,recommendedH:50,wall:"Rigid wall, minimum 100 mm, 550 kg/m³",seal:"140 kg/m³ duct insulation with approved coating; mortar/plaster wall seal",spacingA:200,spacingB:110,pairAllowed:false,note:"Follow official suspension and distance details."},
+WK25_RIGID_REMOTE_WEICH:{label:"Rigid wall — remote — Fire Batt / Weichschott",type:"wk25-fixed",reference:"EI 90/120 S • page 30",w:800,h:800,wall:"Rigid wall, minimum 100 mm, 550 kg/m³",seal:"140 kg/m³ duct insulation and Weichschott wall seal",spacingA:200,spacingB:110,pairAllowed:false,note:"Remote installation."},
+WK25_RIGID_REMOTE_KIT:{label:"Rigid wall — remote — KITFP + Promat 478",type:"wk25-fixed",reference:"EI 90 S • page 31",w:50,h:50,wall:"Rigid wall, minimum 100 mm",seal:"Factory KITFP; Promat 478 duct insulation; mortar wall seal",spacingA:165,spacingB:80,pairAllowed:false,note:"Use specified KITSRP components."},
+WK25_LIGHTF_DRY:{label:"Light wall type F — inside — rock wool/plasterboard",type:"wk25-range",reference:"EI 120 S • 500 Pa • page 32",minW:75,maxW:95,minH:75,maxH:95,recommendedW:75,recommendedH:75,wall:"Light wall type F, minimum 100 mm",seal:"100 kg/m³ rock wool with plasterboard both sides or calcium silicate",spacingA:44,spacingB:75,pairAllowed:true,note:"Single or approved paired assembly."},
+WK25_LIGHTF_WET:{label:"Light wall type F — inside — mortar/plaster",type:"wk25-range",reference:"EI 120 S • 500 Pa • page 32",minW:75,maxW:440,minH:75,maxH:440,recommendedW:75,recommendedH:75,wall:"Light wall type F, minimum 100 mm",seal:"Mortar or plaster putty",spacingA:44,spacingB:75,pairAllowed:true,note:"Single or approved paired assembly."},
+WK25_LIGHT_REMOTE_DRY:{label:"Light wall — remote — rock wool/plasterboard",type:"wk25-range",reference:"EI 90/120 S • page 39",minW:75,maxW:95,minH:75,maxH:95,recommendedW:75,recommendedH:75,wall:"Certified light wall, minimum 100 mm",seal:"100 kg/m³ wall infill; 140 kg/m³ insulated duct with approved coating",spacingA:200,spacingB:110,pairAllowed:false,note:"Maximum wall distance 1000 mm; maximum connected duct 2100 mm."},
+WK25_LIGHT_REMOTE_WET:{label:"Light wall — remote — mortar/plaster",type:"wk25-range",reference:"EI 90/120 S • page 39",minW:75,maxW:440,minH:75,maxH:440,recommendedW:75,recommendedH:75,wall:"Certified light wall, minimum 100 mm",seal:"Mortar/plaster wall seal; 140 kg/m³ insulated duct with approved coating",spacingA:200,spacingB:110,pairAllowed:false,note:"Maximum wall distance 1000 mm; maximum connected duct 2100 mm."},
+WK25_GYPSUM_DRY:{label:"Solid gypsum-block wall — inside",type:"wk25-range",reference:"EI 120 S • manual method",minW:75,maxW:95,minH:75,maxH:95,recommendedW:75,recommendedH:75,wall:"Solid gypsum blocks, minimum 100 mm, 995 kg/m³",seal:"Plasterboard on both sides",spacingA:44,spacingB:75,pairAllowed:true,note:"Approved paired assembly permitted."},
+WK25_GYPSUM_WEICH:{label:"Solid gypsum-block wall — Fire Batt / Weichschott",type:"wk25-fixed",reference:"EI 120 S • manual method",w:800,h:800,wall:"Solid gypsum blocks, minimum 100 mm, 995 kg/m³",seal:"140 kg/m³ rock-wool boards with approved coating/sealant",spacingA:44,spacingB:50,pairAllowed:true,note:"Fixed square opening allowance."},
+WK25_SHAFT:{label:"Shaft wall — inside",type:"wk25-range",reference:"EI 60 S • manual method",minW:75,maxW:95,minH:75,maxH:95,recommendedW:75,recommendedH:75,wall:"Certified shaft-wall construction",seal:"Mortar or plaster putty on motor side",spacingA:200,spacingB:75,pairAllowed:false,note:"Paired installation not permitted."},
+WK25_FLOOR_WET:{label:"Floor — inside slab — mortar",type:"wk25-range",reference:"EI 90/120/180 S • floor methods",minW:50,maxW:440,minH:50,maxH:440,recommendedW:50,recommendedH:50,wall:"Certified floor; required thickness/density depends on EI rating",seal:"Mortar",spacingC:44,spacingD:75,pairAllowed:true,note:"Paired assembly permitted with separate ducts."},
+WK25_FLOOR_WEICH:{label:"Floor — Fire Batt / Weichschott",type:"wk25-fixed",reference:"EI 120 S • floor method",w:800,h:800,wall:"Certified floor construction",seal:"140 kg/m³ rock-wool boards with approved coating/sealant",spacingC:200,spacingD:75,pairAllowed:false,note:"Paired installation not permitted."}
+}},
     "WK45":{label:"WK45 — Rectangular 500/300 Pa",shape:"rect",manual:"https://www.lindab.com/globalassets/commerce/lindabwebproductsdoc/assets/production/yzk1nduxndytztk1my00odhlltlkztutztdkyweymta3zti5/5250833076614407765/wk45_booklet_document_en_l.pdf?v=1783821283",guide:"Lindab WK45 Installation Booklet",revision:"1MUBWK45EN-LIND rev 25-12",methods:{
       WK45_LIGHT_DRY:{label:"Light wall — plasterboard and rock wool",type:"lindab-rect-range",reference:"EI method",minW:75,maxW:95,minH:75,maxH:95,recommendedW:75,recommendedH:75,note:"Wall opening range stated in the installation booklet."},
       WK45_LIGHT_WET:{label:"Light wall — mortar or plaster",type:"lindab-rect-range",reference:"EI method",minW:100,maxW:580,minH:100,maxH:580,recommendedW:100,recommendedH:100,note:"Wall opening range stated in the installation booklet."}
@@ -385,14 +400,16 @@ function configureDwfx(m){const variant=$("fdDwfxVariant").value;const isSmoke=v
  const smokeText='For SmokeShield, the entered width must include the 28 mm PTC shroud. Do not include the peripheral flange.';
  $("fdDwfxHint").textContent=m.type==="dwfx-link"?'This method is listed for reference only because the current guide does not provide one safe universal opening formula. Use the official Actionair hole-sizing tool or installation drawing.':`Enter measured overall casing width × height. ${smokeText}`;
 }
-function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="circle",dwfx=productKey==="DWFX-F",hevac=productKey==="HEVAC-IF",span=productKey==="SPAN";
+function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="circle",dwfx=productKey==="DWFX-F",hevac=productKey==="HEVAC-IF",span=productKey==="SPAN",wk25=productKey==="WK25";
   $("fdRectInputs").style.display=p.shape==="rect"?"block":"none";
   $("fdCircularInputs").style.display=circle?"block":"none";
   $("fdDwfxWrap").style.display=dwfx?"block":"none";
   $("fdHevacWrap").style.display=hevac?"block":"none";
   $("fdSpanWrap").style.display=span?"block":"none";
-  $("fdWidthLabel").textContent=dwfx?"Measured overall casing width (mm)":hevac?"Measured outside frame width (mm)":"Nominal duct width (mm)";
-  $("fdHeightLabel").textContent=dwfx?"Measured overall casing height (mm)":hevac?"Measured outside frame height (mm)":"Nominal duct height (mm)";
+  $("fdWk25Wrap").style.display=wk25?"block":"none";
+  const wkConfig=$("fdWk25Config")?.value||"single";
+  $("fdWidthLabel").textContent=dwfx?"Measured overall casing width (mm)":hevac?"Measured outside frame width (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly width (mm)":"Nominal duct width (mm)";
+  $("fdHeightLabel").textContent=dwfx?"Measured overall casing height (mm)":hevac?"Measured outside frame height (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly height (mm)":"Nominal duct height (mm)";
   $("fdBoardWrap").style.display=["bsb-dry","css-dry"].includes(m.type)?"block":"none";
   $("fdWallBuildWrap").style.display=m.type==="css-dry"?"block":"none";
   $("fdShapeWrap").style.display=["css-masonry"].includes(m.type)?"block":"none";
@@ -476,7 +493,14 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
      $("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;
      $("fdManualLink").href=p.manual;
      fdMsg("bad","⚠ "+r.error);
-     return r;
+     
+// VentTools V5.7.2 safety reminder
+if(r && !r.isLinkOnly){
+  const extra='\n\n⚠ Final verification required: Verify all dimensions, wall/floor construction, certified sealing system and installation method against the current manufacturer installation booklet before installation.';
+  r.range=(r.range||'')+extra;
+}
+
+return r;
    }
  }
  else if(p.shape==="rect"){const W=parseFloat($("fdWidth").value)||0,H=parseFloat($("fdHeight").value)||0;
@@ -498,7 +522,13 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     const ref=variant==="SMOKE"?m.referenceSmoke:m.referenceFire;
     const openW=W+2*gap,openH=H+2*gap;
     r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`Installation frame ${fmt0(W)} × ${fmt0(H)} mm`,rule:`Measured frame size + 2 × ${fmt0(gap)} mm clear mortar gap`,reference:ref,range:"Official drawing permits 5–75 mm from the installation-frame upstand to the aperture face all round."};
-  }else if(m.type==="lindab-rect-fixed"){
+  }else if(m.type==="wk25-fixed" || m.type==="wk25-range"){
+ const config=$("fdWk25Config")?.value||"single",axis=$("fdWk25Axis")?.value||"horizontal",paired=config!=="single";
+ if(paired&&!m.pairAllowed)r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Paired arrangement not certified",damper:`${fmt0(W)} × ${fmt0(H)} mm entered assembly`,rule:"Choose a method that permits paired dampers.",reference:m.reference,isLinkOnly:true,range:`Minimum separation to another damper: ${m.spacingA||m.spacingC} mm. Minimum distance to wall/floor: ${m.spacingB||m.spacingD} mm. ${m.note}`};
+ else if(config==="pair-stack"&&axis==="vertical")r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Orientation not permitted",damper:`${fmt0(W)} × ${fmt0(H)} mm entered assembly`,rule:"Two vertically stacked WK25 dampers must not both have vertical blade axes.",reference:"WK25 booklet page 2",isLinkOnly:true,range:"Select horizontal or mixed blade-axis arrangement."};
+ else{const aw=m.type==="wk25-fixed"?m.w:m.recommendedW,ah=m.type==="wk25-fixed"?m.h:m.recommendedH,openW=W+aw,openH=H+ah,sd=m.spacingA||m.spacingC,se=m.spacingB||m.spacingD,rr=m.type==="wk25-range"?`Permitted allowance: width +${m.minW} to +${m.maxW} mm; height +${m.minH} to +${m.maxH} mm.`:`Fixed allowance: width +${m.w} mm; height +${m.h} mm.`;
+ r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm${m.type==="wk25-range"?" recommended":""}`,damper:`${fmt0(W)} × ${fmt0(H)} mm ${paired?"measured joined assembly":"nominal damper"}`,rule:`${rr} ${paired?"Use the approved Lindab pairing kit and intumescent gasket.":""}`,reference:m.reference,range:`Construction: ${m.wall}. Seal: ${m.seal}. Minimum separation to another independent damper/assembly: ${sd} mm. Minimum distance to adjacent wall/floor: ${se} mm. ${m.note}`};}
+}else if(m.type==="lindab-rect-fixed"){
     const openW=W+m.w,openH=H+m.h;
     r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal`,rule:`Nominal width +${m.w} mm; nominal height +${m.h} mm`,reference:m.reference,range:m.note};
   }else if(m.type==="lindab-rect-range"){
@@ -544,7 +574,9 @@ else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-sp
 else fdMsg("ok",`✅ Independent VentTools result based on ${man.label} published installation guidance.${range} Verify the current official manual before construction.`);return r}
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nBuilder's opening: ${r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
 function resetFD(){$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
-if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",()=>{fillFDMethods();updateFDManualButtonLabel()});$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);calcFD()});$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
+if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",()=>{fillFDMethods();updateFDManualButtonLabel()});
+$("fdWk25Config")?.addEventListener("change",updateFDInputs);
+$("fdWk25Axis")?.addEventListener("change",calcFD);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);calcFD()});$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
 
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");
