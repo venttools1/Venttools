@@ -849,3 +849,52 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .fd-range-head{background:#dbeafe;font-size:.83rem;font-weight:900;text-transform:uppercase;letter-spacing:.04em}
 .fd-range-label{text-align:left!important;font-weight:900}
 .fd-opening-range p{margin:12px 0 0;line-height:1.45;font-size:.92rem}
+
+/* V6.1.4 — Contact page */
+.footer-links{margin-top:8px}
+.footer-link-btn{border:0;background:transparent;color:#0b5ea8;font:inherit;font-weight:900;text-decoration:underline;cursor:pointer;padding:4px 8px;display:inline-block}
+.contact-shell{max-width:760px;margin:0 auto;padding:28px 20px 42px}
+.contact-shell .section-heading{margin-bottom:20px}
+.contact-card{margin:16px 0;padding:20px;border:1px solid #d7dee8;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.06)}
+.contact-card h2{margin:0 0 10px;color:#14263a}
+.contact-card p{margin:0;line-height:1.6;color:#475569}
+.contact-email{display:inline-block;margin-top:14px;padding:13px 16px;border-radius:12px;background:#0b5ea8;color:#fff;font-weight:950;text-decoration:none}
+.contact-note{background:#f8fafc}
+.contact-home-btn{width:100%;margin-top:12px}
+
+/* V6.2.0 — professional site foundation */
+.footer-links{display:flex;flex-wrap:wrap;justify-content:center;gap:2px 8px;margin-top:10px}
+.footer-link-btn{font-size:12px}
+.legal-page{padding:0 14px}
+.legal-shell{max-width:780px;margin:0 auto;padding:18px 0 42px}
+.legal-hero{margin:14px 0 18px;padding:24px;border-radius:20px;background:linear-gradient(135deg,#062d4f,#0b5e98);color:#fff}
+.legal-hero h1{margin:5px 0 8px;color:#fff;font-size:clamp(27px,6vw,40px)}
+.legal-hero p{margin:0;line-height:1.55;color:#e7f4ff}
+.legal-card{margin:14px 0;padding:20px;border:1px solid #d7dee8;border-radius:18px;background:#fff;box-shadow:0 7px 22px rgba(15,23,42,.05)}
+.legal-card h2{margin:0 0 9px;color:#14324d}
+.legal-card p{margin:0;line-height:1.65;color:#475569}
+.legal-card a{color:#075d9a;font-weight:800}
+.legal-warning{border-left:6px solid #c55a05;background:#fffaf2}
+.legal-action{margin-top:14px;border:0;border-radius:12px;padding:12px 15px;background:#0b5e98;color:#fff;font-weight:900}
+.cookie-banner{position:fixed;z-index:10000;left:12px;right:12px;bottom:12px;max-width:760px;margin:auto;padding:16px;border:1px solid #b9c9d8;border-radius:18px;background:#fff;box-shadow:0 16px 50px rgba(2,17,31,.28)}
+.cookie-banner[hidden],.cookie-modal-backdrop[hidden]{display:none!important}
+.cookie-banner-copy strong{font-size:1.08rem;color:#14324d}
+.cookie-banner-copy p{margin:6px 0 0;line-height:1.45;color:#475569}
+.cookie-banner-actions{display:flex;flex-wrap:wrap;gap:9px;margin-top:13px}
+.cookie-primary,.cookie-secondary,.cookie-link{border-radius:11px;padding:10px 13px;font-weight:900;cursor:pointer}
+.cookie-primary{border:1px solid #0b5e98;background:#0b5e98;color:#fff}
+.cookie-secondary{border:1px solid #b9c9d8;background:#fff;color:#14324d}
+.cookie-link{border:0;background:transparent;color:#0b5e98;text-decoration:underline}
+.cookie-modal-backdrop{position:fixed;z-index:10001;inset:0;display:grid;place-items:center;padding:18px;background:rgba(2,17,31,.66)}
+.cookie-modal{width:min(560px,100%);padding:22px;border-radius:20px;background:#fff;box-shadow:0 20px 70px rgba(0,0,0,.35)}
+.cookie-modal h2{margin:0 0 14px}
+.cookie-option{display:flex;align-items:center;justify-content:space-between;gap:15px;padding:15px 0;border-top:1px solid #e2e8f0}
+.cookie-option p{margin:4px 0 0;color:#64748b;font-size:.9rem;line-height:1.4}
+.cookie-always{white-space:nowrap;border-radius:999px;padding:6px 9px;background:#e8f7ee;color:#166534;font-size:.8rem;font-weight:900}
+.cookie-toggle input{width:24px;height:24px}
+.cookie-modal-actions{display:flex;justify-content:flex-end;gap:9px;margin-top:16px}
+@media(max-width:540px){.cookie-banner-actions>*{flex:1 1 100%}.cookie-modal-actions{flex-direction:column-reverse}.cookie-modal-actions>*{width:100%}}
+
+/* V6.3.0 standalone legal and information pages */
+.standalone-home-link{display:inline-block;text-decoration:none;color:inherit}
+.standalone-legal .contact-home-btn{text-align:center;text-decoration:none}

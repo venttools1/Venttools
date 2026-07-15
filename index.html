@@ -1,10 +1,13 @@
 <!doctype html>
 <html lang="en">
 <head>
+  <script>
+    window.VENTTOOLS_GA_ID = "G-KWBWNN0WCB";
+  </script>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width,initial-scale=1">
   <meta name="theme-color" content="#064b82">
-  <meta name="description" content="VentTools V5 provides practical HVAC calculators for duct fitters, including offsets, duct sizing and manufacturer-specific fire damper builder’s openings.">
+  <meta name="description" content="VentTools provides practical HVAC calculators for duct fitters, including offsets, duct sizing and manufacturer-specific fire damper builder’s openings.">
   <title>VentTools — Professional HVAC Installation Tools</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,4 61,37 96,37 68,57 79,91 50,70 21,91 32,57 4,37 39,37' fill='none' stroke='%23064b82' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='21' fill='%23064b82'/%3E%3Ctext x='50' y='59' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3EK%3C/text%3E%3C/svg%3E">
   <link rel="stylesheet" href="style.css">
@@ -169,7 +172,7 @@
 </svg>
     <div class="brand-copy"><strong>Vent Tools</strong><span>Offset Calculator</span></div>
   </div>
-  <div class="version-pill">V5 Beta</div>
+  <div class="version-pill">V6.3</div>
 </div>
 <div class="page-intro card"><h2>Offset Calculator</h2><p class="sub">Diagram → inputs → cut size</p></div><div class="card"><svg id="diagram" class="diagram" viewBox="0 0 760 360"><defs><marker id="arrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,4 L0,8 Z" fill="#334155"/></marker><linearGradient id="ductGrad" x1="0" y1="0" x2="0" y2="1"><stop offset="0%" stop-color="#f3f4f6"/><stop offset="50%" stop-color="#cfd5dd"/><stop offset="100%" stop-color="#f8fafc"/></linearGradient></defs><g id="diagramLayer"></g></svg><div class="note">Schematic centreline diagram — rolled offsets are 3D, so check orientation on site.</div>
 <div class="fitting-chip" id="fittingChip">Fitting style: —</div></div><div class="card"><div class="row"><div><label>Rise / Up (mm)</label><input id="up" type="number" value="300" min="0" step="1"></div><div><label>Offset / Over (mm)</label><input id="over" type="number" value="250" min="0" step="1"></div></div><div class="row"><div><label>Bend angle</label><select id="angle"><option value="15">15°</option><option value="22.5">22.5°</option><option value="30">30°</option><option value="45" selected>45°</option><option value="60">60°</option><option value="90">90°</option><option value="custom">Custom…</option></select><input id="angleCustom" type="number" value="45" min="1" max="89" step="0.1" style="display:none;margin-top:10px"></div><div><label>Duct diameter (mm)</label><input id="dia" type="number" value="315" min="0" step="1"></div></div><div class="row"><div><label>Minimum straight / swedge limit (mm)</label><input id="minStraight" type="number" value="120" min="0" step="1"><div class="hint">Warns when opposing bend spigots/swages may meet inside the straight.</div></div><div><label>rm factor</label><input id="rmFactor" type="number" value="1.0" min="0" step="0.01"><div class="hint">Known manufacturer bend take-offs are used for supported diameters at 15°, 30°, 45°, 60° and 90°. Other sizes or angles use rm × tan(θ/2) as an estimate.</div></div></div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Cut straight L</div><div class="val" id="straightBig">—</div></div><div class="tile"><div class="lab">Roll angle</div><div class="val" id="rollBig">—</div></div></div>
@@ -205,7 +208,7 @@
 </svg>
     <div class="brand-copy"><strong>Vent Tools</strong><span>Rect to Round</span></div>
   </div>
-  <div class="version-pill">V5 Beta</div>
+  <div class="version-pill">V6.3</div>
 </div>
 <div class="page-intro card"><h2>Rect to Round Ductulator</h2><p class="sub">Same-area conversion for quick spiral size check</p></div><div class="card"><svg id="ductDiagram" class="diagram" viewBox="0 0 760 260"><g id="ductDiagramLayer"></g></svg></div><div class="card"><div class="row"><div><label>Rect width (mm)</label><input id="rectW" type="number" value="600" min="1" step="1"></div><div><label>Rect height (mm)</label><input id="rectH" type="number" value="300" min="1" step="1"></div></div><div class="hint">Same-area equivalent, not full equal-friction duct design.</div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Equivalent round</div><div class="val" id="eqRound">—</div></div><div class="tile"><div class="lab">Nearest spiral</div><div class="val" id="nearestRound">—</div></div></div><div class="tile" style="margin-top:10px"><div class="lab">Rectangular area</div><div class="val" id="rectArea">—</div></div><div class="actions"><button class="action primary" id="copyDuctBtn">Copy result</button><button class="action" id="resetDuctBtn">Reset</button></div><div class="hint">Standard sizes used: 80, 100, 125, 150, 160, 180, 200, 224, 250, 280, 300, 315, 355, 400, 450, 500, 560, 600, 630, 710, 800, 900, 1000, 1120, 1250 mm.</div></div></section>
 
@@ -424,7 +427,243 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V6.1.3 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
+
+<section id="contact" class="page legal-page">
+  <div class="page-shell contact-shell">
+    <div class="section-heading">
+      <span class="eyebrow">VENTTOOLS SUPPORT</span>
+      <h1>Contact VentTools</h1>
+      <p>Questions, corrections and suggestions are welcome.</p>
+    </div>
+
+    <div class="contact-card">
+      <h2>Email</h2>
+      <p>For general enquiries, calculator feedback, manufacturer information or to report a possible error:</p>
+      <a class="contact-email" href="mailto:info@venttools.com">info@venttools.com</a>
+    </div>
+
+    <div class="contact-card">
+      <h2>Technical feedback</h2>
+      <p>When reporting a calculation or installation-method issue, include the manufacturer, damper model, selected installation method and the dimensions entered.</p>
+    </div>
+
+    <div class="contact-card contact-note">
+      <h2>Independent resource</h2>
+      <p>VentTools is an independent HVAC calculation and installation-reference website. It is not owned, approved or endorsed by the manufacturers listed on the site.</p>
+    </div>
+
+    <button type="button" class="v5-primary contact-home-btn" onclick="showPage('home')">Return Home</button>
+  </div>
+</section>
+
+
+<section id="about" class="page legal-page">
+  <div class="legal-shell">
+    <button class="back" onclick="showPage('home')">← Home</button>
+    <div class="legal-hero">
+      <span class="eyebrow">ABOUT VENTTOOLS</span>
+      <h1>Built for real ductwork installation</h1>
+      <p>VentTools is an independent collection of HVAC calculators and installation-reference tools designed around the measurements and decisions that arise on site.</p>
+    </div>
+    <div class="legal-card">
+      <h2>What VentTools does</h2>
+      <p>VentTools converts published manufacturer information into clearer calculation steps, opening dimensions and practical installation notes. It also provides general ductwork calculators such as offset and square-to-round tools.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Independent by design</h2>
+      <p>VentTools is not owned, approved or endorsed by any manufacturer shown on the website. Manufacturer names and product references are used only to help users select and verify the relevant published installation method.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Help improve it</h2>
+      <p>Corrections and suggestions are welcome at <a href="mailto:info@venttools.com">info@venttools.com</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section id="privacy" class="page legal-page">
+  <div class="legal-shell">
+    <button class="back" onclick="showPage('home')">← Home</button>
+    <div class="legal-hero">
+      <span class="eyebrow">PRIVACY NOTICE</span>
+      <h1>Privacy Policy</h1>
+      <p>Last updated: 16 July 2026</p>
+    </div>
+    <div class="legal-card">
+      <h2>Who operates this website</h2>
+      <p>VentTools operates venttools.com. Privacy enquiries can be sent to <a href="mailto:privacy@venttools.com">privacy@venttools.com</a>.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Information you provide</h2>
+      <p>The calculators work in your browser and do not require an account. If you contact VentTools by email, the information you send—such as your email address, message and attachments—will be used to answer your enquiry, investigate reported issues and keep an appropriate correspondence record.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Technical and usage information</h2>
+      <p>The website host and security providers may process basic technical data such as IP address, browser type, device information, request time and pages requested to deliver, secure and maintain the website. Google Analytics is available on this website but is only loaded after you choose to allow optional analytics.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Advertising</h2>
+      <p>VentTools does not include advertising code in this release. If advertising is introduced, this notice and the cookie controls will be updated before advertising cookies or similar technologies are activated. Where required, a suitable consent-management platform will be used.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Why information is used</h2>
+      <p>Information may be used to provide and secure the website, respond to enquiries, correct calculator data, understand website performance where consent has been given, prevent abuse and comply with legal obligations.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Sharing and international processing</h2>
+      <p>Information may be handled by service providers used for website hosting, security, email routing and—if enabled—analytics or advertising. Some providers may process information outside the United Kingdom. Appropriate provider safeguards and settings should be reviewed when each optional service is enabled.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Retention</h2>
+      <p>Technical logs are retained according to the relevant service provider’s settings. Email correspondence is kept only for as long as reasonably needed to answer the enquiry, maintain accurate technical records, resolve disputes or meet legal requirements.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Your rights</h2>
+      <p>Depending on the circumstances, you may have rights to ask for access, correction, deletion, restriction or objection concerning personal information, and to complain to the UK Information Commissioner’s Office. Start by emailing <a href="mailto:privacy@venttools.com">privacy@venttools.com</a>.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Changes</h2>
+      <p>This policy may be updated as VentTools adds services. The latest version will always be published on this page with its update date.</p>
+    </div>
+  </div>
+</section>
+
+<section id="cookies" class="page legal-page">
+  <div class="legal-shell">
+    <button class="back" onclick="showPage('home')">← Home</button>
+    <div class="legal-hero">
+      <span class="eyebrow">COOKIE INFORMATION</span>
+      <h1>Cookie Policy</h1>
+      <p>Last updated: 16 July 2026</p>
+    </div>
+    <div class="legal-card">
+      <h2>Current website storage</h2>
+      <p>This release stores a small preference on your device so VentTools can remember your cookie choice. The website may also use browser storage needed for normal app behaviour and service-worker caching so pages and assets load reliably.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Essential technologies</h2>
+      <p>Essential storage supports security, network delivery, saved consent choices and core site operation. It cannot be switched off through the preference panel because the website may not function correctly without it.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Analytics</h2>
+      <p>Analytics is optional. Google Analytics is connected to the consent control and only loads after you choose Accept analytics. Microsoft Clarity is not included in this release.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Advertising cookies</h2>
+      <p>No advertising cookies are included in this release. Before Google AdSense or another advertising service is enabled, VentTools will need the relevant advertising disclosures and an appropriate consent-management solution for visitors in locations where consent is required.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Change your choice</h2>
+      <p>You can review or change the optional analytics preference at any time.</p>
+      <button type="button" class="legal-action" onclick="openCookiePreferences()">Open cookie preferences</button>
+    </div>
+  </div>
+</section>
+
+<section id="terms" class="page legal-page">
+  <div class="legal-shell">
+    <button class="back" onclick="showPage('home')">← Home</button>
+    <div class="legal-hero">
+      <span class="eyebrow">SITE TERMS</span>
+      <h1>Terms of Use</h1>
+      <p>Last updated: 16 July 2026</p>
+    </div>
+    <div class="legal-card">
+      <h2>Using VentTools</h2>
+      <p>VentTools is provided as an independent calculation and reference aid. You may use the website for lawful personal and professional purposes. Do not misuse the website, attempt to interfere with its operation, introduce harmful code or use automated access in a way that creates unreasonable load.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Life-safety work</h2>
+      <p>Fire and smoke damper installation is life-safety work. Results must be checked by a competent person against the current manufacturer documentation, project specification, approved construction details and applicable site requirements before work proceeds.</p>
+    </div>
+    <div class="legal-card">
+      <h2>No substitute for design or approval</h2>
+      <p>VentTools does not provide engineering design, product certification, Building Control approval, manufacturer approval or project-specific professional advice. A calculator result does not authorise a departure from a tested installation method.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Accuracy and availability</h2>
+      <p>Reasonable care is taken when preparing the tools, but information may contain errors, become outdated or be unavailable. VentTools may change, suspend or remove tools without notice.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Manufacturer material</h2>
+      <p>Product names and references belong to their respective owners. Links to official documents are provided for verification and convenience. Users remain responsible for checking that the linked document is current and applies to the exact product and installation.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Liability</h2>
+      <p>To the fullest extent permitted by law, VentTools is not responsible for loss caused by relying on the website without carrying out the required independent checks. Nothing in these terms excludes liability that cannot legally be excluded.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Contact</h2>
+      <p>Questions about these terms can be sent to <a href="mailto:info@venttools.com">info@venttools.com</a>.</p>
+    </div>
+  </div>
+</section>
+
+<section id="disclaimer" class="page legal-page">
+  <div class="legal-shell">
+    <button class="back" onclick="showPage('home')">← Home</button>
+    <div class="legal-hero">
+      <span class="eyebrow">IMPORTANT</span>
+      <h1>Technical Disclaimer</h1>
+    </div>
+    <div class="legal-card legal-warning">
+      <h2>Always verify before construction</h2>
+      <p>VentTools simplifies calculations and selected information from published documents. It does not replace the full installation manual, classification, Declaration of Performance, project fire strategy, approved drawing or competent-person review.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Manufacturer revisions</h2>
+      <p>Manufacturers may revise products, opening tables, tested constructions and installation instructions. Confirm the document revision shown by VentTools against the latest official manufacturer publication.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Input responsibility</h2>
+      <p>The user is responsible for selecting the correct manufacturer, product, installation method, supporting construction, sealing system and dimensions. An accurate calculation based on the wrong method is still an incorrect result.</p>
+    </div>
+    <div class="legal-card">
+      <h2>Report a concern</h2>
+      <p>Stop and verify the installation if a result appears inconsistent. Report suspected errors to <a href="mailto:info@venttools.com">info@venttools.com</a> with the product, method, dimensions and manual reference.</p>
+    </div>
+  </div>
+</section>
+
+<div class="cookie-banner" id="cookieBanner" role="dialog" aria-live="polite" aria-label="Cookie choices" hidden>
+  <div class="cookie-banner-copy">
+    <strong>Cookie choices</strong>
+    <p>VentTools uses essential storage for site operation. Optional analytics will only be allowed if you choose Accept analytics.</p>
+  </div>
+  <div class="cookie-banner-actions">
+    <button type="button" class="cookie-secondary" onclick="saveCookieConsent(false)">Essential only</button>
+    <button type="button" class="cookie-primary" onclick="saveCookieConsent(true)">Accept analytics</button>
+    <button type="button" class="cookie-link" onclick="showPage('cookies')">Learn more</button>
+  </div>
+</div>
+
+<div class="cookie-modal-backdrop" id="cookieModal" hidden>
+  <div class="cookie-modal" role="dialog" aria-modal="true" aria-labelledby="cookieModalTitle">
+    <h2 id="cookieModalTitle">Cookie preferences</h2>
+    <div class="cookie-option">
+      <div><strong>Essential</strong><p>Required for core site operation and remembering your choice.</p></div>
+      <span class="cookie-always">Always on</span>
+    </div>
+    <label class="cookie-option cookie-toggle">
+      <div><strong>Analytics</strong><p>Allows optional measurement tools to understand usage and improve VentTools.</p></div>
+      <input type="checkbox" id="analyticsConsentToggle">
+    </label>
+    <div class="cookie-modal-actions">
+      <button type="button" class="cookie-secondary" onclick="closeCookiePreferences()">Cancel</button>
+      <button type="button" class="cookie-primary" onclick="saveCookiePreferences()">Save preferences</button>
+    </div>
+  </div>
+</div>
+
+<div class="footer"><div class="footer-live-note">VentTools V6.3.0 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span>
+<nav class="footer-links" aria-label="Site information">
+  <a class="footer-link-btn" href="about.html">About</a>
+  <a class="footer-link-btn" href="contact.html">Contact</a>
+  <a class="footer-link-btn" href="privacy.html">Privacy</a>
+  <a class="footer-link-btn" href="cookies.html">Cookies</a>
+  <a class="footer-link-btn" href="terms.html">Terms</a>
+  <a class="footer-link-btn" href="disclaimer.html">Disclaimer</a>
+  <button type="button" class="footer-link-btn" onclick="openCookiePreferences()">Cookie preferences</button>
+</nav></div></div>
 <script src="script.js"></script>
 </body>
 </html>

@@ -434,3 +434,67 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - The main result remains the minimum published opening.
 - Fixed-opening and tolerance-only methods remain unchanged.
 - Updated the service-worker cache.
+
+
+## VentTools V6.1.4 — Contact page
+
+- Added a dedicated Contact page.
+- Added a Contact link in the footer.
+- Public contact address: info@venttools.com.
+- Left the owner's personal name off the page.
+- Added guidance for reporting calculator and installation-method issues.
+- Added a clear independent-resource statement.
+- Updated index.html, README, sitemap and the service-worker cache.
+
+
+## VentTools V6.2.0 — professional site foundation
+
+Added:
+- About page
+- Contact page using info@venttools.com
+- Privacy Policy using privacy@venttools.com
+- Cookie Policy
+- Terms of Use
+- Technical Disclaimer
+- Complete footer navigation
+- Cookie consent banner with equally accessible essential-only and analytics choices
+- Reopenable cookie-preferences panel
+- Consent event hook: `venttools:consent`
+- Hash-aware legal-page navigation
+- Network-first navigation handling in the service worker to reduce stale-version problems
+
+Important:
+- This release does not include Google Analytics, Microsoft Clarity or advertising code.
+- Any future analytics code must read the recorded analytics consent before loading.
+- Before AdSense is enabled for visitors in regions where consent is required, configure an appropriate consent-management platform and update the live privacy/cookie disclosures.
+- Legal pages are practical website templates and should be reviewed if the business structure, data collection or services change.
+
+
+## VentTools V6.2.1 — Google Analytics
+
+- Added Google Analytics Measurement ID `G-KWBWNN0WCB`.
+- Analytics only loads after a visitor chooses **Accept analytics**.
+- Essential-only visitors are not sent to Google Analytics.
+- Added consent updates and single-page page-view tracking.
+- Advertising consent remains denied.
+- Updated the Privacy and Cookie wording.
+- Updated the index version and service-worker cache.
+
+### Test after deployment
+
+1. Upload this release to GitHub.
+2. Open VentTools in a private/incognito window.
+3. Choose **Accept analytics**.
+4. Return to Google Analytics and press **Test installation**.
+5. Check Realtime after opening several VentTools sections.
+
+
+## VentTools V6.3.0 — Standalone legal and trust pages
+
+- Reviewed the V6.2.1 Google Analytics implementation and retained consent-gated loading for Measurement ID `G-KWBWNN0WCB`.
+- Added crawlable standalone About, Contact, Privacy, Cookie Policy, Terms and Disclaimer HTML files.
+- Converted footer information links to normal links so search engines and AdSense reviewers can reach the pages without JavaScript.
+- Retained the in-app versions of the same pages for installed/PWA use.
+- Added every public information page to sitemap.xml.
+- Updated the service-worker cache and visible release label to V6.3.0.
+- Updated policy dates to 16 July 2026.
