@@ -405,3 +405,12 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - BSB lining calculations now name the selected aperture-lining thickness.
 - Removed duplicate warning/disclaimer blocks and kept one clear independent-use notice.
 - Updated the service-worker cache.
+
+
+## V6.2 — Advanced Air release fix
+
+- Added Advanced Air to the visible manufacturer dropdown.
+- Advanced Air products already present in the calculator database are now selectable: 0160, 2530, 26SCD, 0400MAN, 0400FME and 0500MAN.
+- Added Advanced Air and Lindab to the supported-manufacturers panel.
+- Updated the visible release label to V6.2.
+- Bumped the service-worker cache name so phones receive the corrected build.
