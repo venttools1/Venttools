@@ -425,3 +425,12 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Retained Swegon — Actionair products, Lindab and BSB.
 - No calculator logic changed.
 - Updated the service-worker cache so the corrected dropdown is fetched.
+
+
+## VentTools V6.1.3 — explicit opening ranges
+- Added a dedicated Permitted Opening Range panel.
+- Shows minimum and maximum width and height separately.
+- Enabled for Advanced Air 0160 AFS, 2530 AFS and 2530 HEVAC.
+- The main result remains the minimum published opening.
+- Fixed-opening and tolerance-only methods remain unchanged.
+- Updated the service-worker cache.
