@@ -238,10 +238,10 @@
 </div>
 <div class="card">
   <div class="row">
-    <div><label for="fdManufacturer">Manufacturer</label><select id="fdManufacturer"><option value="BSB" selected>BSB</option><option value="ACTIONAIR">Swegon — Actionair products</option><option value="LINDAB">Lindab</option></select></div>
+    <div><label for="fdManufacturer">Select Manufacturer</label><select id="fdManufacturer"><option value="BSB" selected>BSB</option><option value="ACTIONAIR">Swegon — Actionair products</option><option value="LINDAB">Lindab</option></select></div>
     <div><label for="fdSeries">Product / series</label><select id="fdSeries"></select></div>
   </div>
-  <label for="fdMethod">Installation method</label><select id="fdMethod"></select>
+  <label for="fdMethod">Select Certified Installation Method</label><select id="fdMethod"></select>
 <div id="fdWk25Wrap" style="display:none">
   <div class="row">
     <div><label for="fdWk25Config">Damper configuration</label><select id="fdWk25Config"><option value="single">Single damper</option><option value="pair-side">Twin dampers — side by side</option><option value="pair-stack">Twin dampers — stacked</option></select></div>
@@ -322,36 +322,37 @@
 </div>
 <div class="card">
   <svg id="fdDiagram" class="diagram" viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg"><defs><marker id="fdArrow" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto"><path d="M0,0 L8,4 L0,8 Z" fill="#064b82"/></marker></defs><g id="fdDiagramLayer"></g></svg>
+  <div class="fd-section-heading">Calculation Results</div>
   <div class="fd-professional-result" style="margin-top:12px">
     <div class="fd-opening-hero">
-      <div class="result-label">Structural hole to cut</div>
+      <div class="result-label">Structural Hole to Cut</div>
       <div class="fd-opening-value" id="fdOpeningBig">—</div>
       <div class="fd-result-status" id="fdResultStatus">Waiting for calculation</div>
     </div>
 
     <div class="fd-certified-method">
-      <div class="fd-section-kicker">Certified installation method</div>
+      <div class="fd-section-kicker">Certified Installation Method</div>
       <div class="fd-method-value" id="fdMethodBig">—</div>
     </div>
 
     <div class="fd-build-flow" aria-label="Installation calculation breakdown">
       <div class="fd-flow-card">
-        <span class="fd-flow-label">Nominal duct</span>
+        <span class="fd-flow-label">Nominal Damper Size</span>
         <strong id="fdNominalStage">—</strong>
       </div>
       <span class="fd-flow-arrow" aria-hidden="true">→</span>
       <div class="fd-flow-card">
-        <span class="fd-flow-label">Damper / frame build-up</span>
+        <span class="fd-flow-label">Damper / Frame Build-up</span>
         <strong id="fdCasingStage">—</strong>
       </div>
       <span class="fd-flow-arrow" aria-hidden="true">→</span>
       <div class="fd-flow-card">
-        <span class="fd-flow-label">Finished opening</span>
+        <span class="fd-flow-label">Finished Opening</span>
         <strong id="fdFinishedStage">—</strong>
       </div>
       <span class="fd-flow-arrow" aria-hidden="true">→</span>
       <div class="fd-flow-card fd-flow-final">
-        <span class="fd-flow-label">Hole to cut</span>
+        <span class="fd-flow-label">Structural Hole to Cut</span>
         <strong id="fdCutStage">—</strong>
       </div>
     </div>
@@ -360,13 +361,9 @@
     </div>
   </div>
 
-  <div id="fdBsbProfessionalNote" class="fd-bsb-note" style="display:none">
-  <strong>BSB Professional Method Selector</strong>
-  <span>Select the exact tested method. BSB drywall openings are normally lined, except where the selected method explicitly says the opening must not be lined.</span>
-</div>
-<div id="fdLindabProfessionalNote" class="fd-lindab-note" style="display:none">
-  <strong>Lindab Professional Method Selector</strong>
-  <span>Choose the exact tested supporting construction and sealing arrangement. Opening sizes and critical rules change with the selected method.</span>
+  <div id="fdMethodSelectorNote" class="fd-method-selector-note">
+  <strong>Select Certified Installation Method</strong>
+  <span>Choose the manufacturer's tested installation method that matches the supporting construction and sealing system.</span>
 </div>
 <div id="fdMessage" class="msg ok"></div>
 
@@ -383,7 +380,7 @@
   <span id="fdReferenceSummary" class="sr-only">—</span>
 
   <div class="fd-critical-rules">
-    <div class="fd-section-kicker">Critical installation rules</div>
+    <div class="fd-section-kicker">Critical Installation Requirements</div>
     <div id="fdCriticalRules">Select a product and certified installation method.</div>
   </div>
   
@@ -393,14 +390,17 @@
 </div>
 <p class="fd-professional-disclaimer"><strong>VentTools</strong> is an independent HVAC installation reference and calculation aid. It does not replace manufacturer instructions, project specifications, applicable legislation or professional judgement. The installer remains responsible for compliance.</p>
 <div class="fd-official-resources">
-  <div class="fd-section-kicker">Official manufacturer resources</div>
+  <div class="fd-section-kicker">Official Manufacturer Resources</div>
   <p class="fd-resource-note">Always verify the installation against the manufacturer's latest published guidance.</p>
   <a class="action fd-manual-primary" id="fdManualLink" href="#" target="_blank" rel="noopener">📖 Open Official Manufacturer Installation Manual</a>
 </div>
+<div class="fd-independent-note">
+  VentTools presents calculations from the selected manufacturer's published tested installation method. Always verify the selected method against the latest official installation manual before construction or installation.
+</div>
 <div class="fd-venttools-actions">
-  <div class="fd-section-kicker">VentTools actions</div>
-  <button class="action fd-copy-secondary" id="fdCopyBtn"><span aria-hidden="true">📋</span> Copy Result</button>
-  <button class="action reset-button" id="fdResetBtn"><span aria-hidden="true">↻</span> New Calculation</button>
+  <div class="fd-section-kicker">VentTools Actions</div>
+  <button class="action fd-copy-secondary" id="fdCopyBtn"><span aria-hidden="true">📋</span> Copy Results</button>
+  <button class="action reset-button" id="fdResetBtn"><span aria-hidden="true">↻</span> Start New Calculation</button>
 </div>
   <div class="resource-note fd-safety-note">Use the result only for the selected manufacturer, product and installation method. Confirm the damper label, supporting construction, permitted aperture range and latest official installation manual before forming the opening.</div>
 </div>
@@ -417,7 +417,7 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V6.0.1 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
+<div class="footer"><div class="footer-live-note">VentTools V6.0.2 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>

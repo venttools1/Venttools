@@ -761,18 +761,6 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
   .fd-venttools-actions{grid-template-columns:1fr}
 }
 
-/* VentTools V5.9 — Lindab Professional */
-.fd-lindab-note{
-  margin:14px 0;padding:13px 15px;border:1px solid #93c5fd;
-  border-left:5px solid #0b5ea8;border-radius:14px;background:#eff6ff;
-  color:#16324a;flex-direction:column;gap:5px
-}
-.fd-lindab-note strong{font-size:.95rem}
-.fd-lindab-note span{font-size:.88rem;line-height:1.42}
-
-/* VentTools V6.0 — BSB Professional */
-.fd-bsb-note{margin:14px 0;padding:13px 15px;border:1px solid #fdba74;border-left:5px solid #c2410c;border-radius:14px;background:#fff7ed;color:#431407;flex-direction:column;gap:5px}.fd-bsb-note strong{font-size:.95rem}.fd-bsb-note span{font-size:.88rem;line-height:1.42}
-
 /* V6.0.1 — transparent calculation build-up */
 .fd-trust-note{
   margin-top:10px;
@@ -783,4 +771,37 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
   font-size:.8rem;
   line-height:1.4;
   text-align:center;
+}
+
+/* VentTools V6.0.2 — unified manufacturer-neutral interface */
+.fd-method-selector-note{
+  margin:14px 0;
+  padding:13px 15px;
+  border:1px solid #93c5fd;
+  border-left:5px solid #0b5ea8;
+  border-radius:14px;
+  background:#eff6ff;
+  color:#16324a;
+  display:flex;
+  flex-direction:column;
+  gap:5px;
+}
+.fd-method-selector-note strong{font-size:.95rem}
+.fd-method-selector-note span{font-size:.88rem;line-height:1.42}
+.fd-section-heading{
+  margin:16px 0 10px;
+  color:#0f172a;
+  font-size:1rem;
+  font-weight:950;
+  letter-spacing:.2px;
+}
+.fd-independent-note{
+  margin-top:14px;
+  padding:11px 13px;
+  border:1px solid #dbe3ec;
+  border-radius:12px;
+  background:#f8fafc;
+  color:#475569;
+  font-size:.82rem;
+  line-height:1.45;
 }

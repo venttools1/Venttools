@@ -359,3 +359,27 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Renamed the flow stage to “Damper / frame build-up”.
 - Added a short traceability note beneath the calculation flow.
 - Updated the service-worker cache for clean deployment.
+
+
+## VentTools V6.0.2 — Unified Interface Standard
+
+- Replaced manufacturer-branded method-selector wording with the neutral heading:
+  “Select Certified Installation Method”.
+- Added one consistent explanation for Actionair, Lindab and BSB.
+- Standardised the fire-damper workflow headings:
+  - Select Manufacturer
+  - Select Product
+  - Select Certified Installation Method
+  - Calculation Results
+  - Nominal Damper Size
+  - Damper / Frame Build-up
+  - Finished Opening
+  - Structural Hole to Cut
+  - Critical Installation Requirements
+  - Official Manufacturer Resources
+  - Copy Results
+  - Start New Calculation
+- Added a clear independent-use notice stating that VentTools presents manufacturer-published tested methods and does not replace the current official manual.
+- Removed wording that could imply a manufacturer owns or endorses the VentTools selector.
+- No calculation logic was changed.
+- Updated the service-worker cache for clean deployment.
