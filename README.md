@@ -407,10 +407,13 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Updated the service-worker cache.
 
 
-## V6.2 — Advanced Air release fix
+## VentTools V6.1.1 — Advanced Air official manual links
 
-- Added Advanced Air to the visible manufacturer dropdown.
-- Advanced Air products already present in the calculator database are now selectable: 0160, 2530, 26SCD, 0400MAN, 0400FME and 0500MAN.
-- Added Advanced Air and Lindab to the supported-manufacturers panel.
-- Updated the visible release label to V6.2.
-- Bumped the service-worker cache name so phones receive the corrected build.
+- Added a reusable Advanced Air document library.
+- Linked 0160 directly to its official IOM.
+- Linked 2530 directly to its official IOM.
+- Linked 0400MAN, 0400FME and 0500MAN to the shared official 0400/0500 IOM.
+- Linked 26SCD directly to its official IOM.
+- Manual-button text now identifies the exact document being opened.
+- Source-document text now matches the linked official document.
+- Updated the service-worker cache.

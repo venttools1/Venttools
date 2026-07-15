@@ -298,6 +298,13 @@ const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450
 function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($('rectH').value)||0,area=w*h,eq=Math.sqrt((4*area)/Math.PI),near=nearestStandard(eq);$('eqRound').textContent=fmt(eq)+' mm';$('nearestRound').textContent='Ø '+fmt0(near);$('rectArea').textContent=fmt0(area)+' mm²';drawDuctulator(w,h,eq);return `Vent Tools - Rect to Round Ductulator\n\nRectangular duct: ${fmt0(w)} × ${fmt0(h)} mm\nArea: ${fmt0(area)} mm²\nSame-area round: Ø ${fmt(eq)} mm\nNearest standard spiral: Ø ${fmt0(near)} mm`}async function copyDuct(){let r=calculateDuct();try{await navigator.clipboard.writeText(r)}catch(e){}}function resetDuct(){$('rectW').value=600;$('rectH').value=300;calculateDuct()}['rectW','rectH'].forEach(id=>$(id).addEventListener('input',calculateDuct));$('copyDuctBtn').addEventListener('click',copyDuct);$('resetDuctBtn').addEventListener('click',resetDuct);angleUI();calculateOffset();calculateDuct();
 
 
+const ADVANCED_AIR_DOCUMENTS={
+  IOM_0160:{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual"},
+  IOM_2530:{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual"},
+  IOM_0400_0500:{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual"},
+  IOM_26SCD:{url:"https://www.advancedair.co.uk/app/uploads/26SCD_IOM_Rev1.0.pdf",title:"26SCD Installation Manual"}
+};
+
 const FD_MANUFACTURERS={
   BSB:{label:"BSB",products:{
     "FSD-TD":{label:"FSD-TD — Rectangular fire/smoke damper",shape:"rect",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",guide:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904",methods:{
@@ -330,30 +337,30 @@ const FD_MANUFACTURERS={
     }}
   }},
   ADVANCED_AIR:{label:"Advanced Air",products:{
-    "0160":{label:"0160 — Curtain fire damper",shape:"rect",manual:"https://advancedair.co.uk/",guide:"Advanced Air 0160 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • April 2026",methods:{
+    "0160":{label:"0160 — Curtain fire damper",shape:"rect",documentId:"IOM_0160",manual:ADVANCED_AIR_DOCUMENTS.IOM_0160.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0160.title,guide:"Advanced Air 0160 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • April 2026",methods:{
       AFS_60:{label:"AFS — 60 minute flexible/rigid wall",type:"advanced-afs-0160",reference:"0160 AFS • E60",wall:"Flexible or rigid supporting construction, minimum 94 mm",seal:"Two layers of 50 mm, 140 kg/m³ coated fire batt with tested intumescent sealant",classification:"E60",note:"Opening shown is the manufacturer table minimum. Letterbox lining is part of the wall construction and is not added again by VentTools."},
       AFS_120:{label:"AFS — 120 minute flexible/rigid wall",type:"advanced-afs-0160",reference:"0160 AFS • E120",wall:"Flexible or rigid supporting construction, minimum 131 mm",seal:"Two layers of 50 mm, 140 kg/m³ coated fire batt with tested intumescent sealant",classification:"E120",note:"Opening shown is the manufacturer table minimum. Letterbox lining is part of the wall construction and is not added again by VentTools."},
       TRIMOTERM:{label:"Trimoterm wall — E120",type:"advanced-rect-fixed",addW:55,addH:55,tolerance:10,reference:"0160 Trimoterm • E120",wall:"Trimoterm sandwich panel, minimum 120 mm",seal:"Tested capping, Astroflame Astro INTU Mastic or equivalent, and retaining flanges",classification:"E120",note:"Opening is nominal width and height +55 mm, tolerance ±10 mm."}
     }},
-    "2530":{label:"2530 — Motorised fire damper",shape:"rect",manual:"https://advancedair.co.uk/",guide:"Advanced Air 2530 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • April 2026",methods:{
+    "2530":{label:"2530 — Motorised fire damper",shape:"rect",documentId:"IOM_2530",manual:ADVANCED_AIR_DOCUMENTS.IOM_2530.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_2530.title,guide:"Advanced Air 2530 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • April 2026",methods:{
       AFS:{label:"AFS — flexible/rigid wall",type:"advanced-afs-2530",reference:"2530 AFS",wall:"Flexible or rigid wall matching the selected 60/120 minute tested construction",seal:"Two layers of 50 mm, 140 kg/m³ coated fire batt with tested intumescent sealant",classification:"E60/E120 S",note:"The opening shown is the published minimum for the entered nominal size. The AFS frame and fire-batt zone are already included."},
       HEVAC:{label:"HEVAC frame — rigid wall E120",type:"advanced-hevac-2530",reference:"2530 HEVAC • E120",wall:"Rigid wall, minimum 150 mm",seal:"HEVAC frame with turnback tabs and 4:1 mortar mix",classification:"E120 S",note:"The damper must remain able to move within the HEVAC frame. Do not fill mortar onto the damper spigots."}
     }},
-    "26SCD":{label:"26SCD — Smoke control damper",shape:"rect",manual:"https://advancedair.co.uk/",guide:"Advanced Air 26SCD Installation, Operation and Maintenance Manual",revision:"Rev 1.0 • April 2026",methods:{
+    "26SCD":{label:"26SCD — Smoke control damper",shape:"rect",documentId:"IOM_26SCD",manual:ADVANCED_AIR_DOCUMENTS.IOM_26SCD.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_26SCD.title,guide:"Advanced Air 26SCD Installation, Operation and Maintenance Manual",revision:"Rev 1.0 • April 2026",methods:{
       OFFICIAL:{label:"AFS wall / remote installation — official opening table required",type:"advanced-link",reference:"26SCD tested installation",note:"The 26SCD has wall and remote-from-wall methods. VentTools will not apply the 0160/2530 opening table without the exact selected 26SCD dimensional table."}
     }},
-    "0400MAN":{label:"0400MAN — Circular fire damper",shape:"circle",manual:"https://advancedair.co.uk/",guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
+    "0400MAN":{label:"0400MAN — Circular fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
       FLEX_60:{label:"60 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400MAN flexible wall • E60",wall:"Flexible wall, minimum 106 mm, two layers of 12.5 mm Type F board each side",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square, tolerance ±4 mm."},
       FLEX_120:{label:"120 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400MAN flexible wall • E120",wall:"Flexible wall, minimum 131 mm, two layers of 15 mm Type F board each side",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square, tolerance ±4 mm."},
       RIGID_60:{label:"60 minute rigid wall — square/circular opening",type:"advanced-circle-fixed",add:35,openingShape:"square",reference:"0400MAN rigid wall • E60",wall:"Rigid wall, minimum 106 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening: nominal diameter +35 mm; stated tolerance ±25 mm."},
       RIGID_120:{label:"120 minute rigid wall — square/circular opening",type:"advanced-circle-fixed",add:35,openingShape:"square",reference:"0400MAN rigid wall • E120",wall:"Rigid wall, minimum 131 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening: nominal diameter +35 mm; stated tolerance ±25 mm."}
     }},
-    "0400FME":{label:"0400FME — Circular motorised fire damper",shape:"circle",manual:"https://advancedair.co.uk/",guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
+    "0400FME":{label:"0400FME — Circular motorised fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
       FLEX_60:{label:"60 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400FME flexible wall • E60 S",wall:"Flexible wall, minimum 106 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square."},
       FLEX_120:{label:"120 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400FME flexible wall • E120 S",wall:"Flexible wall, minimum 131 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square."},
       RIGID:{label:"Rigid wall — square/circular opening",type:"advanced-circle-fixed",add:35,openingShape:"square",reference:"0400FME rigid wall",wall:"Rigid wall matching the selected tested construction",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening: nominal diameter +35 mm."}
     }},
-    "0500MAN":{label:"0500MAN — Circular floor fire damper",shape:"circle",manual:"https://advancedair.co.uk/",guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
+    "0500MAN":{label:"0500MAN — Circular floor fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
       FLOOR:{label:"Rigid floor — compound infill E120",type:"advanced-circle-floor",add:10,reference:"0500MAN floor • E120",wall:"Aerated concrete floor, minimum 150 mm, density 575 kg/m³ ±50 kg/m³",seal:"Silverseal HS Compound, minimum 100 mm thick",note:"Minimum opening is nominal diameter +10 mm. Maximum permitted opening is 1800 × 1800 mm."}
     }}
   }},
@@ -573,7 +580,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
      $("fdDamperSummary").textContent="—";
      $("fdRuleSummary").textContent=r.error;
      $("fdReferenceSummary").textContent="SmokeShield PTC SPAN";
-     $("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;
+     $("fdGuideSummary").textContent=`${p.manualTitle||p.guide} — ${p.revision}`;
      $("fdManualLink").href=p.manual;
      fdMsg("bad","⚠ "+r.error);
      return r;
@@ -745,7 +752,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
  $("fdDamperSummary").textContent=r.damper;
  $("fdRuleSummary").textContent=r.rule;
  $("fdReferenceSummary").textContent=r.reference;
- $("fdGuideSummary").textContent=`${p.guide} — ${p.revision}`;
+ $("fdGuideSummary").textContent=`${p.manualTitle||p.guide} — ${p.revision}`;
  $("fdNominalStage").textContent=nominalStage;
  $("fdCasingStage").textContent=casingStage;
  $("fdFinishedStage").textContent=finishedStage;
@@ -768,13 +775,16 @@ $("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);$("fdHevacVaria
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");
   if(!link) return;
+  const {p}=currentFD();
   const manufacturer=$("fdManufacturer").value;
   const product=$("fdSeries")?.value||"";
-  link.innerHTML=manufacturer==="BSB"
-    ? '<span aria-hidden="true">📄</span> Open Official BSB Installation Manual'
-    : manufacturer==="LINDAB"
-      ? `<span aria-hidden="true">📄</span> Open Official ${product} Installation Booklet`
-      : '<span aria-hidden="true">📄</span> Open Official Swegon / Actionair Installation Guide';
+  link.innerHTML=p.manualTitle
+    ? `<span aria-hidden="true">📄</span> Open Official ${p.manualTitle}`
+    : manufacturer==="BSB"
+      ? '<span aria-hidden="true">📄</span> Open Official BSB Installation Manual'
+      : manufacturer==="LINDAB"
+        ? `<span aria-hidden="true">📄</span> Open Official ${product} Installation Booklet`
+        : '<span aria-hidden="true">📄</span> Open Official Swegon / Actionair Installation Guide';
 }
 
 
