@@ -383,3 +383,25 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Removed wording that could imply a manufacturer owns or endorses the VentTools selector.
 - No calculation logic was changed.
 - Updated the service-worker cache for clean deployment.
+
+
+## VentTools V6.1 — Advanced Air and usability update
+
+- Added Advanced Air as a manufacturer.
+- Added safe, source-table-based support for:
+  - 0160 AFS wall methods
+  - 0160 Trimoterm
+  - 2530 AFS
+  - 2530 HEVAC
+  - 0400MAN
+  - 0400FME
+  - 0500MAN
+- Kept 26SCD as official-table-required until its exact dimensional table is implemented.
+- Added a prominent Square to Round shortcut in the homepage hero.
+- Hid detailed calculation stages behind “Show Calculation Details”.
+- Made the structural-hole heading dynamic:
+  - “Structural Hole to Cut (including aperture lining)” when VentTools adds lining
+  - “Opening Required by Selected Method” when the manufacturer table already defines the formed opening
+- BSB lining calculations now name the selected aperture-lining thickness.
+- Removed duplicate warning/disclaimer blocks and kept one clear independent-use notice.
+- Updated the service-worker cache.

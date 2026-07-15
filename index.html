@@ -54,6 +54,7 @@
       <div class="v5-hero-actions">
         <button onclick="showPage('fireDamper')" class="v5-primary">Open Fire Damper Calculator</button>
         <button onclick="showPage('offset')" class="v5-secondary">Open Offset Calculator</button>
+        <button onclick="showPage('ductulator')" class="v5-secondary v5-square-round-quick">▢→○ Square to Round</button>
         <button id="installVentToolsBtn" class="v5-install" hidden>📱 Install VentTools</button>
       </div>
     </div>
@@ -325,7 +326,7 @@
   <div class="fd-section-heading">Calculation Results</div>
   <div class="fd-professional-result" style="margin-top:12px">
     <div class="fd-opening-hero">
-      <div class="result-label">Structural Hole to Cut</div>
+      <div class="result-label" id="fdOpeningLabel">Structural Hole to Cut</div>
       <div class="fd-opening-value" id="fdOpeningBig">—</div>
       <div class="fd-result-status" id="fdResultStatus">Waiting for calculation</div>
     </div>
@@ -335,30 +336,33 @@
       <div class="fd-method-value" id="fdMethodBig">—</div>
     </div>
 
-    <div class="fd-build-flow" aria-label="Installation calculation breakdown">
-      <div class="fd-flow-card">
-        <span class="fd-flow-label">Nominal Damper Size</span>
-        <strong id="fdNominalStage">—</strong>
+    <details class="fd-calculation-details">
+      <summary>Show Calculation Details</summary>
+      <div class="fd-build-flow" aria-label="Installation calculation breakdown">
+        <div class="fd-flow-card">
+          <span class="fd-flow-label">Nominal Damper Size</span>
+          <strong id="fdNominalStage">—</strong>
+        </div>
+        <span class="fd-flow-arrow" aria-hidden="true">→</span>
+        <div class="fd-flow-card">
+          <span class="fd-flow-label">Damper / Frame Build-up</span>
+          <strong id="fdCasingStage">—</strong>
+        </div>
+        <span class="fd-flow-arrow" aria-hidden="true">→</span>
+        <div class="fd-flow-card">
+          <span class="fd-flow-label">Finished Opening</span>
+          <strong id="fdFinishedStage">—</strong>
+        </div>
+        <span class="fd-flow-arrow" aria-hidden="true">→</span>
+        <div class="fd-flow-card fd-flow-final">
+          <span class="fd-flow-label">Structural Hole to Cut</span>
+          <strong id="fdCutStage">—</strong>
+        </div>
       </div>
-      <span class="fd-flow-arrow" aria-hidden="true">→</span>
-      <div class="fd-flow-card">
-        <span class="fd-flow-label">Damper / Frame Build-up</span>
-        <strong id="fdCasingStage">—</strong>
+      <div class="fd-trust-note">
+        Every dimension is shown so the result can be checked against the selected manufacturer method.
       </div>
-      <span class="fd-flow-arrow" aria-hidden="true">→</span>
-      <div class="fd-flow-card">
-        <span class="fd-flow-label">Finished Opening</span>
-        <strong id="fdFinishedStage">—</strong>
-      </div>
-      <span class="fd-flow-arrow" aria-hidden="true">→</span>
-      <div class="fd-flow-card fd-flow-final">
-        <span class="fd-flow-label">Structural Hole to Cut</span>
-        <strong id="fdCutStage">—</strong>
-      </div>
-    </div>
-    <div class="fd-trust-note">
-      Every dimension above is shown so the result can be checked against the selected manufacturer method.
-    </div>
+    </details>
   </div>
 
   <div id="fdMethodSelectorNote" class="fd-method-selector-note">
@@ -384,11 +388,6 @@
     <div id="fdCriticalRules">Select a product and certified installation method.</div>
   </div>
   
-<div class="fd-final-check" role="note">
-  <strong>⚠ Final verification required</strong>
-  <span>Verify all dimensions, wall or floor construction, certified sealing system, spacing and installation method against the current manufacturer installation booklet before installation.</span>
-</div>
-<p class="fd-professional-disclaimer"><strong>VentTools</strong> is an independent HVAC installation reference and calculation aid. It does not replace manufacturer instructions, project specifications, applicable legislation or professional judgement. The installer remains responsible for compliance.</p>
 <div class="fd-official-resources">
   <div class="fd-section-kicker">Official Manufacturer Resources</div>
   <p class="fd-resource-note">Always verify the installation against the manufacturer's latest published guidance.</p>
@@ -402,8 +401,7 @@
   <button class="action fd-copy-secondary" id="fdCopyBtn"><span aria-hidden="true">📋</span> Copy Results</button>
   <button class="action reset-button" id="fdResetBtn"><span aria-hidden="true">↻</span> Start New Calculation</button>
 </div>
-  <div class="resource-note fd-safety-note">Use the result only for the selected manufacturer, product and installation method. Confirm the damper label, supporting construction, permitted aperture range and latest official installation manual before forming the opening.</div>
-</div>
+  </div>
 </section>
 
 
@@ -417,7 +415,7 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V6.0.2 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
+<div class="footer"><div class="footer-live-note">VentTools V6.1 • Professional HVAC Installation Tools</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Stable release • Built for ductwork installers</span></div></div>
 <script src="script.js"></script>
 </body>
 </html>

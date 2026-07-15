@@ -805,3 +805,35 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
   font-size:.82rem;
   line-height:1.45;
 }
+
+/* VentTools V6.1 — quick access, cleaner results and Advanced Air */
+.v5-square-round-quick{
+  border-color:rgba(255,255,255,.55)!important;
+  box-shadow:0 8px 20px rgba(0,0,0,.16);
+}
+.fd-calculation-details{
+  margin-top:12px;
+  border:1px solid #cbd5e1;
+  border-radius:14px;
+  background:#fff;
+  overflow:hidden;
+}
+.fd-calculation-details summary{
+  cursor:pointer;
+  padding:13px 15px;
+  font-weight:950;
+  color:#0b5ea8;
+  list-style:none;
+}
+.fd-calculation-details summary::-webkit-details-marker{display:none}
+.fd-calculation-details summary::after{
+  content:"▾";
+  float:right;
+}
+.fd-calculation-details[open] summary::after{content:"▴"}
+.fd-calculation-details .fd-build-flow{
+  padding:0 13px 13px;
+}
+.fd-calculation-details .fd-trust-note{
+  margin:0 13px 13px;
+}
