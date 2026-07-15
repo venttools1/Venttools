@@ -345,3 +345,17 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Adds tested support, sealing, spacing, edge-distance and access requirements.
 - Keeps AT-FSD as official-drawing-required rather than inventing a universal formula.
 - No BSB-owned images or drawings are embedded.
+
+
+## VentTools V6.0.1 — Trust Breakdown
+
+- Replaced the vague BSB “Nominal + case/frame build-up” text with the actual arithmetic.
+- BSB rectangular results now show:
+  - nominal duct dimensions
+  - the exact published width and height allowances
+  - the resulting finished aperture
+  - the lining-board thickness on each side
+  - the final structural-cut arithmetic
+- Renamed the flow stage to “Damper / frame build-up”.
+- Added a short traceability note beneath the calculation flow.
+- Updated the service-worker cache for clean deployment.

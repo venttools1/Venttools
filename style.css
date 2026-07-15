@@ -772,3 +772,15 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 
 /* VentTools V6.0 — BSB Professional */
 .fd-bsb-note{margin:14px 0;padding:13px 15px;border:1px solid #fdba74;border-left:5px solid #c2410c;border-radius:14px;background:#fff7ed;color:#431407;flex-direction:column;gap:5px}.fd-bsb-note strong{font-size:.95rem}.fd-bsb-note span{font-size:.88rem;line-height:1.42}
+
+/* V6.0.1 — transparent calculation build-up */
+.fd-trust-note{
+  margin-top:10px;
+  padding:9px 11px;
+  border-radius:10px;
+  background:#f8fafc;
+  color:#475569;
+  font-size:.8rem;
+  line-height:1.4;
+  text-align:center;
+}
