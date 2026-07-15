@@ -417,3 +417,11 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Manual-button text now identifies the exact document being opened.
 - Source-document text now matches the linked official document.
 - Updated the service-worker cache.
+
+
+## VentTools V6.1.2 — Manufacturer dropdown fix
+
+- Added Advanced Air to the visible manufacturer dropdown.
+- Retained Swegon — Actionair products, Lindab and BSB.
+- No calculator logic changed.
+- Updated the service-worker cache so the corrected dropdown is fetched.
