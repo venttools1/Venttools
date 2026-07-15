@@ -321,3 +321,65 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Made the official manufacturer installation manual the primary full-width button.
 - Kept Copy Result and New Calculation as secondary VentTools actions.
 - Updated service-worker cache for clean deployment.
+
+
+## VentTools V5.9 — Lindab Professional
+
+- Upgraded Lindab results to the VentTools Professional traceability standard.
+- Added professional calculation stages and critical-rule checklists for circular and rectangular Lindab dampers.
+- Expanded WK45 with certified options for rigid walls, light walls, safety walls, gypsum blocks, sandwich walls and floors.
+- Included wet, dry and Fire Batt/Weichschott installation routes where published.
+- Preserved the detailed WK25 single/paired wizard.
+- Added a visible Lindab method-selection notice.
+- Kept official Lindab installation booklets as the primary resource buttons.
+- No manufacturer-owned photographs or installation drawings are embedded.
+
+
+## VentTools V6.0 — BSB Professional
+
+- Added AT-FSD, FD-C, FSD-C, FSD-TD and MFD-IC product routes.
+- Standardised BSB results with Actionair and Lindab Professional layouts.
+- Separates nominal size, finished aperture and structural cut.
+- Applies drywall lining only where the selected BSB method requires it.
+- Explicitly marks MFD-IC M9 as an unlined drywall opening.
+- Adds tested support, sealing, spacing, edge-distance and access requirements.
+- Keeps AT-FSD as official-drawing-required rather than inventing a universal formula.
+- No BSB-owned images or drawings are embedded.
+
+
+## VentTools V6.0.1 — Trust Breakdown
+
+- Replaced the vague BSB “Nominal + case/frame build-up” text with the actual arithmetic.
+- BSB rectangular results now show:
+  - nominal duct dimensions
+  - the exact published width and height allowances
+  - the resulting finished aperture
+  - the lining-board thickness on each side
+  - the final structural-cut arithmetic
+- Renamed the flow stage to “Damper / frame build-up”.
+- Added a short traceability note beneath the calculation flow.
+- Updated the service-worker cache for clean deployment.
+
+
+## VentTools V6.0.2 — Unified Interface Standard
+
+- Replaced manufacturer-branded method-selector wording with the neutral heading:
+  “Select Certified Installation Method”.
+- Added one consistent explanation for Actionair, Lindab and BSB.
+- Standardised the fire-damper workflow headings:
+  - Select Manufacturer
+  - Select Product
+  - Select Certified Installation Method
+  - Calculation Results
+  - Nominal Damper Size
+  - Damper / Frame Build-up
+  - Finished Opening
+  - Structural Hole to Cut
+  - Critical Installation Requirements
+  - Official Manufacturer Resources
+  - Copy Results
+  - Start New Calculation
+- Added a clear independent-use notice stating that VentTools presents manufacturer-published tested methods and does not replace the current official manual.
+- Removed wording that could imply a manufacturer owns or endorses the VentTools selector.
+- No calculation logic was changed.
+- Updated the service-worker cache for clean deployment.
