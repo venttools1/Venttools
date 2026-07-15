@@ -1,4 +1,14 @@
-const $=id=>document.getElementById(id);function showPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));$(id).classList.add('active');if(id==='offset')calculateOffset();if(id==='ductulator')calculateDuct();if(id==='fireDamper')calcFD()}function rad(d){return d*Math.PI/180}function deg(r){return r*180/Math.PI}function fmt(x){return Number.isFinite(x)?(Math.round(x*10)/10).toFixed(1):'—'}function fmt0(x){return Number.isFinite(x)?String(Math.round(x)):'—'}function getAngle(){return $('angle').value==='custom'?(parseFloat($('angleCustom').value)||45):(parseFloat($('angle').value)||45)}function setMsg(type,txt){let m=$('msg');m.className='msg '+type;m.textContent=txt}
+const $=id=>document.getElementById(id);function showPage(id){
+ const page=$(id)||$("home");
+ document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
+ page.classList.add("active");
+ if(id==="offset")calculateOffset();
+ if(id==="ductulator")calculateDuct();
+ if(id==="fireDamper")calcFD();
+ if(history.replaceState)history.replaceState(null,"",id==="home"?"#home":`#${id}`);
+ if(window.venttoolsConsent&&window.venttoolsConsent.analytics)sendVentToolsPageView();
+ window.scrollTo({top:0,behavior:"smooth"});
+}function rad(d){return d*Math.PI/180}function deg(r){return r*180/Math.PI}function fmt(x){return Number.isFinite(x)?(Math.round(x*10)/10).toFixed(1):'—'}function fmt0(x){return Number.isFinite(x)?String(Math.round(x)):'—'}function getAngle(){return $('angle').value==='custom'?(parseFloat($('angleCustom').value)||45):(parseFloat($('angle').value)||45)}function setMsg(type,txt){let m=$('msg');m.className='msg '+type;m.textContent=txt}
 function ductPath(x1,y1,x2,y2,w){let vx=x2-x1,vy=y2-y1,L=Math.hypot(vx,vy)||1,nx=-vy/L*w/2,ny=vx/L*w/2;return`M ${x1+nx} ${y1+ny} L ${x2+nx} ${y2+ny} L ${x2-nx} ${y2-ny} L ${x1-nx} ${y1-ny} Z`}function spiralLines(x1,y1,x2,y2,w,count){let vx=x2-x1,vy=y2-y1,L=Math.hypot(vx,vy)||1,ux=vx/L,uy=vy/L,nx=-uy,ny=ux,s='';for(let i=1;i<count;i++){let t=i/count*L,cx=x1+ux*t,cy=y1+uy*t,a=18;s+=`<line x1="${cx+nx*w*.42-ux*a}" y1="${cy+ny*w*.42-uy*a}" x2="${cx-nx*w*.42+ux*a}" y2="${cy-ny*w*.42+uy*a}" stroke="#9aa4b2" stroke-width="1.4"/>`}return s}
 function annularSectorPath(cx,cy,rO,rI,a1,a2){const p=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)],A=p(rO,a1),B=p(rO,a2),C=p(rI,a2),D=p(rI,a1),sw=a2>a1?1:0;return `M ${A[0]} ${A[1]} A ${rO} ${rO} 0 0 ${sw} ${B[0]} ${B[1]} L ${C[0]} ${C[1]} A ${rI} ${rI} 0 0 ${1-sw} ${D[0]} ${D[1]} Z`}
 
@@ -859,3 +869,93 @@ installModal?.addEventListener('click',(event)=>{if(event.target===installModal)
 if('serviceWorker' in navigator){
   window.addEventListener('load',()=>navigator.serviceWorker.register('/sw.js').catch(()=>{}));
 }
+
+
+const VT_GA_ID=window.VENTTOOLS_GA_ID||"G-KWBWNN0WCB";
+let vtAnalyticsLoaded=false;
+
+function loadVentToolsAnalytics(){
+  if(vtAnalyticsLoaded || !VT_GA_ID) return;
+  vtAnalyticsLoaded=true;
+  window.dataLayer=window.dataLayer||[];
+  window.gtag=window.gtag||function(){window.dataLayer.push(arguments);};
+  window.gtag("consent","default",{
+    analytics_storage:"granted",
+    ad_storage:"denied",
+    ad_user_data:"denied",
+    ad_personalization:"denied"
+  });
+  window.gtag("js",new Date());
+  window.gtag("config",VT_GA_ID,{
+    anonymize_ip:true,
+    send_page_view:false
+  });
+  const tag=document.createElement("script");
+  tag.async=true;
+  tag.src=`https://www.googletagmanager.com/gtag/js?id=${encodeURIComponent(VT_GA_ID)}`;
+  document.head.appendChild(tag);
+  sendVentToolsPageView();
+}
+
+function sendVentToolsPageView(){
+  if(!vtAnalyticsLoaded || typeof window.gtag!=="function") return;
+  const page=(location.hash||"#home").slice(1);
+  window.gtag("event","page_view",{
+    page_title:`VentTools — ${page}`,
+    page_location:location.href,
+    page_path:`/${page==="home"?"":`#${page}`}`
+  });
+}
+
+function disableVentToolsAnalytics(){
+  if(typeof window.gtag==="function"){
+    window.gtag("consent","update",{analytics_storage:"denied"});
+  }
+}
+
+const VT_CONSENT_KEY="venttools-consent-v1";
+function getCookieConsent(){
+  try{return JSON.parse(localStorage.getItem(VT_CONSENT_KEY)||"null")}catch(e){return null}
+}
+function applyCookieConsent(consent){
+  window.venttoolsConsent={essential:true,analytics:!!(consent&&consent.analytics)};
+  if(window.venttoolsConsent.analytics){
+    loadVentToolsAnalytics();
+    if(typeof window.gtag==="function"){
+      window.gtag("consent","update",{analytics_storage:"granted"});
+    }
+  }else{
+    disableVentToolsAnalytics();
+  }
+  document.dispatchEvent(new CustomEvent("venttools:consent",{detail:window.venttoolsConsent}));
+}
+function saveCookieConsent(analytics){
+  const consent={essential:true,analytics:!!analytics,updated:new Date().toISOString()};
+  localStorage.setItem(VT_CONSENT_KEY,JSON.stringify(consent));
+  applyCookieConsent(consent);
+  const banner=$("cookieBanner");if(banner)banner.hidden=true;
+  closeCookiePreferences();
+}
+function openCookiePreferences(){
+  const consent=getCookieConsent();
+  const toggle=$("analyticsConsentToggle");
+  if(toggle)toggle.checked=!!(consent&&consent.analytics);
+  const modal=$("cookieModal");if(modal)modal.hidden=false;
+}
+function closeCookiePreferences(){
+  const modal=$("cookieModal");if(modal)modal.hidden=true;
+}
+function saveCookiePreferences(){
+  const toggle=$("analyticsConsentToggle");
+  saveCookieConsent(!!(toggle&&toggle.checked));
+}
+function initialiseVentToolsSite(){
+  const consent=getCookieConsent();
+  applyCookieConsent(consent||{analytics:false});
+  const banner=$("cookieBanner");
+  if(banner)banner.hidden=!!consent;
+  const requested=(location.hash||"#home").slice(1);
+  const allowed=["home","offset","ductulator","ductwrap","fireDamper","contact","about","privacy","cookies","terms","disclaimer"];
+  showPage(allowed.includes(requested)?requested:"home");
+}
+window.addEventListener("DOMContentLoaded",initialiseVentToolsSite);
