@@ -383,3 +383,54 @@ Detailed WK25 installation routes, opening ranges, wall/seal requirements, pairi
 - Removed wording that could imply a manufacturer owns or endorses the VentTools selector.
 - No calculation logic was changed.
 - Updated the service-worker cache for clean deployment.
+
+
+## VentTools V6.1 — Advanced Air and usability update
+
+- Added Advanced Air as a manufacturer.
+- Added safe, source-table-based support for:
+  - 0160 AFS wall methods
+  - 0160 Trimoterm
+  - 2530 AFS
+  - 2530 HEVAC
+  - 0400MAN
+  - 0400FME
+  - 0500MAN
+- Kept 26SCD as official-table-required until its exact dimensional table is implemented.
+- Added a prominent Square to Round shortcut in the homepage hero.
+- Hid detailed calculation stages behind “Show Calculation Details”.
+- Made the structural-hole heading dynamic:
+  - “Structural Hole to Cut (including aperture lining)” when VentTools adds lining
+  - “Opening Required by Selected Method” when the manufacturer table already defines the formed opening
+- BSB lining calculations now name the selected aperture-lining thickness.
+- Removed duplicate warning/disclaimer blocks and kept one clear independent-use notice.
+- Updated the service-worker cache.
+
+
+## VentTools V6.1.1 — Advanced Air official manual links
+
+- Added a reusable Advanced Air document library.
+- Linked 0160 directly to its official IOM.
+- Linked 2530 directly to its official IOM.
+- Linked 0400MAN, 0400FME and 0500MAN to the shared official 0400/0500 IOM.
+- Linked 26SCD directly to its official IOM.
+- Manual-button text now identifies the exact document being opened.
+- Source-document text now matches the linked official document.
+- Updated the service-worker cache.
+
+
+## VentTools V6.1.2 — Manufacturer dropdown fix
+
+- Added Advanced Air to the visible manufacturer dropdown.
+- Retained Swegon — Actionair products, Lindab and BSB.
+- No calculator logic changed.
+- Updated the service-worker cache so the corrected dropdown is fetched.
+
+
+## VentTools V6.1.3 — explicit opening ranges
+- Added a dedicated Permitted Opening Range panel.
+- Shows minimum and maximum width and height separately.
+- Enabled for Advanced Air 0160 AFS, 2530 AFS and 2530 HEVAC.
+- The main result remains the minimum published opening.
+- Fixed-opening and tolerance-only methods remain unchanged.
+- Updated the service-worker cache.
