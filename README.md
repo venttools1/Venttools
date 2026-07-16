@@ -498,3 +498,13 @@ Important:
 - Added every public information page to sitemap.xml.
 - Updated the service-worker cache and visible release label to V6.3.0.
 - Updated policy dates to 16 July 2026.
+
+
+## VentTools V6.3.1 — Homepage and cache refresh
+
+- Updated the homepage Latest updates panel to reflect the current release.
+- Added Lindab and Advanced Air to the visible Supported manufacturers panel.
+- Replaced the outdated More manufacturers planned card with a neutral under-review message.
+- Updated visible version labels to V6.3.1.
+- Changed the service-worker cache key so existing visitors receive the refreshed homepage and assets.
+- Retained the existing install-app button and PWA behaviour.
