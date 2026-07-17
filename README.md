@@ -500,11 +500,30 @@ Important:
 - Updated policy dates to 16 July 2026.
 
 
-## VentTools V6.3.1 — Homepage and cache refresh
+## VentTools V6.3.2 — Homepage and cache refresh
 
 - Updated the homepage Latest updates panel to reflect the current release.
 - Added Lindab and Advanced Air to the visible Supported manufacturers panel.
 - Replaced the outdated More manufacturers planned card with a neutral under-review message.
-- Updated visible version labels to V6.3.1.
+- Updated visible version labels to V6.3.2.
 - Changed the service-worker cache key so existing visitors receive the refreshed homepage and assets.
 - Retained the existing install-app button and PWA behaviour.
+
+
+## VentTools V6.3.2 — BSB drywall lining clarification
+
+- Clarified that the two 12.5 mm D&F boards on each wall face form the tested drywall construction.
+- Clarified that the aperture itself is lined with one board thickness at each internal edge.
+- Structural cut remains finished aperture plus two lining-board thicknesses overall in width and height.
+- Updated result wording and input guidance to prevent users adding the wall-face layers twice.
+- Bumped the service-worker cache so existing users receive the corrected wording.
+
+
+## VentTools V6.4.0 — Manual-first fire-damper workflow
+
+- Added a prominent official manufacturer manual link immediately after product and method selection.
+- Added a permanent warning that manufacturer instructions and the project fire strategy take precedence.
+- Added optional site setting-out levels for structural opening and nominal duct.
+- Added centred or custom vertical positioning, with explicit warnings that positioning must be checked against the official drawing.
+- Moved calculation source, verification and detailed installation requirements into a collapsible section to reduce page clutter.
+- Updated the service-worker cache and visible version labels.

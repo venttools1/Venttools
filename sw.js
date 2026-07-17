@@ -1,4 +1,4 @@
-const CACHE='venttools-v6-3-1-homepage-refresh';
+const CACHE='venttools-v6-4-0-manual-setting-out';
 const ASSETS=['/index.html','/style.css','/script.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/about.html','/contact.html','/privacy.html','/cookies.html','/terms.html','/disclaimer.html'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
