@@ -538,7 +538,7 @@ Important:
 - With the default 12.5 mm lining, M5 now instructs the fitter to start the structural opening 60.5 mm below the bottom of the nominal duct.
 - Other methods remain locked to “Manual check required” until their casing projection and directional clearances are verified.
 - The expanded explanation shows the full dimension breakdown without cluttering the main site instruction.
-# VentTools V6.5 RC8
+# VentTools V6.5 RC9
 
 This build consolidates the four original manufacturers into one codebase:
 
@@ -574,21 +574,21 @@ This is a regression-test beta, not an instruction to depart from the current ma
 The result page now places “Damper & Opening Details” and “Installation Requirements” immediately below the certified method, before Site Setting Out.
 
 
-## V6.5 RC8 — main-site refresh release
+## V6.5 RC9 — main-site refresh release
 
 - Removed the repeated post-result “Select Certified Installation Method” information panel.
 - Moved the verified manufacturer-method message directly beneath the site setting-out results.
 - Reworded the verified message to confirm that published casing build-up and installation/expansion gaps are included where applicable.
-- Updated all public version labels from V7 beta to V6.5 RC8.
+- Updated all public version labels from V7 beta to V6.5 RC9.
 - Bumped the service-worker cache and retained skipWaiting/client claim so returning visitors receive the new files after refresh.
 
 
-## V6.5 RC8
+## V6.5 RC9
 - Updated all visible version labels.
 - Added verified nominal-duct-edge setting-out support for BSB FD-C M9 and FSD-C M9.
 - Structural opening offset now includes the published 10 mm gap plus the selected aperture-lining board.
 - Bumped browser asset and service-worker cache versions.
 
 
-## V6.5 RC8 BSB engineering database
+## V6.5 RC9 BSB engineering database
 Structured source: `data/bsb-engineering-database.json`. The live calculator retains an embedded runtime copy for offline reliability.
