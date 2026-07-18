@@ -538,7 +538,7 @@ Important:
 - With the default 12.5 mm lining, M5 now instructs the fitter to start the structural opening 60.5 mm below the bottom of the nominal duct.
 - Other methods remain locked to “Manual check required” until their casing projection and directional clearances are verified.
 - The expanded explanation shows the full dimension breakdown without cluttering the main site instruction.
-# VentTools V7.0 Engineering Database Beta
+# VentTools V7.0 Engineering Database Beta 2
 
 This build consolidates the four original manufacturers into one codebase:
 
