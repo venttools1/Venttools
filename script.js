@@ -817,6 +817,7 @@ function renderFDInstallationRequirements(rules){
   Object.entries(map).forEach(([key,id])=>{
     const el=$(id); if(!el)return;
     const content=el.querySelector(".fd-requirement-content");
+    if(!content)return;
     const items=groups[key];
     if(key==="duct" && !items.length){
       el.hidden=false;
