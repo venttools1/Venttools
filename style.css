@@ -914,3 +914,13 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .fd-setting-level-card strong{font-size:1.15rem;color:#142033;margin-top:4px}
 .fd-setting-badge.verified{background:#dff5e8;color:#08623c}
 .fd-setting-badge.warning{background:#fff1cf;color:#805400}
+
+/* V6.5 RC3 grouped manufacturer installation requirements */
+.fd-requirements-grid{display:grid;gap:12px;margin:14px 0 16px}
+.fd-requirement-group{border:1px solid #d9e2ea;border-radius:13px;background:#fbfdff;overflow:hidden}
+.fd-requirement-group h4{display:flex;align-items:center;gap:8px;margin:0;padding:12px 14px;background:#f1f6fa;color:#142033;font-size:.95rem}
+.fd-requirement-content{padding:12px 14px}
+.fd-requirement-content .fd-checklist{margin:0}
+.fd-duct-connection{border-color:#b8d8c4;background:#fbfffc}
+.fd-duct-connection h4{background:#eaf7ee;color:#14532d}
+.fd-no-specific-data{margin:0;color:#5c6875;font-size:.88rem;line-height:1.45}

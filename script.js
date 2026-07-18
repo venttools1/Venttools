@@ -320,7 +320,7 @@ const FD_MANUFACTURERS={
     "FSD-TD":{label:"FSD-TD — Rectangular fire/smoke damper",shape:"rect",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",guide:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904",methods:{
       M5:{label:"M5 — Drywall, non-cleated frameless",type:"bsb-rect-dry",finishedW:121,finishedH:96,reference:"FSD-TD M5",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Two-layer plasterboard pattress each side; void filling is not required",classification:"See BSB method M5",note:"Finished aperture allows 10 mm top/bottom, 10 mm non-actuator side and 35 mm actuator side.",settingOut:{basis:"casing-edge",casingProjectionBottom:38,casingProjectionTop:38,bottomClearance:10,topClearance:10,source:"BSB FSD-TD M5 sections 8.1.2 and 8.2.9: finished aperture is nominal height +96 mm, with 10 mm clearance above and below the damper case; the damper is positioned centrally. This gives a 38 mm casing projection beyond the nominal duct at both top and bottom."}},
       M6:{label:"M6 — Drywall, pattress and cleat",type:"bsb-rect-dry",finishedW:156,finishedH:96,reference:"FSD-TD M6",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening with tested pattress and cleat arrangement",classification:"See BSB method M6",note:"Use every fixing position and ensure screws pick up the aperture track."},
-      M9:{label:"M9 — Drywall, AF Easy Fix angle frame",type:"bsb-rect-dry",finishedW:122,finishedH:99,casingAddW:102,casingAddH:79,clearanceLeft:10,clearanceRight:10,clearanceBottom:10,clearanceTop:10,reference:"FSD-TD M9",settingOut:{basis:"casing-edge",casingProjectionBottom:39.5,casingProjectionTop:39.5,bottomClearance:10,topClearance:10,source:"BSB FSD-TD M9: overall casing is derived from the published nominal-size build-up and the finished aperture provides 10 mm clearance above and below the casing."},wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening; Easy Fix angle frame fixed through the tested pilot holes",classification:"See BSB method M9",note:"Use the inner row of pilot holes for drywall."},
+      M9:{label:"M9 — Drywall, AF Easy Fix angle frame",type:"bsb-rect-dry",finishedW:122,finishedH:99,casingAddW:102,casingAddH:79,clearanceLeft:10,clearanceRight:10,clearanceBottom:10,clearanceTop:10,reference:"FSD-TD M9",settingOut:{basis:"casing-edge",casingProjectionBottom:39.5,casingProjectionTop:39.5,bottomClearance:10,topClearance:10,source:"BSB FSD-TD M9: overall casing is derived from the published nominal-size build-up and the finished aperture provides 10 mm clearance above and below the casing."},wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening; Easy Fix angle frame fixed through the tested pilot holes",classification:"See BSB method M9",note:"Finished aperture includes the manufacturer-specified installation/expansion gaps around the casing. Use the inner row of pilot holes for drywall."},
       M10:{label:"M10 — Masonry wall, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,reference:"FSD-TD M10",wall:"Masonry wall matching the BSB tested construction",seal:"Easy Fix angle frame; void behind the frame does not require filling where stated",classification:"See BSB method M10",note:"Use the outer pilot holes and keep fixing anchors at least 20 mm from aperture edges."},
       M11:{label:"M11 — Masonry floor, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,reference:"FSD-TD M11",wall:"Masonry floor, minimum 150 mm, density 580 kg/m³",seal:"Easy Fix angle frame; no need to fill the opening void",classification:"E 120 (ho i←o) S",note:"Finished aperture: nominal width +122 mm and nominal height +99 mm."}
     }},
@@ -790,13 +790,44 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
      $("fdRangeNote").textContent=r.rangeNote||"The minimum published opening is used as the main result.";
    }
  }
- $("fdCriticalRules").innerHTML=`<ul class="fd-checklist">${criticalRules.map(x=>`<li><span aria-hidden="true">✓</span><span>${x}</span></li>`).join("")}</ul>`;
+ renderFDInstallationRequirements(criticalRules);
  $("fdManualLink").href=p.manual;
  updateFDManualButtonLabel();
  updateFDSettingOut(r);
  drawFD(r);const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
 else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);
-else fdMsg("ok",`✅ Independent VentTools result based on ${man.label} published installation guidance.${hasStructuredRange?" Permitted minimum and maximum openings are shown below.":range} Verify the current official manual before construction.`);return r}
+else fdMsg("ok",`✅ Verified from the selected ${man.label} tested installation method.${hasStructuredRange?" Permitted minimum and maximum openings are shown below.":range} The stated opening includes the manufacturer-specified casing build-up and installation/expansion gaps where published. Verify the current official manual before construction.`);return r}
+
+function renderFDInstallationRequirements(rules){
+  const groups={construction:[],duct:[],supports:[],access:[],position:[],critical:[]};
+  const clean=(rules||[]).filter(Boolean);
+  clean.forEach(rule=>{
+    const t=String(rule).toLowerCase();
+    if(/ductwork|duct connection|expansion gap|expansion clearance|spigot|overlap|rivet|breakaway|duct seal|connected duct/.test(t)){groups.duct.push(rule);return;}
+    if(/hanger|drop-rod|drop rod|independently supported|independent support|support within|afs rails|support rail/.test(t)){groups.supports.push(rule);return;}
+    if(/actuator|access|commissioning|servicing|cleaning|maintenance/.test(t)){groups.access.push(rule);return;}
+    if(/separation|distance from|adjacent construction|adjacent wall|adjacent floor|adjacent ceiling|centred|centered|position|orientation/.test(t)){groups.position.push(rule);return;}
+    if(/supporting construction|wall|floor|opening treatment|penetration seal|sealing\/fixing|sealing arrangement|fire batt|mortar|plaster|board lining|lined opening/.test(t)){groups.construction.push(rule);return;}
+    groups.critical.push(rule);
+  });
+  const map={
+    construction:"fdReqConstruction",duct:"fdReqDuct",supports:"fdReqSupports",
+    access:"fdReqAccess",position:"fdReqPosition",critical:"fdReqCritical"
+  };
+  Object.entries(map).forEach(([key,id])=>{
+    const el=$(id); if(!el)return;
+    const content=el.querySelector(".fd-requirement-content");
+    const items=groups[key];
+    if(key==="duct" && !items.length){
+      el.hidden=false;
+      content.innerHTML='<p class="fd-no-specific-data">No manufacturer-specific duct connection detail is recorded for this selected method. Check the current official installation manual before connecting the ductwork.</p>';
+      return;
+    }
+    el.hidden=!items.length;
+    if(items.length)content.innerHTML=`<ul class="fd-checklist">${items.map(x=>`<li><span aria-hidden="true">✓</span><span>${x}</span></li>`).join("")}</ul>`;
+  });
+}
+
 function updateFDSettingOut(r){
   const ids=["fdSetOpeningBottom","fdSetOpeningTop","fdSetDuctBottom","fdSetDuctTop","fdSetBottomOffset"];
   const clear=()=>ids.forEach(id=>{if($(id))$(id).textContent="—"});

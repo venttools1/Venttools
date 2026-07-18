@@ -1,4 +1,4 @@
-const CACHE='venttools-v7-0-engineering-database-beta-3';
+const CACHE='venttools-v6-5-rc3-main-20260718';
 const ASSETS=['/index.html','/style.css','/script.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/about.html','/contact.html','/privacy.html','/cookies.html','/terms.html','/disclaimer.html','/engineering.html','/data/manufacturer-registry.json','/data/audit-log.json'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
