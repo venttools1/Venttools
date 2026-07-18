@@ -318,20 +318,20 @@ const ADVANCED_AIR_DOCUMENTS={
 const FD_MANUFACTURERS={
   BSB:{label:"BSB",products:{
     "FSD-TD":{label:"FSD-TD — Rectangular fire/smoke damper",shape:"rect",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",guide:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904",methods:{
-      M5:{label:"M5 — Drywall, non-cleated frameless",type:"bsb-rect-dry",finishedW:121,finishedH:96,reference:"FSD-TD M5",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Two-layer plasterboard pattress each side; void filling is not required",classification:"See BSB method M5",note:"Finished aperture allows 10 mm top/bottom, 10 mm non-actuator side and 35 mm actuator side."},
+      M5:{label:"M5 — Drywall, non-cleated frameless",type:"bsb-rect-dry",finishedW:121,finishedH:96,reference:"FSD-TD M5",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Two-layer plasterboard pattress each side; void filling is not required",classification:"See BSB method M5",note:"Finished aperture allows 10 mm top/bottom, 10 mm non-actuator side and 35 mm actuator side.",settingOut:{basis:"casing-edge",casingProjectionBottom:38,casingProjectionTop:38,bottomClearance:10,topClearance:10,source:"BSB FSD-TD M5 sections 8.1.2 and 8.2.9: finished aperture is nominal height +96 mm, with 10 mm clearance above and below the damper case; the damper is positioned centrally. This gives a 38 mm casing projection beyond the nominal duct at both top and bottom."}},
       M6:{label:"M6 — Drywall, pattress and cleat",type:"bsb-rect-dry",finishedW:156,finishedH:96,reference:"FSD-TD M6",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening with tested pattress and cleat arrangement",classification:"See BSB method M6",note:"Use every fixing position and ensure screws pick up the aperture track."},
       M9:{label:"M9 — Drywall, AF Easy Fix angle frame",type:"bsb-rect-dry",finishedW:122,finishedH:99,reference:"FSD-TD M9",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening; Easy Fix angle frame fixed through the tested pilot holes",classification:"See BSB method M9",note:"Use the inner row of pilot holes for drywall."},
       M10:{label:"M10 — Masonry wall, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,reference:"FSD-TD M10",wall:"Masonry wall matching the BSB tested construction",seal:"Easy Fix angle frame; void behind the frame does not require filling where stated",classification:"See BSB method M10",note:"Use the outer pilot holes and keep fixing anchors at least 20 mm from aperture edges."},
       M11:{label:"M11 — Masonry floor, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,reference:"FSD-TD M11",wall:"Masonry floor, minimum 150 mm, density 580 kg/m³",seal:"Easy Fix angle frame; no need to fill the opening void",classification:"E 120 (ho i←o) S",note:"Finished aperture: nominal width +122 mm and nominal height +99 mm."}
     }},
     "FD-C":{label:"FD-C — Circular fire damper",shape:"circle",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_c_series_iom.pdf",guide:"BSB FD-C Installation, Operation and Maintenance Instructions",revision:"V62904",minSize:100,maxSize:315,methods:{
-      M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; opening lined with fire-rated wall board",note:"Finished aperture is square and nominal diameter +20 mm."},
+      M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; opening lined with fire-rated wall board",note:"Finished aperture is square and nominal diameter +20 mm.",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FD-C M9: 10 mm nominal gap all round"}},
       M10:{label:"M10 — Masonry wall",type:"bsb-circle-solid",add:20,reference:"FD-C M10",wall:"Masonry wall matching the tested detail",seal:"Follow the tested BSB masonry sealing and plate fixing arrangement",note:"Opening is nominal diameter +20 mm."},
       M11:{label:"M11 — Masonry floor",type:"bsb-circle-solid",add:20,reference:"FD-C M11",wall:"Concrete/masonry floor matching the tested detail",seal:"Follow the tested BSB floor sealing and plate fixing arrangement",note:"Opening is nominal diameter +20 mm."},
       M14:{label:"M14 — Flexible fire curtain",type:"bsb-circle-trim",add:10,reference:"FD-C M14",wall:"Tested flexible fire-curtain construction",seal:"Trim opening to the BSB tested fire-curtain detail",note:"Use nominal diameter with up to 10 mm trim tolerance."}
     }},
     "FSD-C":{label:"FSD-C — Circular fire/smoke damper",shape:"circle",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_c_iom_11zon.pdf",guide:"BSB FSD-C Installation, Operation and Maintenance Instructions",revision:"V62904",minSize:100,maxSize:315,methods:{
-      M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FSD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; line opening to the tested BSB detail",note:"Use every installation-plate fixing position."},
+      M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FSD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; line opening to the tested BSB detail",note:"Use every installation-plate fixing position.",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FSD-C M9: 10 mm nominal gap all round"}},
       M10:{label:"M10 — Masonry wall",type:"bsb-circle-solid",add:20,reference:"FSD-C M10",wall:"Masonry wall matching the tested detail",seal:"Tested plate and penetration-seal arrangement",note:"Opening is nominal diameter +20 mm."},
       M11:{label:"M11 — Masonry floor / Batt infill",type:"bsb-circle-solid",add:20,reference:"FSD-C M11",wall:"Masonry floor matching the tested detail",seal:"Ablative Batt infill where required by the selected drawing",note:"Use all fixing holes and the exact Batt arrangement."},
       M14:{label:"M14 — Flexible fire curtain",type:"bsb-circle-trim",add:10,reference:"FSD-C M14",wall:"Tested flexible fire-curtain construction",seal:"Trim and fix only as shown in the BSB drawing",note:"Use nominal diameter with up to 10 mm trim tolerance."}
@@ -790,49 +790,55 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
 else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);
 else fdMsg("ok",`✅ Independent VentTools result based on ${man.label} published installation guidance.${hasStructuredRange?" Permitted minimum and maximum openings are shown below.":range} Verify the current official manual before construction.`);return r}
 function updateFDSettingOut(r){
+  const ids=["fdSetOpeningBottom","fdSetOpeningTop","fdSetDuctBottom","fdSetDuctTop","fdSetBottomOffset"];
+  const clear=()=>ids.forEach(id=>{if($(id))$(id).textContent="—"});
+  const answer=$("fdSettingAnswer"),warning=$("fdSettingWarning"),status=$("fdSettingStatus");
   if(!r || r.error || r.isLinkOnly || r.invalidSize){
-    ["fdSetOpeningBottom","fdSetOpeningTop","fdSetDuctBottom","fdSetDuctCentre","fdSetDuctTop","fdSetBottomOffset"].forEach(id=>{if($(id))$(id).textContent="—"});
+    clear();
+    if(answer)answer.textContent="A setting-out answer is not available for this selection.";
+    if(status){status.textContent="Check manual";status.className="fd-setting-badge warning";}
     return;
   }
-  const openingH=Number(r.openH ?? r.openD ?? r.visualOpen);
+  const {m}=currentFD();
   const ductH=Number(r.nomH ?? r.dia);
-  if(!Number.isFinite(openingH)||!Number.isFinite(ductH)||openingH<=0||ductH<=0)return;
-  const alignment=$("fdVerticalAlignment")?.value||"centred";
-  const centredOffset=(openingH-ductH)/2;
-  const offset=alignment==="custom"?(parseFloat($("fdBottomClearance")?.value)||0):centredOffset;
-  if(alignment==="centred" && $("fdBottomClearance")) $("fdBottomClearance").value=fmt(centredOffset);
-  const known=parseFloat($("fdDatumLevel")?.value)||0;
-  const datum=$("fdDatumType")?.value||"duct-bottom";
-  let openingBottom;
-  if(datum==="duct-bottom") openingBottom=known-offset;
-  else if(datum==="duct-centre") openingBottom=known-(ductH/2)-offset;
-  else if(datum==="opening-centre") openingBottom=known-(openingH/2);
-  else openingBottom=known;
-  const ductBottom=openingBottom+offset;
-  const values={
-    fdSetOpeningBottom:openingBottom,
-    fdSetOpeningTop:openingBottom+openingH,
-    fdSetDuctBottom:ductBottom,
-    fdSetDuctCentre:ductBottom+ductH/2,
-    fdSetDuctTop:ductBottom+ductH,
-    fdSetBottomOffset:offset
-  };
-  Object.entries(values).forEach(([id,v])=>{if($(id))$(id).textContent=`${fmt(v)} mm AFFL`});
-  if($("fdSetBottomOffset"))$("fdSetBottomOffset").textContent=`${fmt(offset)} mm`;
-  const warning=$("fdSettingWarning");
-  if(warning) warning.textContent=alignment==="centred"
-    ?"Centred alignment is a setting-out assumption only. Confirm the actual damper/frame position from the selected official manufacturer drawing before marking the opening."
-    :"Custom clearance is user-entered and is not verified by VentTools. Confirm it against the selected official manufacturer drawing before marking the opening.";
+  const openingH=Number(r.openH ?? r.openD ?? r.visualOpen);
+  const board=r.includesLining?(parseFloat($("fdBoardThickness")?.value)||0):0;
+  const rule=m.settingOut;
+  if(!rule || rule.basis!=="casing-edge" || !Number.isFinite(rule.casingProjectionBottom) || !Number.isFinite(rule.bottomClearance)){
+    clear();
+    if($("fdSetDuctBottom"))$("fdSetDuctBottom").textContent=`${fmt(parseFloat($("fdDatumLevel")?.value)||0)} mm AFFL`;
+    if(answer)answer.innerHTML="<strong>Do not guess the hole start.</strong> This method has not yet been fully mapped from nominal duct edge → damper casing edge → manufacturer clearance → structural lining.";
+    if(warning)warning.textContent="No centred or user-entered assumption has been applied. VentTools will show a setting-out instruction only after every part of that dimension chain has been verified from the official method.";
+    if(status){status.textContent="Manual check required";status.className="fd-setting-badge warning";}
+    return;
+  }
+  const casingBottom=Number(rule.casingProjectionBottom);
+  const casingTop=Number(rule.casingProjectionTop);
+  const clearanceBottom=Number(rule.bottomClearance);
+  const clearanceTop=Number(rule.topClearance);
+  const bottomOffset=casingBottom+clearanceBottom+board;
+  const topOffset=(Number.isFinite(casingTop)&&Number.isFinite(clearanceTop))?(casingTop+clearanceTop+board):NaN;
+  const ductBottom=parseFloat($("fdDatumLevel")?.value)||0;
+  const openingBottom=ductBottom-bottomOffset;
+  const ductTop=Number.isFinite(ductH)?ductBottom+ductH:NaN;
+  const openingTop=Number.isFinite(ductTop)?ductTop+topOffset:(Number.isFinite(openingH)?openingBottom+openingH:NaN);
+  if($("fdSetOpeningBottom"))$("fdSetOpeningBottom").textContent=`${fmt(openingBottom)} mm AFFL`;
+  if($("fdSetOpeningTop"))$("fdSetOpeningTop").textContent=Number.isFinite(openingTop)?`${fmt(openingTop)} mm AFFL`:"—";
+  if($("fdSetDuctBottom"))$("fdSetDuctBottom").textContent=`${fmt(ductBottom)} mm AFFL`;
+  if($("fdSetDuctTop"))$("fdSetDuctTop").textContent=Number.isFinite(ductTop)?`${fmt(ductTop)} mm AFFL`:"—";
+  if($("fdSetBottomOffset"))$("fdSetBottomOffset").textContent=`${fmt(bottomOffset)} mm`;
+  if(answer)answer.innerHTML=`To set out this opening, mark the bottom of the structural opening <strong>${fmt(bottomOffset)} mm below the bottom of the nominal duct</strong>.`;
+  if(warning)warning.textContent=`Breakdown: ${fmt(casingBottom)} mm from nominal duct to casing edge + ${fmt(clearanceBottom)} mm manufacturer clearance below the casing${board?` + ${fmt(board)} mm aperture lining`:""} = ${fmt(bottomOffset)} mm. Source: ${rule.source} Confirm the selected method and official drawing before cutting.`;
+  if(status){status.textContent="Manufacturer specified";status.className="fd-setting-badge verified";}
 }
 
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nFinished opening: ${r.finishedStage||r.opening}\nStructural hole to cut: ${r.cutStage||r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
-function resetFD(){$("fdDatumType")&&( $("fdDatumType").value="duct-bottom");$("fdDatumLevel")&&( $("fdDatumLevel").value=2400);$("fdVerticalAlignment")&&( $("fdVerticalAlignment").value="centred");$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
+function resetFD(){$("fdDatumLevel")&&( $("fdDatumLevel").value=2400);$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
 if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",()=>{fillFDMethods();updateFDManualButtonLabel()});
 $("fdWk25Config")?.addEventListener("change",updateFDInputs);
 $("fdWk25Axis")?.addEventListener("change",calcFD);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
 $("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);
-["fdDatumType","fdDatumLevel","fdBottomClearance"].forEach(id=>$(id)?.addEventListener("input",()=>updateFDSettingOut(calcFD())));
-$("fdVerticalAlignment")?.addEventListener("change",()=>{const custom=$("fdVerticalAlignment").value==="custom";$("fdBottomClearanceWrap").hidden=!custom;updateFDSettingOut(calcFD())});$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
+["fdDatumLevel"].forEach(id=>$(id)?.addEventListener("input",()=>updateFDSettingOut(calcFD())));$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
 
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");

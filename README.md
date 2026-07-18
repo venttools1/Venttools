@@ -519,11 +519,52 @@ Important:
 - Bumped the service-worker cache so existing users receive the corrected wording.
 
 
-## VentTools V6.4.0 — Manual-first fire-damper workflow
+## VentTools V6.4.2 — Manual-led quick setting out
 
-- Added a prominent official manufacturer manual link immediately after product and method selection.
-- Added a permanent warning that manufacturer instructions and the project fire strategy take precedence.
-- Added optional site setting-out levels for structural opening and nominal duct.
-- Added centred or custom vertical positioning, with explicit warnings that positioning must be checked against the official drawing.
-- Moved calculation source, verification and detailed installation requirements into a collapsible section to reduce page clutter.
+- Replaced the centred/custom-position controls with a manufacturer-led setting-out answer.
+- Added the plain-site instruction: “mark the bottom of the structural opening X mm below the bottom of the nominal duct.”
+- The answer is displayed only where the selected official method records enough information to split the opening above and below the duct.
+- Where that position has not been verified, VentTools now says not to guess and directs the user to the official drawing.
+- Added direct AFFL calculation from the known bottom-of-duct level.
+- Aperture-lining thickness is automatically included below the finished opening where the selected method requires lining.
+- Retained the prominent official manual link, traceability details and collapsible technical information.
 - Updated the service-worker cache and visible version labels.
+
+
+## VentTools V6.4.2 — Casing-mapped setting out
+
+- Corrects the setting-out model so manufacturer clearance is measured from the damper casing, not automatically from the nominal duct.
+- Maps BSB FSD-TD M5 as a complete dimension chain: nominal duct edge → 38 mm casing projection → 10 mm finished-aperture clearance → aperture-lining thickness.
+- With the default 12.5 mm lining, M5 now instructs the fitter to start the structural opening 60.5 mm below the bottom of the nominal duct.
+- Other methods remain locked to “Manual check required” until their casing projection and directional clearances are verified.
+- The expanded explanation shows the full dimension breakdown without cluttering the main site instruction.
+# VentTools V7.0 Engineering Database Beta
+
+This build consolidates the four original manufacturers into one codebase:
+
+- BSB
+- Actionair
+- Lindab
+- Advanced Air
+
+## Main change
+
+VentTools now treats a result as a chain of verified geometry rather than one hole-size formula:
+
+1. nominal duct;
+2. actual casing or installation-frame geometry;
+3. tested finished aperture;
+4. structural opening, including lining only where required;
+5. practical setting-out offsets;
+6. support, penetration-seal, access and breakaway requirements.
+
+## Safety behaviour
+
+- No free-choice centring rule is presented as a manufacturer requirement.
+- Asymmetric methods retain separate top, bottom, actuator-side and non-actuator-side values.
+- Guidance-only methods do not return a fabricated opening.
+- Audit conflicts remain visible.
+
+## Release status
+
+This is a regression-test beta, not an instruction to depart from the current manufacturer IOM or project fire strategy.

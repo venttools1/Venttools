@@ -1,5 +1,5 @@
-const CACHE='venttools-v6-4-0-manual-setting-out';
-const ASSETS=['/index.html','/style.css','/script.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/about.html','/contact.html','/privacy.html','/cookies.html','/terms.html','/disclaimer.html'];
+const CACHE='venttools-v7-0-engineering-database-beta';
+const ASSETS=['/index.html','/style.css','/script.js','/manifest.webmanifest','/icon-192.png','/icon-512.png','/about.html','/contact.html','/privacy.html','/cookies.html','/terms.html','/disclaimer.html','/engineering.html','/data/manufacturer-registry.json','/data/audit-log.json'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));
