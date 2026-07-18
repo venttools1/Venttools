@@ -1,4 +1,4 @@
-const CACHE='venttools-v6-5-rc7-bsb-db';
+const CACHE='venttools-v6-5-rc8-bsb-db';
 const ASSETS=['/index.html','/style.css?v=6.5-rc5','/script.js?v=6.5-rc5','/manifest.webmanifest','/icon-192.png','/icon-512.png','/about.html','/contact.html','/privacy.html','/cookies.html','/terms.html','/disclaimer.html','/engineering.html','/data/manufacturer-registry.json','/data/audit-log.json'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
