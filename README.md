@@ -568,3 +568,7 @@ VentTools now treats a result as a chain of verified geometry rather than one ho
 ## Release status
 
 This is a regression-test beta, not an instruction to depart from the current manufacturer IOM or project fire strategy.
+
+
+## Beta 3 interface update
+The result page now places “Damper & Opening Details” and “Installation Requirements” immediately below the certified method, before Site Setting Out.

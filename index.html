@@ -358,6 +358,54 @@
       <div class="fd-method-value" id="fdMethodBig">—</div>
     </div>
 
+    <details class="fd-calculation-details fd-damper-details">
+      <summary>Damper &amp; Opening Details</summary>
+      <div class="fd-build-flow" aria-label="Damper and opening calculation breakdown">
+        <div class="fd-flow-card">
+          <span class="fd-flow-label">Nominal Damper Size</span>
+          <strong id="fdNominalStage">—</strong>
+        </div>
+        <span class="fd-flow-arrow" aria-hidden="true">→</span>
+        <div class="fd-flow-card">
+          <span class="fd-flow-label">Overall Damper Casing / Frame</span>
+          <strong id="fdCasingStage">—</strong>
+        </div>
+        <span class="fd-flow-arrow" aria-hidden="true">→</span>
+        <div class="fd-flow-card">
+          <span class="fd-flow-label">Finished Opening</span>
+          <strong id="fdFinishedStage">—</strong>
+        </div>
+        <span class="fd-flow-arrow" aria-hidden="true">→</span>
+        <div class="fd-flow-card fd-flow-final">
+          <span class="fd-flow-label">Structural Hole to Cut</span>
+          <strong id="fdCutStage">—</strong>
+        </div>
+      </div>
+      <div class="fd-traceability-grid compact">
+        <div class="fd-trace-card">
+          <span>Calculation summary</span>
+          <strong id="fdRuleSummary">—</strong>
+        </div>
+      </div>
+      <div class="fd-source-compact">
+        <strong>Manufacturer source:</strong> <span id="fdGuideSummary">—</span>
+      </div>
+      <div class="fd-trust-note">
+        Shows the nominal size, casing or frame build-up, tested opening allowance, lining and final structural cut.
+      </div>
+    </details>
+
+    <details class="fd-reference-details fd-installation-details">
+      <summary>Installation Requirements</summary>
+      <div class="fd-critical-rules">
+        <div class="fd-section-kicker">Critical Installation Requirements</div>
+        <div id="fdCriticalRules">Select a product and certified installation method.</div>
+      </div>
+      <div class="fd-independent-note">
+        VentTools is an independent aid. The current official manufacturer manual, tested installation detail and project fire strategy always take precedence.
+      </div>
+    </details>
+
     <section class="fd-setting-out" aria-labelledby="fdSettingOutTitle">
       <div class="fd-setting-out-head">
         <div>
@@ -388,61 +436,14 @@
       </div>
       <p class="fd-setting-warning" id="fdSettingWarning">VentTools does not centre the damper or accept a user-chosen clearance. The setting-out answer is shown only when it can be traced to the selected manufacturer method.</p>
     </section>
-
-    <details class="fd-calculation-details">
-      <summary>Show Calculation Details</summary>
-      <div class="fd-build-flow" aria-label="Installation calculation breakdown">
-        <div class="fd-flow-card">
-          <span class="fd-flow-label">Nominal Damper Size</span>
-          <strong id="fdNominalStage">—</strong>
-        </div>
-        <span class="fd-flow-arrow" aria-hidden="true">→</span>
-        <div class="fd-flow-card">
-          <span class="fd-flow-label">Damper / Frame Build-up</span>
-          <strong id="fdCasingStage">—</strong>
-        </div>
-        <span class="fd-flow-arrow" aria-hidden="true">→</span>
-        <div class="fd-flow-card">
-          <span class="fd-flow-label">Finished Opening</span>
-          <strong id="fdFinishedStage">—</strong>
-        </div>
-        <span class="fd-flow-arrow" aria-hidden="true">→</span>
-        <div class="fd-flow-card fd-flow-final">
-          <span class="fd-flow-label">Structural Hole to Cut</span>
-          <strong id="fdCutStage">—</strong>
-        </div>
-      </div>
-      <div class="fd-trust-note">
-        Every dimension is shown so the result can be checked against the selected manufacturer method.
-      </div>
-    </details>
   </div>
 
   <div id="fdMethodSelectorNote" class="fd-method-selector-note">
-  <strong>Select Certified Installation Method</strong>
-  <span>Choose the manufacturer's tested installation method that matches the supporting construction and sealing system.</span>
-</div>
-<div id="fdMessage" class="msg ok"></div>
+    <strong>Select Certified Installation Method</strong>
+    <span>Choose the manufacturer's tested installation method that matches the supporting construction and sealing system.</span>
+  </div>
+  <div id="fdMessage" class="msg ok"></div>
 
-  <details class="fd-reference-details">
-    <summary>Show source, verification and installation requirements</summary>
-    <div class="fd-traceability-grid compact">
-      <div class="fd-trace-card">
-        <span>Calculation summary</span>
-        <strong id="fdRuleSummary">—</strong>
-      </div>
-    </div>
-    <div class="fd-source-compact">
-      <strong>Source:</strong> <span id="fdGuideSummary">—</span>
-    </div>
-    <div class="fd-critical-rules">
-      <div class="fd-section-kicker">Critical Installation Requirements</div>
-      <div id="fdCriticalRules">Select a product and certified installation method.</div>
-    </div>
-    <div class="fd-independent-note">
-      VentTools is an independent aid. The current official manufacturer manual, tested installation detail and project fire strategy always take precedence.
-    </div>
-  </details>
   <span id="fdDamperSummary" class="sr-only">—</span>
   <span id="fdReferenceSummary" class="sr-only">—</span>
 <div class="fd-venttools-actions">
