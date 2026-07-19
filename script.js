@@ -923,17 +923,77 @@ function updateFDSettingOut(r){
   if(status){status.textContent="Verified setting-out";status.className="fd-setting-badge verified";}
 }
 
-function buildFDSiteSheet(){
+function getFDSiteSheetDetails(){
+  return new Promise(resolve=>{
+    document.getElementById("fdSiteSheetDetailsOverlay")?.remove();
+    const overlay=document.createElement("div");
+    overlay.id="fdSiteSheetDetailsOverlay";
+    overlay.setAttribute("role","presentation");
+    overlay.innerHTML=`
+      <div class="fd-sheet-dialog" role="dialog" aria-modal="true" aria-labelledby="fdSheetDialogTitle">
+        <div class="fd-sheet-dialog-head">
+          <div>
+            <span class="fd-sheet-dialog-kicker">VentTools site instruction</span>
+            <h2 id="fdSheetDialogTitle">Sheet details</h2>
+          </div>
+          <button type="button" class="fd-sheet-dialog-close" aria-label="Cancel and close">&times;</button>
+        </div>
+        <p class="fd-sheet-dialog-copy">Add the job details that should appear on the builder instruction sheet.</p>
+        <label class="fd-sheet-dialog-field">
+          <span>Drawing reference / damper tag</span>
+          <input id="fdSheetReference" type="text" inputmode="text" autocomplete="off" placeholder="For example FD-01" maxlength="80">
+        </label>
+        <label class="fd-sheet-dialog-field">
+          <span>Location</span>
+          <input id="fdSheetLocation" type="text" inputmode="text" autocomplete="off" placeholder="For example Level 1 corridor" maxlength="120">
+        </label>
+        <div class="fd-sheet-dialog-actions">
+          <button type="button" class="fd-sheet-dialog-cancel">Cancel</button>
+          <button type="button" class="fd-sheet-dialog-create">Create Sheet</button>
+        </div>
+      </div>`;
+    const style=document.createElement("style");
+    style.textContent=`
+      #fdSiteSheetDetailsOverlay{position:fixed;inset:0;z-index:99999;display:grid;place-items:end center;padding:16px;background:rgba(10,20,32,.62);backdrop-filter:blur(3px)}
+      .fd-sheet-dialog{width:min(100%,560px);max-height:calc(100dvh - 32px);overflow:auto;background:#fff;border-radius:22px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.3);color:#142234}
+      .fd-sheet-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.fd-sheet-dialog-head h2{margin:3px 0 0;font-size:24px;line-height:1.15}.fd-sheet-dialog-kicker{display:block;color:#075a93;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+      .fd-sheet-dialog-close{border:0;background:#eef3f6;border-radius:50%;width:40px;height:40px;font-size:28px;line-height:1;cursor:pointer;color:#263746}.fd-sheet-dialog-copy{margin:14px 0 18px;color:#5c6b7a;font-size:14px}
+      .fd-sheet-dialog-field{display:block;margin-top:14px}.fd-sheet-dialog-field span{display:block;margin-bottom:7px;font-size:13px;font-weight:800}.fd-sheet-dialog-field input{display:block;width:100%;min-height:52px;padding:12px 14px;border:1px solid #bfcbd5;border-radius:12px;background:#fff;color:#142234;font:inherit;font-size:16px;outline:none}.fd-sheet-dialog-field input:focus{border-color:#075a93;box-shadow:0 0 0 3px rgba(7,90,147,.14)}
+      .fd-sheet-dialog-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:10px;margin-top:22px}.fd-sheet-dialog-actions button{min-height:50px;border-radius:12px;font:inherit;font-weight:800;cursor:pointer}.fd-sheet-dialog-cancel{border:1px solid #bfcbd5;background:#fff;color:#263746}.fd-sheet-dialog-create{border:1px solid #075a93;background:#075a93;color:#fff}
+      @media(min-width:620px){#fdSiteSheetDetailsOverlay{place-items:center}.fd-sheet-dialog{padding:24px}}
+    `;
+    overlay.appendChild(style);
+    document.body.appendChild(overlay);
+    const refInput=overlay.querySelector("#fdSheetReference");
+    const locInput=overlay.querySelector("#fdSheetLocation");
+    const finish=value=>{overlay.remove();resolve(value)};
+    overlay.querySelector(".fd-sheet-dialog-close").addEventListener("click",()=>finish(null));
+    overlay.querySelector(".fd-sheet-dialog-cancel").addEventListener("click",()=>finish(null));
+    overlay.querySelector(".fd-sheet-dialog-create").addEventListener("click",()=>finish({
+      ref:refInput.value.trim()||"Not entered",
+      loc:locInput.value.trim()||"Not entered"
+    }));
+    overlay.addEventListener("click",e=>{if(e.target===overlay)finish(null)});
+    overlay.addEventListener("keydown",e=>{
+      if(e.key==="Escape")finish(null);
+      if(e.key==="Enter" && e.target.tagName==="INPUT") overlay.querySelector(".fd-sheet-dialog-create").click();
+    });
+    requestAnimationFrame(()=>refInput.focus());
+  });
+}
+
+async function buildFDSiteSheet(){
   const r=calcFD();
   if(!r || r.error || r.invalidSize){
     fdMsg("warn","Select a valid damper and method first.");
     return;
   }
 
+  const details=await getFDSiteSheetDetails();
+  if(!details)return;
+  const {ref,loc}=details;
   const {man,p,m}=currentFD();
   const esc=v=>String(v??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[c]));
-  const ref=prompt("Drawing reference / damper tag (for example FD-01):","")||"Not entered";
-  const loc=prompt("Location (for example Level 1 corridor):","")||"Not entered";
   const datum=parseFloat($("fdDatumLevel")?.value)||0;
   const openingBottom=$("fdSetOpeningBottom")?.textContent||"Manual setting-out check required";
   const openingTop=$("fdSetOpeningTop")?.textContent||"—";
