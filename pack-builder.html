@@ -21,7 +21,7 @@ function writePack(items){
   if(verified.length!==items.length)throw new Error('Pack verification failed');
   return verified;
 }
-function loadPack(){packItems=readPack().sort((a,b)=>new Date(a.createdAt||0)-new Date(b.createdAt||0));render()}
+function loadPack(){packItems=readPack().sort((a,b)=>new Date(a.createdAt||0)-new Date(b.createdAt||0));render();const last=sessionStorage.getItem('venttoolsLastSavedDamperId');if(last){showSavedConfirmation(last);sessionStorage.removeItem('venttoolsLastSavedDamperId')}}
 function openSheet(id){location.href='site-sheet.html?id='+encodeURIComponent(id)}
 function editItem(id){
   const item=packItems.find(x=>x.id===id);if(!item)return;

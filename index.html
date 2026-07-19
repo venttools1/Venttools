@@ -10,7 +10,7 @@
   <meta name="description" content="VentTools provides practical HVAC calculators for duct fitters, including offsets, duct sizing and manufacturer-specific fire damper builder’s openings.">
   <title>VentTools — Professional HVAC Installation Tools</title>
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,4 61,37 96,37 68,57 79,91 50,70 21,91 32,57 4,37 39,37' fill='none' stroke='%23064b82' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='21' fill='%23064b82'/%3E%3Ctext x='50' y='59' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3EK%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css?v=6.5-rc9">
+  <link rel="stylesheet" href="style.css?v=6.5-rc9-debug-save-1">
 
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -460,6 +460,19 @@
         <div><span>Nominal duct bottom</span><strong id="fdSetDuctBottom">—</strong></div>
         <div><span>Nominal duct top</span><strong id="fdSetDuctTop">—</strong></div>
       </div>
+      <section class="vt-explicit-save" id="vtExplicitSave">
+        <div class="vt-explicit-save-head">
+          <span class="vt-explicit-save-icon" aria-hidden="true">✓</span>
+          <div><strong>Save this damper to the Project Pack</strong><small>The damper will only appear in the schedule after this save is confirmed.</small></div>
+        </div>
+        <div class="vt-explicit-save-grid">
+          <label><span>Damper tag / drawing reference</span><input id="vtPackRef" type="text" placeholder="For example FD-01" maxlength="80"></label>
+          <label><span>Location</span><input id="vtPackLoc" type="text" placeholder="For example Level 1 corridor" maxlength="120"></label>
+        </div>
+        <button type="button" class="vt-explicit-save-button" id="vtExplicitSaveButton" onclick="window.vtSaveDamperToPackStandalone()">Save damper to schedule</button>
+        <div class="vt-explicit-save-status" id="vtExplicitSaveStatus" aria-live="polite">Not saved yet</div>
+        <a class="vt-explicit-back" id="vtExplicitBack" href="pack-builder.html" hidden>Back to Project Pack</a>
+      </section>
       <div id="fdMessage" class="msg ok"></div>
       <p class="fd-setting-warning" id="fdSettingWarning" hidden></p>
     </section>
@@ -469,7 +482,7 @@
   <span id="fdReferenceSummary" class="sr-only">—</span>
 <div class="fd-venttools-actions">
   <div class="fd-section-kicker">VentTools Actions</div>
-  <button class="action fd-copy-secondary" id="fdSiteSheetBtn"><span aria-hidden="true">📋</span> Save to Pack</button>
+  <button type="button" class="action fd-copy-secondary" id="fdSiteSheetBtn" onclick="document.getElementById('vtExplicitSave')?.scrollIntoView({behavior:'smooth',block:'center'})"><span aria-hidden="true">✓</span> Save this damper to schedule</button>
   <button class="action fd-copy-secondary" id="fdCopyBtn"><span aria-hidden="true">📋</span> Copy Results</button>
   <button class="action reset-button" id="fdResetBtn"><span aria-hidden="true">↻</span> Start New Calculation</button>
 </div>
@@ -725,6 +738,72 @@
   <a class="footer-link-btn" href="disclaimer.html">Disclaimer</a>
   <button type="button" class="footer-link-btn" onclick="openCookiePreferences()">Cookie preferences</button>
 </nav></div></div>
-<script src="script.js?v=6.5-rc9-sheet-form1"></script>
+<script src="script.js?v=6.5-rc9-debug-save-1"></script>
+
+<script>
+if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});}
+(function(){
+  const KEY='venttoolsProjectPackV1';
+  const text=id=>document.getElementById(id)?.textContent?.trim()||'';
+  const value=id=>document.getElementById(id)?.value?.trim()||'';
+  const selectedText=id=>{const el=document.getElementById(id);return el?.options?.[el.selectedIndex]?.text?.trim()||el?.value||''};
+  const status=(message,state)=>{const el=document.getElementById('vtExplicitSaveStatus');if(!el)return;el.textContent=message;el.dataset.state=state||''};
+  function validResult(){
+    const opening=text('fdOpeningBig');
+    const bottom=text('fdSetOpeningBottom');
+    return opening && opening!=='—' && !/manual|check|required/i.test(opening) && bottom && bottom!=='—';
+  }
+  window.vtSaveDamperToPackStandalone=function(){
+    const button=document.getElementById('vtExplicitSaveButton');
+    const back=document.getElementById('vtExplicitBack');
+    const ref=value('vtPackRef');
+    const loc=value('vtPackLoc');
+    if(!ref){status('Enter a damper tag or drawing reference first.','error');document.getElementById('vtPackRef')?.focus();return;}
+    if(!validResult()){status('Complete a valid fire-damper calculation before saving.','error');return;}
+    button.disabled=true; status('Saving and verifying…','saving');
+    try{
+      const raw=localStorage.getItem(KEY);
+      let items=[];
+      if(raw){const parsed=JSON.parse(raw);if(Array.isArray(parsed))items=parsed;}
+      const now=new Date().toISOString();
+      const entry={
+        id:'fd-'+Date.now()+'-'+Math.random().toString(36).slice(2,8),
+        createdAt:now,updatedAt:now,
+        ref:ref,loc:loc||'Not entered',
+        manufacturer:selectedText('fdManufacturer'),
+        product:selectedText('fdSeries'),
+        reference:selectedText('fdMethod'),
+        damper:text('fdDamperSummary')||[value('fdWidth'),value('fdHeight')].filter(Boolean).join(' × ')+' mm',
+        opening:text('fdOpeningBig'),
+        finishedOpening:text('fdFinishedStage')||text('fdOpeningBig'),
+        structuralOpening:text('fdCutStage')||text('fdOpeningBig'),
+        openingBottom:text('fdSetOpeningBottom'),
+        openingTop:text('fdSetOpeningTop'),
+        ductBottom:text('fdSetDuctBottom'),
+        ductTop:text('fdSetDuctTop'),
+        bottomOffset:text('fdSetBottomOffset'),
+        settingAnswer:text('fdSettingAnswer'),
+        settingWarning:text('fdSettingWarning'),
+        source:text('fdManualTitle')||text('fdReferenceSummary')
+      };
+      items.push(entry);
+      localStorage.setItem(KEY,JSON.stringify(items));
+      const verify=JSON.parse(localStorage.getItem(KEY)||'[]');
+      const saved=Array.isArray(verify)&&verify.some(x=>x&&x.id===entry.id);
+      if(!saved)throw new Error('The browser did not return the saved record.');
+      sessionStorage.setItem('venttoolsLastSavedDamperId',entry.id);
+      status('✓ '+entry.ref+' saved and verified in the Project Pack.','saved');
+      button.textContent='✓ Damper saved';
+      button.disabled=true;
+      back.href='pack-builder.html?added='+encodeURIComponent(entry.id);
+      back.hidden=false;
+    }catch(error){
+      console.error('Standalone pack save failed',error);
+      status('Save failed: '+(error?.message||'browser storage error')+'.','error');
+      button.disabled=false;
+    }
+  };
+})();
+</script>
 </body>
 </html>

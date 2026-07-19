@@ -1033,14 +1033,18 @@ function showPackSaveSuccess(entry){
 }
 
 async function buildFDSiteSheet(){
+  const saveStatus=document.getElementById("fdSavePrimaryStatus");
+  const setSaveStatus=(text,state="")=>{if(saveStatus){saveStatus.textContent=text;saveStatus.className="fd-save-primary-status"+(state?" "+state:"")}};
+  setSaveStatus("Preparing save…","is-saving");
   const r=calcFD();
   if(!r || r.error || r.invalidSize){
     fdMsg("warn","Select a valid damper and method first.");
+    setSaveStatus("Complete a valid calculation first","is-error");
     return;
   }
 
   const details=await getFDSiteSheetDetails();
-  if(!details)return;
+  if(!details){setSaveStatus("Not saved yet");return;}
   const {ref,loc}=details;
   const {man,p,m}=currentFD();
   const esc=v=>String(v??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[c]));
@@ -1118,9 +1122,11 @@ async function buildFDSiteSheet(){
     try{localStorage.setItem("venttoolsSiteSheetHtml:"+entry.id,html)}catch(reportStorageError){}
     try{await vtSaveSheetDocument(entry,html)}catch(databaseError){}
 
+    setSaveStatus(`✓ ${entry.ref} saved to Project Pack`,"is-saved");
     showPackSaveSuccess(entry);
   }catch(e){
     console.error("VentTools Save to Pack failed",e);
+    setSaveStatus("Save failed — please try again","is-error");
     fdMsg("warn","Save failed before verification. Please check that browser storage is enabled and try again.");
   }
 }
@@ -1130,7 +1136,7 @@ if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);
 $("fdWk25Config")?.addEventListener("change",updateFDInputs);
 $("fdWk25Axis")?.addEventListener("change",calcFD);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
 $("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);
-["fdDatumLevel"].forEach(id=>$(id)?.addEventListener("input",()=>updateFDSettingOut(calcFD())));$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdSiteSheetBtn")?.addEventListener("click",buildFDSiteSheet);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
+["fdDatumLevel"].forEach(id=>$(id)?.addEventListener("input",()=>updateFDSettingOut(calcFD())));$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);document.querySelectorAll("[data-save-pack]").forEach(btn=>btn.addEventListener("click",buildFDSiteSheet));$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
 
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");
