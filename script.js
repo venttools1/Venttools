@@ -1104,17 +1104,24 @@ async function buildFDSiteSheet(){
       structuralOpening:r.cutStage||r.opening,openingBottom,openingTop,ductBottom,ductTop,bottomOffset,
       settingAnswer,settingWarning,source:`${p.guide} — ${p.revision}`
     };
-    await vtSaveSheetDocument(entry,html);
-    // Maintain a lightweight compatibility copy where storage is available,
-    // but IndexedDB is now the verified source of truth for the Project Pack.
-    try{
-      const withoutDuplicate=existing.filter(x=>x.id!==entry.id);
-      withoutDuplicate.push(entry);
-      localStorage.setItem(key,JSON.stringify(withoutDuplicate));
-    }catch(storageError){}
+    // Save the lightweight schedule row FIRST. This is the source of truth for the dashboard.
+    const withoutDuplicate=Array.isArray(existing)?existing.filter(x=>x.id!==entry.id):[];
+    withoutDuplicate.push(entry);
+    localStorage.setItem(key,JSON.stringify(withoutDuplicate));
+
+    // Read it back before showing success. Navigation is never used as the save trigger.
+    const verifiedList=JSON.parse(localStorage.getItem(key)||"[]");
+    const verifiedEntry=Array.isArray(verifiedList)?verifiedList.find(x=>x.id===entry.id):null;
+    if(!verifiedEntry) throw new Error("Project Pack row did not verify");
+
+    // Save the full report separately. Failure here must never remove the dashboard row.
+    try{localStorage.setItem("venttoolsSiteSheetHtml:"+entry.id,html)}catch(reportStorageError){}
+    try{await vtSaveSheetDocument(entry,html)}catch(databaseError){}
+
     showPackSaveSuccess(entry);
   }catch(e){
-    fdMsg("warn","The damper could not be added to the project pack on this device.");
+    console.error("VentTools Save to Pack failed",e);
+    fdMsg("warn","Save failed before verification. Please check that browser storage is enabled and try again.");
   }
 }
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nFinished opening: ${r.finishedStage||r.opening}\nStructural hole to cut: ${r.cutStage||r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}

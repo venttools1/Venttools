@@ -1,4 +1,4 @@
-const CACHE='venttools-v6-5-rc9-explicit-save-v1';
+const CACHE='venttools-v6-5-rc9-reliable-save-1';
 const ASSETS=['/index.html','/style.css?v=6.5-rc9-nav-fix2','/script.js?v=6.5-rc9-nav-fix2','/manifest.webmanifest','/icon-192.png','/icon-512.png','/about.html','/contact.html','/privacy.html','/cookies.html','/terms.html','/disclaimer.html','/engineering.html','/site-sheet.html','/pack-builder.html','/data/manufacturer-registry.json','/data/audit-log.json','/data/bsb-engineering-database.json'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
