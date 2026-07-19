@@ -1054,10 +1054,17 @@ async function buildFDSiteSheet(){
       structuralOpening:r.cutStage||r.opening,openingBottom,openingTop,ductBottom,ductTop,bottomOffset,
       settingAnswer,settingWarning,source:`${p.guide} — ${p.revision}`,html
     };
+    // Keep a lightweight pending copy during navigation. The dashboard imports it
+    // before rendering, so mobile browsers cannot lose the newly created record.
+    sessionStorage.setItem("venttoolsPendingPackEntry",JSON.stringify(entry));
     existing.push(entry);
     localStorage.setItem(key,JSON.stringify(existing));
+    // Verify that the write really persisted before leaving the calculator.
+    const confirmed=JSON.parse(localStorage.getItem(key)||"[]").some(x=>x.id===entry.id);
+    if(!confirmed) throw new Error("Project pack save could not be verified");
+    sessionStorage.setItem("venttoolsLastAddedPackId",entry.id);
     sessionStorage.setItem("venttoolsSiteSheetReturn",window.location.href);
-    window.location.assign("pack-builder.html");
+    window.location.assign("pack-builder.html?added="+encodeURIComponent(entry.id));
   }catch(e){
     fdMsg("warn","The damper could not be added to the project pack on this device.");
   }

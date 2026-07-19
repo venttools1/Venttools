@@ -24,6 +24,14 @@
 
 </head>
 <body>
+<script>
+(function(){
+  const params=new URLSearchParams(location.search);
+  if(!params.has('calculator') && !params.has('stay')){
+    location.replace('pack-builder.html');
+  }
+})();
+</script>
 <div class="wrap">
 <section id="home" class="page active v5-home">
   <header class="v5-topbar">

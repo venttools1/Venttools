@@ -1,4 +1,4 @@
-const CACHE='venttools-v6-5-rc9-project-pack-live1';
+const CACHE='venttools-v6-5-rc9-pack-dashboard-fix-1';
 const ASSETS=['/index.html','/style.css?v=6.5-rc9','/script.js?v=6.5-rc9-pack-live1','/manifest.webmanifest','/icon-192.png','/icon-512.png','/about.html','/contact.html','/privacy.html','/cookies.html','/terms.html','/disclaimer.html','/engineering.html','/site-sheet.html','/pack-builder.html','/data/manufacturer-registry.json','/data/audit-log.json','/data/bsb-engineering-database.json'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
