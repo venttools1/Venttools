@@ -1,5 +1,5 @@
-const CACHE='venttools-v6-5-rc9-site-sheet-diagram';
-const ASSETS=['/index.html','/style.css?v=6.5-rc9','/script.js?v=6.5-rc9','/manifest.webmanifest','/icon-192.png','/icon-512.png','/about.html','/contact.html','/privacy.html','/cookies.html','/terms.html','/disclaimer.html','/engineering.html','/data/manufacturer-registry.json','/data/audit-log.json','/data/bsb-engineering-database.json'];
+const CACHE='venttools-v6-5-rc9-site-sheet-real-page-fix';
+const ASSETS=['/index.html','/style.css?v=6.5-rc9','/script.js?v=6.5-rc9','/manifest.webmanifest','/icon-192.png','/icon-512.png','/about.html','/contact.html','/privacy.html','/cookies.html','/terms.html','/disclaimer.html','/engineering.html','/site-sheet.html','/data/manufacturer-registry.json','/data/audit-log.json','/data/bsb-engineering-database.json'];
 self.addEventListener('install',event=>{
   self.skipWaiting();
   event.waitUntil(caches.open(CACHE).then(cache=>cache.addAll(ASSETS)));

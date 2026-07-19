@@ -924,17 +924,8 @@ function updateFDSettingOut(r){
 }
 
 function buildFDSiteSheet(){
-  const w=window.open("about:blank","_blank");
-  if(!w){fdMsg("warn","Allow pop-ups to open the site instruction sheet.");return;}
-  try{
-    w.document.open();
-    w.document.write('<!doctype html><html><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Preparing site sheet…</title></head><body style="font-family:Arial,sans-serif;padding:24px;color:#172033">Preparing site instruction sheet…</body></html>');
-    w.document.close();
-  }catch(e){}
-
   const r=calcFD();
   if(!r || r.error || r.invalidSize){
-    try{w.close();}catch(e){}
     fdMsg("warn","Select a valid damper and method first.");
     return;
   }
@@ -993,13 +984,11 @@ function buildFDSiteSheet(){
 </main><script>function shareSheet(){const data={title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}'};if(navigator.share){navigator.share(data).catch(()=>{});return}window.print()}</script></body></html>`;
 
   try{
-    const blob=new Blob([html],{type:"text/html;charset=utf-8"});
-    const reportUrl=URL.createObjectURL(blob);
-    w.location.replace(reportUrl);
-    w.focus();
-    setTimeout(()=>URL.revokeObjectURL(reportUrl),60000);
+    sessionStorage.setItem("venttoolsSiteSheetHtml",html);
+    sessionStorage.setItem("venttoolsSiteSheetReturn",window.location.href);
+    window.location.assign("site-sheet.html");
   }catch(e){
-    try{w.document.open();w.document.write(html);w.document.close();w.focus()}catch(err){try{w.close()}catch(closeErr){}fdMsg("warn","The site sheet could not be opened on this device.")}
+    fdMsg("warn","The site sheet could not be prepared on this device.");
   }
 }
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nFinished opening: ${r.finishedStage||r.opening}\nStructural hole to cut: ${r.cutStage||r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
