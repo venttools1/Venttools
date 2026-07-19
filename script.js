@@ -459,6 +459,75 @@ WK25_FLOOR_WEICH:{label:"Floor — Fire Batt / Weichschott",type:"wk25-fixed",re
   }}
 };
 function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
+
+
+// RC10 Lindab engineering enrichment.
+// Builder setting-out is enabled only where the selected Lindab installation
+// drawing defines a nominal-size opening allowance that is centred on the damper.
+(function applyLindabEngineeringMapping(){
+  const lindab=FD_MANUFACTURERS.LINDAB;
+  if(!lindab)return;
+  const centred=(method,source)=>{
+    method.settingOut={basis:"table-centred",source};
+    method.packReady=true;
+    method.verificationStatus="manufacturer-mapped";
+  };
+  const addCommon=(method,extra=[])=>{
+    method.engineeringNotes=[
+      "Position the damper centrally within the tested opening shown by the selected Lindab installation detail.",
+      "Connected ductwork must be independently supported so its weight is not carried by the damper or penetration seal.",
+      "Keep access available for inspection, actuator operation and removal of connected ductwork.",
+      ...extra
+    ];
+  };
+
+  const fnc=lindab.products.FNC1;
+  if(fnc){
+    centred(fnc.methods.FNC1_WET30,"FNC1 installation booklet rev 20-12, wall installation diagrams: nominal Ø +30 mm");
+    centred(fnc.methods.FNC1_DRY10,"FNC1 installation booklet rev 20-12, acrylic-seal wall diagrams: nominal Ø +10 mm");
+    centred(fnc.methods.FNC1_FLOOR,"FNC1 installation booklet rev 20-12, floor installation diagram");
+    Object.values(fnc.methods).forEach(m=>addCommon(m,["Allow approximately 200 mm clear working space at the control mechanism where practicable.","Inspection hatches are recommended on both sides of connected ductwork."]));
+  }
+
+  ["WH25","WH45"].forEach(productKey=>{
+    const product=lindab.products[productKey]; if(!product)return;
+    Object.values(product.methods).forEach(m=>{
+      centred(m,`${productKey} Lindab installation booklet, selected tested installation drawing`);
+      addCommon(m,["Observe the method-specific minimum distance to adjacent construction and other dampers shown in the booklet.","Allow approximately 200 mm clear working space at the control mechanism where practicable."]);
+    });
+  });
+
+  ["WK25","WK45"].forEach(productKey=>{
+    const product=lindab.products[productKey]; if(!product)return;
+    Object.values(product.methods).forEach(m=>{
+      if(m.type==="wk25-range"){
+        m.settingOut={basis:"table-centred",source:`${productKey} installation booklet, selected opening range; VentTools uses the documented recommended minimum allowance`};
+        m.packReady=true;
+      }else if(m.type==="wk25-fixed" || m.type==="lindab-rect-fixed"){
+        m.settingOut={basis:"table-centred",source:`${productKey} installation booklet, selected fixed opening detail`};
+        m.packReady=true;
+      }
+      addCommon(m,[m.spacingA!=null?`Recorded minimum separation field A: ${m.spacingA} mm for this method.`:"",m.spacingB!=null?`Recorded minimum edge-distance field B: ${m.spacingB} mm for this method.`:""] .filter(Boolean));
+    });
+  });
+
+  const wks=lindab.products.WKS25;
+  if(wks){
+    const map={
+      WKS25_RIGID:{source:"WKS25 booklet rev 25-03 pp.2,18: square hole b+50 / h+50",wall:"Vertical rigid wall, minimum 100 mm, 550 kg/m³",seal:"Plasterboard sheet on motor side / dry sealing with binders",spacing:0,edge:0},
+      WKS25_LIGHT:{source:"WKS25 booklet rev 25-03 pp.2,20: square hole b+75 / h+75",wall:"Vertical light wall Type A or F, minimum 100 mm",seal:"Plasterboard strip/sheet on motor side / dry sealing with binders",spacing:0,edge:0},
+      WKS25_GYPSUM:{source:"WKS25 booklet rev 25-03 pp.3,27-28: square hole b+50 / h+50",wall:"Solid gypsum-block wall, 70 or 100 mm, 995 kg/m³",seal:"Plasterboard sheet on motor side / dry sealing with binders",spacing:200,edge:75},
+      WKS25_SHAFT:{source:"WKS25 booklet rev 25-03 pp.4,30: square hole b+90 / h+90",wall:"Vertical shaft wall, minimum 90 mm",seal:"Plasterboard sheet on motor side / dry sealing with binders",spacing:200,edge:75}
+    };
+    Object.entries(wks.methods).forEach(([key,m])=>{
+      const d=map[key]; if(!d)return;
+      m.wall=d.wall;m.seal=d.seal;m.spacing=d.spacing;m.edge=d.edge;
+      centred(m,d.source);
+      addCommon(m,["Raise and use the factory fixing flaps as shown in the WKS25 booklet.","No more than two dampers may be paired; three or more are prohibited.","Two vertically paired dampers must not both have vertical blade axes.",`Minimum independent-damper separation recorded for this method: ${d.spacing} mm.`,`Minimum distance to adjacent wall/floor/ceiling recorded for this method: ${d.edge} mm.`]);
+    });
+  }
+})();
+
 function currentFD(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=p.methods[$("fdMethod").value];return{man,p,m,manKey:$("fdManufacturer").value,productKey:$("fdSeries").value,methodKey:$("fdMethod").value}}
 function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;s.appendChild(o)});fillFDMethods()}
 function fillFDMethods(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=$("fdMethod");m.innerHTML="";Object.entries(p.methods).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});updateFDInputs();updateFDManualButtonLabel()}
@@ -832,7 +901,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
      $("fdRangeNote").textContent=r.rangeNote||"The minimum published opening is used as the main result.";
    }
  }
- renderFDInstallationRequirements(criticalRules);
+ renderFDInstallationRequirements([...(criticalRules||[]),...((m&&m.engineeringNotes)||[])]);
  $("fdManualLink").href=p.manual;
  updateFDManualButtonLabel();
  updateFDSettingOut(r);
@@ -1085,7 +1154,7 @@ async function buildFDSiteSheet(){
 </style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V6.5 RC9 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V6.5 RC10-LINDAB · Independent site aid</span></div></header>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
 <section class="section"><div class="section-head"><h2>Setting-out levels</h2><span class="verified">Manufacturer-mapped method</span></div><div class="grid setting-grid"><div class="cell"><span class="label">Nominal duct bottom</span><strong>${esc(ductBottom)}</strong></div><div class="cell"><span class="label">Nominal duct top</span><strong>${esc(ductTop)}</strong></div><div class="cell"><span class="label">Structural opening bottom</span><strong>${esc(openingBottom)}</strong></div><div class="cell"><span class="label">Structural opening top</span><strong>${esc(openingTop)}</strong></div><div class="cell"><span class="label">Bottom cut-line offset</span><strong>${esc(bottomOffset)}</strong></div></div><div class="instruction"><strong>Site instruction:</strong> ${esc(settingAnswer)}</div><div class="breakdown"><strong>Verified dimension chain:</strong> ${esc(settingWarning)}</div></section>
@@ -1094,7 +1163,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Trade requirements</h2><span class="label">Read before installation</span></div><div class="requirements"><div class="req"><h3>Builder / dryliner</h3><ul>${list(builderItems)}</ul></div><div class="req"><h3>HVAC installer</h3><ul>${list(hvacItems)}</ul></div>${otherItems.length?`<div class="req" style="grid-column:1/-1;border-top:1px solid var(--line)"><h3>Additional critical requirements</h3><ul>${list(otherItems)}</ul></div>`:""}</div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V6.5 RC9</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V6.5 RC10-LINDAB</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
