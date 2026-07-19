@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.3-unified-verification-engine";
+const VT_ENGINEERING_DB_VERSION="1.0.8-pack-status-refresh";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -346,7 +346,7 @@ function applyFDVerificationTeaching(){
     Object.entries(manufacturer.products||{}).forEach(([productKey,product])=>{
       Object.entries(product.methods||{}).forEach(([methodKey,method])=>{
         const unsupported=/link|manual/i.test(String(method.type||""));
-        const mappedSetting=!!((method.settingOut && ["casing-edge","nominal-duct","table-centred"].includes(method.settingOut.basis)) || method.dynamicSettingOut===true);
+        const mappedSetting=!!((method.settingOut && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(method.settingOut.basis)) || method.dynamicSettingOut===true);
         method.engineeringVerification={
           manufacturerKey,productKey,methodKey,
           manufacturerVerified:true,
@@ -366,7 +366,7 @@ function getFDVerification(r){
   const {man,p,m,manKey,productKey,methodKey}=currentFD();
   const taught=m?.engineeringVerification||{};
   const activeSetting=r?.settingOut||m?.settingOut;
-  const settingMapped=!!(activeSetting && ["casing-edge","nominal-duct","table-centred"].includes(activeSetting.basis));
+  const settingMapped=!!(activeSetting && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(activeSetting.basis));
   const checks={
     manufacturer:{pass:taught.manufacturerVerified===true && !!man?.label,label:"Manufacturer identified and verified",reason:taught.manufacturerVerified?"Manufacturer exists in the verified registry.":"Manufacturer verification flag is missing."},
     product:{pass:taught.productVerified===true && !!p?.label,label:"Product record identified and verified",reason:taught.productVerified?"Product is mapped to the selected manufacturer.":"Product verification flag is missing."},
@@ -374,10 +374,10 @@ function getFDVerification(r){
     sourceDocument:{pass:taught.sourceDocumentVerified===true && !!p?.manual,label:"Official source document linked",reason:p?.manual||"No official URL recorded."},
     sourceRevision:{pass:taught.sourceRevisionVerified===true && !!p?.revision,label:"Source revision recorded",reason:p?.revision||"No revision recorded."},
     openingCalculation:{pass:taught.openingRuleVerified===true && !!r && !r.error && !r.invalidSize && !r.isLinkOnly && r.statusType!=="manual",label:"Opening calculation verified",reason:r?.sourceStatus||"No calculated result."},
-    finishedOpening:{pass:!!r?.finishedStage && !r?.invalidSize && !r?.isLinkOnly,label:"Finished opening verified",reason:r?.finishedStage||"The formed/finished aperture is not separately recorded."},
+    finishedOpening:{pass:(r?.noBuilderOpening===true || r?.noSeparateFinishedOpening===true || !!r?.finishedStage) && !r?.invalidSize && !r?.isLinkOnly,label:"Finished opening verified",reason:r?.noSeparateFinishedOpening===true?"Manufacturer publishes one structural D-hole and a sealing/infill detail inside it; no separate finished clear-opening dimension is specified.":(r?.finishedStage||"The formed/finished aperture is not separately recorded.")},
     apertureLining:{pass:!r?.includesLining || (r?.liningMapped===true && Number(r?.structuralLiningBottom)>0 && !!r?.cutStage && !!r?.finishedStage),label:"Aperture lining build-up verified",reason:!r?.includesLining?"Selected method does not add a separate aperture lining.":(r?.liningMapped===true&&Number(r?.structuralLiningBottom)>0?`One ${r.structuralLiningBottom} mm fire-rated lining layer is accounted for at each internal edge; opposite edges add ${2*Number(r.structuralLiningBottom)} mm per dimension.`:"Lining is required but its thickness/build-up is not mapped.")},
-    structuralCut:{pass:!!r?.cutStage && (!r?.includesLining || (r?.liningMapped===true && Number(r?.cutW)>Number(r?.finishedW) && Number(r?.cutH)>Number(r?.finishedH))),label:"Structural cut verified separately",reason:r?.cutStage||"The structural builder cut is not separately recorded."},
-    builderSettingOut:{pass:taught.builderSettingOutVerified===true && settingMapped && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified",reason:activeSetting?.source||"Nominal duct → casing → clearance → lining chain is not fully mapped."}
+    structuralCut:{pass:(r?.noBuilderOpening===true || !!r?.cutStage) && (!r?.includesLining || (r?.liningMapped===true && Number(r?.cutW)>Number(r?.finishedW) && Number(r?.cutH)>Number(r?.finishedH))),label:"Structural cut verified separately",reason:r?.cutStage||"The structural builder cut is not separately recorded."},
+    builderSettingOut:{pass:(r?.noBuilderOpening===true || (taught.builderSettingOutVerified===true && settingMapped)) && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified",reason:activeSetting?.source||"Nominal duct → casing → clearance → lining chain is not fully mapped."}
   };
   const failed=Object.entries(checks).filter(([,v])=>!v.pass).map(([key,v])=>({key,label:v.label,reason:v.reason}));
   let status="verified";
@@ -453,7 +453,10 @@ const FD_MANUFACTURERS={
       HEVAC:{label:"HEVAC frame — rigid wall E120",type:"advanced-hevac-2530",reference:"2530 HEVAC • E120",wall:"Rigid wall, minimum 150 mm",seal:"HEVAC frame with turnback tabs and 4:1 mortar mix",classification:"E120 S",note:"The damper must remain able to move within the HEVAC frame. Do not fill mortar onto the damper spigots."}
     }},
     "26SCD":{label:"26SCD — Smoke control damper",shape:"rect",documentId:"IOM_26SCD",manual:ADVANCED_AIR_DOCUMENTS.IOM_26SCD.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_26SCD.title,guide:"Advanced Air 26SCD Installation, Operation and Maintenance Manual",revision:"Rev 1.0 • April 2026",methods:{
-      OFFICIAL:{label:"AFS wall / remote installation — official opening table required",type:"advanced-link",reference:"26SCD tested installation",note:"The 26SCD has wall and remote-from-wall methods. VentTools will not apply the 0160/2530 opening table without the exact selected 26SCD dimensional table."}
+      AFS_FLEX:{label:"AFS — two-hour flexible wall",type:"advanced-26scd-afs",reference:"26SCD IOM page 5 • E120 S500",wall:"Flexible supporting construction, minimum 122 mm; minimum 150 mm for multi-section dampers",seal:"Two layers of 50 mm, 140 kg/m³ fire batt with fire-batt sealant and intumescent mastic",classification:"E120 S500",dynamicSettingOut:true,note:"Published minimum and maximum openings are based on the damper being centralised in the opening."},
+      AFS_RIGID:{label:"AFS — two-hour rigid wall",type:"advanced-26scd-afs",reference:"26SCD IOM page 6 • E120 S500",wall:"Rigid blockwork, masonry or homogeneous concrete wall, minimum 122 mm; minimum 150 mm for multi-section dampers",seal:"Two layers of 50 mm, 140 kg/m³ fire batt with fire-batt sealant and intumescent mastic",classification:"E120 S500",dynamicSettingOut:true,note:"Published minimum and maximum openings are based on the damper being centralised in the opening."},
+      REMOTE_INLINE:{label:"Remote from wall — duct mounted in-line",type:"advanced-26scd-remote",reference:"26SCD IOM page 7 • E120 S500",wall:"Remote duct-mounted installation using fire-rated ductwork tested to BS EN 1366-8",seal:"Ductwork and insulation system to the tested duct supplier's installation",classification:"E120 S500",settingOut:{basis:"not-applicable",source:"26SCD IOM page 7: remote duct-mounted in-line method; no separate damper wall opening is formed."},note:"The damper is supported in-line in the fire-rated ductwork. No separate builder opening is calculated for the damper body."},
+      REMOTE_SIDE:{label:"Remote from wall — duct mounted side",type:"advanced-26scd-remote",reference:"26SCD IOM page 8 • E120 S500",wall:"Remote side-mounted installation using fire-rated ductwork tested to BS EN 1366-8",seal:"High-temperature ceramic sealant at damper-to-duct joint; tested duct insulation system",classification:"E120 S500",settingOut:{basis:"not-applicable",source:"26SCD IOM page 8: remote duct-mounted side method; no separate damper wall opening is formed."},note:"The damper is mounted to the side of the fire-rated ductwork and independently supported. No separate builder opening is calculated for the damper body."}
     }},
     "0400MAN":{label:"0400MAN — Circular fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
       FLEX_60:{label:"60 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400MAN flexible wall • E60",wall:"Flexible wall, minimum 106 mm, two layers of 12.5 mm Type F board each side",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square, tolerance ±4 mm."},
@@ -869,8 +872,9 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
  const config=$("fdWk25Config")?.value||"single",axis=$("fdWk25Axis")?.value||"horizontal",paired=config!=="single";
  if(paired&&!m.pairAllowed)r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Paired arrangement not certified",damper:`${fmt0(W)} × ${fmt0(H)} mm entered assembly`,rule:"Choose a method that permits paired dampers.",reference:m.reference,isLinkOnly:true,range:`Minimum separation to another damper: ${m.spacingA||m.spacingC} mm. Minimum distance to wall/floor: ${m.spacingB||m.spacingD} mm. ${m.note}`};
  else if(config==="pair-stack"&&axis==="vertical")r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Orientation not permitted",damper:`${fmt0(W)} × ${fmt0(H)} mm entered assembly`,rule:"Two vertically stacked WK25 dampers must not both have vertical blade axes.",reference:"WK25 booklet page 2",isLinkOnly:true,range:"Select horizontal or mixed blade-axis arrangement."};
- else{const aw=m.type==="wk25-fixed"?m.w:m.recommendedW,ah=m.type==="wk25-fixed"?m.h:m.recommendedH,openW=W+aw,openH=H+ah,sd=m.spacingA||m.spacingC,se=m.spacingB||m.spacingD,rr=m.type==="wk25-range"?`Permitted allowance: width +${m.minW} to +${m.maxW} mm; height +${m.minH} to +${m.maxH} mm.`:`Fixed allowance: width +${m.w} mm; height +${m.h} mm.`;
- r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm${m.type==="wk25-range"?" recommended":""}`,damper:`${fmt0(W)} × ${fmt0(H)} mm ${paired?"measured joined assembly":"nominal damper"}`,rule:`${rr} ${paired?"Use the approved Lindab pairing kit and intumescent gasket.":""}`,reference:m.reference,range:`Construction: ${m.wall}. Seal: ${m.seal}. Minimum separation to another independent damper/assembly: ${sd} mm. Minimum distance to adjacent wall/floor: ${se} mm. ${m.note}`};}
+ else{const aw=m.type==="wk25-fixed"?m.w:m.recommendedW,ah=m.type==="wk25-fixed"?m.h:m.recommendedH,openW=W+aw,openH=H+ah,sd=m.spacingA||m.spacingC,se=m.spacingB||m.spacingD,rr=m.type==="wk25-range"?`Permitted structural D-hole allowance: width +${m.minW} to +${m.maxW} mm; height +${m.minH} to +${m.maxH} mm.`:`Fixed structural D-hole allowance: width +${m.w} mm; height +${m.h} mm.`;
+ const dHole=`${fmt0(openW)} × ${fmt0(openH)} mm`;
+ r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${dHole}${m.type==="wk25-range"?" recommended structural D-hole":" structural D-hole"}`,damper:`${fmt0(W)} × ${fmt0(H)} mm ${paired?"measured joined assembly":"nominal damper"}`,rule:`${rr} The sealing material and any plasterboard/calcium-silicate infill are installed within this published D-hole; they are not a separate reveal lining to add outside it. ${paired?"Use the approved Lindab pairing kit and intumescent gasket.":""}`,reference:m.reference,range:`Construction: ${m.wall}. Seal: ${m.seal}. Minimum separation to another independent damper/assembly: ${sd} mm. Minimum distance to adjacent wall/floor: ${se} mm. ${m.note}`,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:`${fmt0(W)} × ${fmt0(H)} mm nominal damper`,finishedStage:"Not published separately — sealing/infill is formed inside the structural D-hole",cutStage:`${dHole} structural D-hole`,noSeparateFinishedOpening:true,sourceStatus:`Verified from Lindab WK25 installation booklet ${m.reference}`,statusType:"verified",settingOut:{basis:"table-centred",source:`Lindab WK25 ${m.reference}: structural D-hole is centred on the nominal damper/approved assembly using the selected documented allowance.`},criticalRules:[`Structural D-hole: ${dHole}.`,m.type==="wk25-range"?`Permitted D-hole range: width +${m.minW} to +${m.maxW} mm and height +${m.minH} to +${m.maxH} mm.`:`Use the fixed D-hole allowance shown by the selected detail.`,`Do not subtract plasterboard or calcium-silicate infill from the D-hole and do not add it again outside the D-hole.`,`Certified sealing arrangement: ${m.seal}.`,`Minimum separation to another independent damper/assembly: ${sd} mm.`,`Minimum distance to adjacent wall/floor: ${se} mm.`,m.note]};}
 }else if(m.type==="lindab-rect-fixed"){
     const openW=W+m.w,openH=H+m.h;
     const critical=[`Supporting construction: ${m.wall||m.note||"See official Lindab method"}.`,`Certified sealing arrangement: ${m.seal||"See official Lindab method"}.`,`Opening allowance: +${m.w} mm width and +${m.h} mm height.`,m.spacing!==undefined?`Minimum separation between independent dampers: ${m.spacing} mm.`:"Check the official separation detail.",m.edge!==undefined?`Minimum distance to adjacent wall/floor/ceiling: ${m.edge} mm.`:"Check the official edge-distance detail.",m.note||"Install exactly to the selected certified detail."];
@@ -891,6 +895,29 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
   }else if(m.type==="advanced-rect-fixed"){
     const openW=W+m.addW,openH=H+m.addH;
     r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`Nominal width +${m.addW} mm; nominal height +${m.addH} mm`,reference:m.reference,range:`Tolerance ±${m.tolerance} mm.`,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:"Manufacturer fixed opening allowance",finishedStage:`${fmt0(openW)} × ${fmt0(openH)} mm`,cutStage:`${fmt0(openW)} × ${fmt0(openH)} mm`,sourceStatus:"Verified from manufacturer method",statusType:"verified",includesLining:false,criticalRules:[`Supporting construction: ${m.wall}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Opening tolerance: ±${m.tolerance} mm.`,`Use all specified retaining-flange fixings at the stated centres.`,m.note]};
+  }else if(m.type==="advanced-26scd-afs"){
+    const widthMin=W>=200?W+194:(W>=175?W+219:394);
+    const widthMax=W>=200?W+310:(W>=175?W+335:510);
+    const heightMin=H>=200?H+100:(H>=175?H+125:300);
+    const heightMax=H>=200?H+310:(H>=175?H+335:510);
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:widthMin,openH:heightMin,
+      opening:`${fmt0(widthMin)} × ${fmt0(heightMin)} mm minimum opening to form`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,
+      rule:"26SCD AFS published opening table, with width and height bands applied independently",reference:m.reference,
+      range:`Published opening range: ${fmt0(widthMin)}–${fmt0(widthMax)} mm wide × ${fmt0(heightMin)}–${fmt0(heightMax)} mm high.`,
+      nominalStage:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,casingStage:"26SCD casing, AFS rails/brackets and fire-batt zone included in the published method",
+      finishedStage:`${fmt0(widthMin)} × ${fmt0(heightMin)} mm minimum opening to form`,cutStage:`${fmt0(widthMin)} × ${fmt0(heightMin)} mm minimum structural opening`,
+      finishedW:widthMin,finishedH:heightMin,cutW:widthMin,cutH:heightMin,includesLining:false,
+      sourceStatus:"Verified from Advanced Air 26SCD IOM opening table",statusType:"verified",
+      settingOut:{basis:"table-centred",source:`${m.reference}: published opening table states the damper is centralised in the opening.`},
+      criticalRules:[`Supporting construction: ${m.wall}.`,`Certified penetration seal: ${m.seal}.`,`Use the published minimum/maximum opening band for each nominal dimension.`,`The damper must be centralised unless the later AFS non-centralised guidance is followed in full.`,`Use M10 drop rods and the tested AFS rail/bracket/Z-piece support.`,`Leave at least 10 mm duct expansion clearance and independently support ductwork within one metre.`,`Provide access doors on both sides for DW145 compliance.`,m.note]};
+  }else if(m.type==="advanced-26scd-remote"){
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,
+      opening:"No separate damper opening — remote duct-mounted method",damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,
+      rule:"The selected tested method mounts the damper in or beside fire-rated ductwork remote from the wall.",reference:m.reference,
+      nominalStage:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,casingStage:"Damper supported from M10 drop rods / AFS support as shown in the selected remote method",
+      finishedStage:"Not applicable — no separate wall opening for the damper body",cutStage:"Not applicable — coordinate the fire-rated duct penetration separately",
+      sourceStatus:"Verified from Advanced Air 26SCD remote-from-wall method",statusType:"verified",includesLining:false,noBuilderOpening:true,settingOut:m.settingOut,
+      criticalRules:[`Tested construction: ${m.wall}.`,`Certified sealing arrangement: ${m.seal}.`,`Use self-tapping steel fixings at 150 mm centres where stated.`,`Maintain the permitted overlap and 10 mm duct expansion allowance.`,`Support the damper and ductwork exactly as shown in the selected remote method.`,`Leave the actuator uncovered and provide access for maintenance.`,m.note]};
   }else if(m.type==="advanced-link"){
     r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Official product opening table required",damper:`${fmt0(W)} × ${fmt0(H)} mm entered size`,rule:"No 0160/2530 opening rule has been reused for this product.",reference:m.reference,isLinkOnly:true,range:m.note,sourceStatus:"Official drawing required",statusType:"manual",criticalRules:[m.note,"Select the exact wall or remote installation from the current Advanced Air IOM.","Do not form an opening from another Advanced Air product table."]};
   }else if(m.type==="lindab-link"){
@@ -935,6 +962,8 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     r.opening=r.apertureShape==="square"?`${fmt0(open)} × ${fmt0(open)} mm opening to form`:`Ø ${fmt0(open)} mm opening`;
     r.rule=`Nominal diameter +${m.add} mm`;
     r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;
+    r.finishedW=open;r.finishedH=open;r.cutW=open;r.cutH=open;
+    r.settingOut={basis:"table-centred",source:`${m.reference}: published opening is centred on the nominal circular duct.`};
     r.sourceStatus="Verified from manufacturer opening table";r.statusType="verified";r.includesLining=false;
     r.criticalRules=[`Supporting construction: ${m.wall}.`,`Certified penetration seal: ${m.seal}.`,`The published opening is the opening to form; where the wall is letterboxed, do not add the board thickness again.`,m.note,"Populate all pre-drilled flange fixing holes.","Leave the stated 10 mm duct expansion clearance and independently support connected ductwork within 1 metre."];
   }
@@ -944,6 +973,8 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     r.rule=`Minimum opening = nominal diameter +${m.add} mm`;
     r.range="Maximum opening: 1800 × 1800 mm.";
     r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;
+    r.finishedW=open;r.finishedH=open;r.cutW=open;r.cutH=open;
+    r.settingOut={basis:"table-centred",source:`${m.reference}: minimum opening is formed around the nominal circular damper.`};
     r.sourceStatus="Verified from manufacturer method";r.statusType="verified";r.includesLining=false;
     r.criticalRules=[`Supporting construction: ${m.wall}.`,`Certified infill: ${m.seal}.`,`Minimum opening: nominal diameter +${m.add} mm; maximum 1800 × 1800 mm.`,"Use shuttering and the compound manufacturer's tested mixing/curing instructions.","Independently support connected ductwork within 1 metre.",m.note];
   }
@@ -977,26 +1008,35 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
   }
   else if(m.type==="lindab-circle-fixed"){
     const open=dia+m.add;r.visualOpen=open;r.apertureShape=m.openingShape||"circle";r.openD=open;
-    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm`:`${fmt0(open)} × ${fmt0(open)} mm square`;
-    r.rule=`Nominal diameter +${m.add} mm`;r.range=m.note;
-    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";
-    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Opening allowance: nominal diameter +${m.add} mm.`,`Use only the sealing system shown for the selected certified method.`,"Verify wall/floor thickness, fire classification and size range in the current Lindab booklet."];
+    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm structural wall opening`:`${fmt0(open)} × ${fmt0(open)} mm structural wall opening`;
+    r.rule=`Manufacturer D hole size: nominal diameter +${m.add} mm`;r.range=m.note;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;
+    r.finishedStage=`No separate finished clear-opening dimension published — use the structural D-hole and install the specified sealing/infill within it`;
+    r.cutStage=r.opening;r.finishedW=null;r.finishedH=null;r.cutW=open;r.cutH=open;r.includesLining=false;r.noSeparateFinishedOpening=true;
+    r.sourceStatus="Verified from Lindab manufacturer D-hole method";r.statusType="verified";
+    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Structural D-hole allowance: nominal diameter +${m.add} mm.`,`The specified plasterboard, rock wool, mortar or putty is sealing/infill within this opening; VentTools does not add it again as aperture lining.`,`Use only the sealing system shown for the selected certified method.`,"Verify wall/floor thickness, fire classification and size range in the current Lindab booklet."];
   }
   else if(m.type==="lindab-circle-range"){
     const open=dia+m.recommendedAdd;r.visualOpen=open;r.apertureShape=m.openingShape||"circle";r.openD=open;
-    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm selected`:`${fmt0(open)} × ${fmt0(open)} mm selected`;
-    r.rule=`Selected opening: nominal diameter +${m.recommendedAdd} mm`;
-    r.range=`Permitted allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
-    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";
-    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Permitted opening allowance: +${m.minAdd} to +${m.maxAdd} mm.`,`Selected allowance: +${m.recommendedAdd} mm.`,`Use only the sealing system shown for the selected certified method.`,"Verify the current Lindab booklet before construction."];
+    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm structural wall opening selected`:`${fmt0(open)} × ${fmt0(open)} mm structural wall opening selected`;
+    r.rule=`Selected manufacturer D hole: nominal diameter +${m.recommendedAdd} mm`;
+    r.range=`Permitted D-hole allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;
+    r.finishedStage=`No separate finished clear-opening dimension published — use the selected structural D-hole and install the specified sealing within it`;
+    r.cutStage=r.opening;r.finishedW=null;r.finishedH=null;r.cutW=open;r.cutH=open;r.includesLining=false;r.noSeparateFinishedOpening=true;
+    r.sourceStatus="Verified from Lindab manufacturer D-hole range";r.statusType="verified";
+    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Permitted structural D-hole allowance: +${m.minAdd} to +${m.maxAdd} mm.`,`Selected allowance: +${m.recommendedAdd} mm.`,`Sealing material occupies the clearance inside the D hole; do not add its thickness to the structural cut.`,`Use only the sealing system shown for the selected certified method.`,"Verify the current Lindab booklet before construction."];
   }
   else if(m.type==="lindab-circle-square-range"){
     const open=dia+m.recommendedAdd;r.visualOpen=open;r.apertureShape="square";r.openD=open;
-    r.opening=`${fmt0(open)} × ${fmt0(open)} mm square selected`;
-    r.rule=`Selected square opening: nominal diameter +${m.recommendedAdd} mm`;
-    r.range=`Permitted square allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
-    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";
-    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Square opening allowance: +${m.minAdd} to +${m.maxAdd} mm.`,`Selected allowance: +${m.recommendedAdd} mm.`,`Use only the sealing system shown for the selected certified method.`,"Verify the current Lindab booklet before construction."];
+    r.opening=`${fmt0(open)} × ${fmt0(open)} mm square structural wall opening selected`;
+    r.rule=`Selected manufacturer D hole: nominal diameter +${m.recommendedAdd} mm`;
+    r.range=`Permitted square D-hole allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;
+    r.finishedStage=`No separate finished clear-opening dimension published — the 12.5 mm plasterboard arch/infill is a face sealing component and rock wool fills the space within the structural D-hole`;
+    r.cutStage=r.opening;r.finishedW=null;r.finishedH=null;r.cutW=open;r.cutH=open;r.includesLining=false;r.noSeparateFinishedOpening=true;
+    r.sourceStatus="Verified from Lindab manufacturer D-hole range";r.statusType="verified";
+    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Square structural D-hole allowance: +${m.minAdd} to +${m.maxAdd} mm.`,`Selected allowance: +${m.recommendedAdd} mm.`,`The 12.5 mm plasterboard arch/infill is a face sealing component around the penetration; it is not a four-sided reveal lining to subtract from D and it is not added outside the D-hole.`,`Use only the sealing system shown for the selected certified method.`,"Verify the current Lindab booklet before construction."];
   }
   if((man.label==="Lindab" || man.label==="BSB" || man.label==="Advanced Air") && p.minSize && (dia<p.minSize || dia>p.maxSize)){
     r.opening="Size outside manual range";
@@ -1122,6 +1162,13 @@ function updateFDSettingOut(r){
     return;
   }
   const {m}=currentFD();
+  if(r.noBuilderOpening===true){
+    clear();
+    if(answer)answer.innerHTML="<strong>No separate damper opening is formed.</strong> Coordinate the fire-rated duct penetration and supports to the selected remote-from-wall method.";
+    if(warning)warning.textContent=r.settingOut?.source||m?.settingOut?.source||"See the official remote-from-wall installation drawing.";
+    if(status){status.textContent="Verified remote method";status.className="fd-setting-badge verified";}
+    return;
+  }
   const ductH=Number(r.nomH ?? r.dia);
   const openingH=Number(r.openH ?? r.openD ?? r.visualOpen);
   const board=r.includesLining?(Number.isFinite(r.structuralLiningBottom)?Number(r.structuralLiningBottom):(parseFloat($("fdBoardThickness")?.value)||0)):0;
@@ -1318,8 +1365,8 @@ async function buildFDSiteSheet(){
   const list=items=>items.length?items.map(x=>`<li>${esc(x)}</li>`).join(""):'<li>Follow the selected official manufacturer installation drawing.</li>';
   const isCircle=r.shape==="circle";
   const diagram=isCircle
-    ? `<svg viewBox="0 0 560 400" role="img" aria-label="Circular structural opening and nominal damper schematic"><rect x="20" y="20" width="520" height="330" rx="18" class="construction"/><circle cx="280" cy="185" r="132" class="opening"/><circle cx="280" cy="185" r="91" class="damper"/><text x="280" y="181" text-anchor="middle" class="diagram-title">Nominal damper</text><text x="280" y="207" text-anchor="middle" class="diagram-value">${esc(r.damper)}</text><text x="280" y="43" text-anchor="middle" class="diagram-label">STRUCTURAL / FINISHED OPENING</text><line x1="148" y1="370" x2="412" y2="370" class="dimension"/><path d="M148 361v18M412 361v18" class="dimension"/><text x="280" y="396" text-anchor="middle" class="diagram-dimension">${esc(r.opening)}</text></svg>`
-    : `<svg viewBox="0 0 660 430" role="img" aria-label="Rectangular structural opening and nominal damper schematic"><rect x="24" y="20" width="612" height="355" rx="18" class="construction"/><rect x="105" y="72" width="450" height="250" class="opening"/><rect x="172" y="120" width="316" height="154" class="damper"/><text x="330" y="191" text-anchor="middle" class="diagram-title">Nominal damper</text><text x="330" y="218" text-anchor="middle" class="diagram-value">${esc(r.damper)}</text><text x="330" y="56" text-anchor="middle" class="diagram-label">STRUCTURAL / FINISHED OPENING</text><line x1="105" y1="397" x2="555" y2="397" class="dimension"/><path d="M105 388v18M555 388v18" class="dimension"/><text x="330" y="425" text-anchor="middle" class="diagram-dimension">${esc(r.opening)}</text></svg>`;
+    ? `<svg viewBox="0 0 560 400" role="img" aria-label="Circular structural opening and nominal damper schematic"><rect x="20" y="20" width="520" height="330" rx="18" class="construction"/><circle cx="280" cy="185" r="132" class="opening"/><circle cx="280" cy="185" r="91" class="damper"/><text x="280" y="181" text-anchor="middle" class="diagram-title">Nominal damper</text><text x="280" y="207" text-anchor="middle" class="diagram-value">${esc(r.damper)}</text><text x="280" y="43" text-anchor="middle" class="diagram-label">${diagramLabel}</text><line x1="148" y1="370" x2="412" y2="370" class="dimension"/><path d="M148 361v18M412 361v18" class="dimension"/><text x="280" y="396" text-anchor="middle" class="diagram-dimension">${esc(r.opening)}</text></svg>`
+    : `<svg viewBox="0 0 660 430" role="img" aria-label="Rectangular structural opening and nominal damper schematic"><rect x="24" y="20" width="612" height="355" rx="18" class="construction"/><rect x="105" y="72" width="450" height="250" class="opening"/><rect x="172" y="120" width="316" height="154" class="damper"/><text x="330" y="191" text-anchor="middle" class="diagram-title">Nominal damper</text><text x="330" y="218" text-anchor="middle" class="diagram-value">${esc(r.damper)}</text><text x="330" y="56" text-anchor="middle" class="diagram-label">${diagramLabel}</text><line x1="105" y1="397" x2="555" y2="397" class="dimension"/><path d="M105 388v18M555 388v18" class="dimension"/><text x="330" y="425" text-anchor="middle" class="diagram-dimension">${esc(r.opening)}</text></svg>`;
 
   const html=`<!doctype html>
 <html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=yes,viewport-fit=cover"><meta name="color-scheme" content="light"><title>${esc(ref)} — VentTools Site Instruction Sheet</title>
@@ -1343,7 +1390,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.2</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.8</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
@@ -1357,7 +1404,7 @@ async function buildFDSiteSheet(){
       structuralOpening:r.cutStage||r.opening,openingBottom,openingTop,ductBottom,ductTop,bottomOffset,
       settingAnswer,settingWarning,source:`${p.guide} — ${p.revision}`,
       verificationStatus:verification.status,verificationLabel:verification.label,issueLabel:verification.issueLabel,
-      canIssue:verification.canIssue,verificationChecks:verification.checks,traceability:verification.traceability
+      canIssue:verification.canIssue,verificationChecks:verification.checks,traceability:verification.traceability,engineering:verification.engineering
     };
     // Save the lightweight schedule row FIRST. This is the source of truth for the dashboard.
     const withoutDuplicate=Array.isArray(existing)?existing.filter(x=>x.id!==entry.id):[];
