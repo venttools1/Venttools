@@ -1211,20 +1211,28 @@ $("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);
 
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");
-  if(!link || !$("fdSeries")?.value) return;
-  const {man,p}=currentFD();
-  const product=$("fdSeries")?.value||"";
-  const title=p.manualTitle||p.guide||`${man.label} installation manual`;
-  link.href=p.manual||"#";
-  link.innerHTML=p.manualTitle
-    ? `<span aria-hidden="true">📄</span> Open Official ${p.manualTitle}`
-    : man.label==="BSB"
-      ? '<span aria-hidden="true">📄</span> Open Official BSB Installation Manual'
-      : man.label==="Lindab"
-        ? `<span aria-hidden="true">📄</span> Open Official ${product} Installation Booklet`
-        : `<span aria-hidden="true">📄</span> Open Official ${man.label} Installation Guide`;
   const titleEl=$("fdManualTitle");
-  if(titleEl) titleEl.textContent=`${man.label} • ${title} • ${p.revision||"current revision"}`;
+  const manufacturerSelect=$("fdManufacturer");
+  const productSelect=$("fdSeries");
+  if(!link || !manufacturerSelect || !productSelect || !productSelect.value) return;
+
+  const man=FD_MANUFACTURERS[manufacturerSelect.value];
+  const p=man?.products?.[productSelect.value];
+  if(!man || !p) return;
+
+  const productLabel=(p.label||productSelect.value).split(" — ")[0];
+  const documentTitle=p.manualTitle||p.guide||`${productLabel} Installation Manual`;
+  const destination=p.manual||"#";
+
+  link.href=destination;
+  link.target="_blank";
+  link.rel="noopener noreferrer";
+  link.innerHTML=`<span aria-hidden="true">📄</span> Open Official ${man.label} ${productLabel} IOM`;
+  link.setAttribute("aria-label",`Open official ${man.label} ${productLabel} installation manual`);
+
+  if(titleEl){
+    titleEl.textContent=`${man.label} • ${documentTitle} • ${p.revision||"current revision"}`;
+  }
 }
 
 
