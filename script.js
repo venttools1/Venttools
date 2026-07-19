@@ -308,6 +308,42 @@ const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450
 function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($('rectH').value)||0,area=w*h,eq=Math.sqrt((4*area)/Math.PI),near=nearestStandard(eq);$('eqRound').textContent=fmt(eq)+' mm';$('nearestRound').textContent='Ø '+fmt0(near);$('rectArea').textContent=fmt0(area)+' mm²';drawDuctulator(w,h,eq);return `Vent Tools - Rect to Round Ductulator\n\nRectangular duct: ${fmt0(w)} × ${fmt0(h)} mm\nArea: ${fmt0(area)} mm²\nSame-area round: Ø ${fmt(eq)} mm\nNearest standard spiral: Ø ${fmt0(near)} mm`}async function copyDuct(){let r=calculateDuct();try{await navigator.clipboard.writeText(r)}catch(e){}}function resetDuct(){$('rectW').value=600;$('rectH').value=300;calculateDuct()}['rectW','rectH'].forEach(id=>$(id).addEventListener('input',calculateDuct));$('copyDuctBtn').addEventListener('click',copyDuct);$('resetDuctBtn').addEventListener('click',resetDuct);angleUI();calculateOffset();calculateDuct();
 
 
+
+const VT_ENGINEERING_DB_VERSION="1.0.0-rc12-dev4";
+function getFDVerification(r){
+  const {man,p,m}=currentFD();
+  const settingMapped=!!(m?.settingOut && ["casing-edge","nominal-duct","table-centred"].includes(m.settingOut.basis));
+  const checks={
+    manufacturer:{pass:!!man?.label,label:"Manufacturer identified"},
+    product:{pass:!!p?.label,label:"Product record identified"},
+    installationMethod:{pass:!!m?.reference && !r?.isLinkOnly,label:"Installation method verified"},
+    sourceDocument:{pass:!!p?.manual,label:"Official source document linked"},
+    sourceRevision:{pass:!!p?.revision,label:"Source revision recorded"},
+    openingCalculation:{pass:!!r && !r.error && !r.invalidSize && !r.isLinkOnly && r.statusType!=="manual",label:"Opening calculation verified"},
+    builderSettingOut:{pass:settingMapped && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified"}
+  };
+  const failed=Object.entries(checks).filter(([,v])=>!v.pass).map(([key,v])=>({key,label:v.label}));
+  let status="verified";
+  if(r?.error || r?.invalidSize || r?.isLinkOnly || !checks.installationMethod.pass || !checks.openingCalculation.pass) status="draft";
+  else if(failed.length) status="partial";
+  const meta={
+    verified:{icon:"🟢",label:"Verified",issueLabel:"Ready to issue",canIssue:true},
+    partial:{icon:"🟡",label:"Partially verified",issueLabel:"Engineering review required",canIssue:true},
+    draft:{icon:"🔴",label:"Draft",issueLabel:"Do not issue",canIssue:false}
+  }[status];
+  return {status,...meta,checks,failed,traceability:{manufacturer:man?.label||"—",product:p?.label||r?.product||"—",installationMethod:m?.label||r?.reference||"—",sourceDocument:p?.guide||p?.manualTitle||"—",sourceRevision:p?.revision||"—",sourceUrl:p?.manual||"",databaseVersion:VT_ENGINEERING_DB_VERSION,generatedAt:new Date().toISOString()}};
+}
+function renderFDVerification(r){
+  const v=getFDVerification(r);r.verification=v;
+  let panel=document.getElementById("fdVerificationPanel");
+  if(!panel){panel=document.createElement("section");panel.id="fdVerificationPanel";panel.className="fd-verification-panel";document.getElementById("fdResultStatus")?.insertAdjacentElement("afterend",panel)}
+  const checks=Object.values(v.checks).map(c=>`<li class="${c.pass?'pass':'fail'}"><span>${c.pass?'✓':'!'}</span>${c.label}</li>`).join('');
+  panel.className=`fd-verification-panel ${v.status}`;
+  panel.innerHTML=`<button type="button" class="fd-verification-head" aria-expanded="false"><span class="fd-verification-badge">${v.icon} ${v.label}</span><strong>${v.issueLabel}</strong><span class="chev">Details ▾</span></button><div class="fd-verification-body" hidden><h4>Engineering verification</h4><ul>${checks}</ul><h4>Engineering traceability</h4><dl><div><dt>Manufacturer</dt><dd>${v.traceability.manufacturer}</dd></div><div><dt>Product</dt><dd>${v.traceability.product}</dd></div><div><dt>Method</dt><dd>${v.traceability.installationMethod}</dd></div><div><dt>Source</dt><dd>${v.traceability.sourceDocument}</dd></div><div><dt>Revision</dt><dd>${v.traceability.sourceRevision}</dd></div><div><dt>Database</dt><dd>${v.traceability.databaseVersion}</dd></div></dl></div>`;
+  const btn=panel.querySelector('button'),body=panel.querySelector('.fd-verification-body');btn.onclick=()=>{const open=body.hidden;body.hidden=!open;btn.setAttribute('aria-expanded',String(open));btn.querySelector('.chev').textContent=open?'Details ▴':'Details ▾'};
+  return v;
+}
+
 const ADVANCED_AIR_DOCUMENTS={
   IOM_0160:{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual"},
   IOM_2530:{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual"},
@@ -904,6 +940,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
    }
  }
  renderFDInstallationRequirements([...(criticalRules||[]),...((m&&m.engineeringNotes)||[])]);
+ renderFDVerification(r);
  $("fdManualLink").href=p.manual;
  updateFDManualButtonLabel();
  updateFDSettingOut(r);
@@ -1108,12 +1145,19 @@ async function buildFDSiteSheet(){
   const setSaveStatus=(text,state="")=>{if(saveStatus){saveStatus.textContent=text;saveStatus.className="fd-save-primary-status"+(state?" "+state:"")}};
   setSaveStatus("Preparing save…","is-saving");
   const r=calcFD();
+  const verification=r?getFDVerification(r):null;
+  if(verification?.status==="draft"){
+    fdMsg("warn","🔴 Draft calculations cannot be saved or issued. Open the verification details to see what is missing.");
+    setSaveStatus("Draft — cannot be issued","is-error");
+    return;
+  }
   if(!r || r.error || r.invalidSize){
     fdMsg("warn","Select a valid damper and method first.");
     setSaveStatus("Complete a valid calculation first","is-error");
     return;
   }
 
+  if(verification?.status==="partial" && !confirm("This calculation is only partially verified. Save it for engineering review? It will be marked REVIEW REQUIRED and cannot be issued without confirmation.")){setSaveStatus("Not saved yet");return;}
   const details=await getFDSiteSheetDetails();
   if(!details){setSaveStatus("Not saved yet");return;}
   const {ref,loc}=details;
@@ -1153,19 +1197,21 @@ async function buildFDSiteSheet(){
 @media screen and (max-width:760px){html{background:#fff}.toolbar{width:100%;max-width:100vw}.sheet{max-width:none!important}.diagram-wrap,.section,.identity,.hero{max-width:100%}.toolbar{justify-content:stretch}.toolbar button{flex:1;min-width:0}.sheet{width:100%!important;min-height:0;margin:0;box-shadow:none;padding:18px 14px 28px}.report-header{grid-template-columns:1fr}.doc-meta{text-align:left}.identity{grid-template-columns:1fr 1fr}.hero .value{font-size:26px}.setting-grid,.engineering-grid{grid-template-columns:1fr 1fr}.cell,.cell:nth-child(5n),.engineering-grid .cell:nth-child(3n){border-right:1px solid var(--line)}.cell:nth-child(2n){border-right:0}.requirements{grid-template-columns:1fr}.req+ .req{border-left:0;border-top:1px solid var(--line)}.signoff{grid-template-columns:1fr}footer{display:block}footer span{display:block;margin-top:4px}}
 @media(max-width:430px){.identity{grid-template-columns:1fr}.setting-grid,.engineering-grid{grid-template-columns:1fr}.cell,.cell:nth-child(2n){border-right:0}.brand{align-items:flex-start}.mark{width:45px;height:45px}h1{font-size:23px}}
 @page{size:A4;margin:11mm}@media print{html,body{background:#fff}.toolbar{display:none!important}.sheet{width:auto;min-height:auto;margin:0;padding:0;box-shadow:none}.report-header{padding-bottom:10px}.identity,.hero,.section,.warning,.signoff{break-inside:avoid}.hero{padding:12px}.hero .value{font-size:25px}.section{margin-top:10px}.cell{min-height:55px;padding:8px 9px}.diagram-wrap svg{max-height:230px}.req{padding:10px 12px}li{margin-bottom:4px;font-size:10.5px}.warning{margin-top:10px;padding:9px 11px}.signoff{margin-top:10px}footer{margin-top:10px}}
-</style></head><body>
+.verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V6.5 RC12 MAIN CANDIDATE · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V6.5 RC12 DEV 4 · Independent site aid</span></div></header>
+<section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
 <section class="section"><div class="section-head"><h2>Setting-out levels</h2><span class="verified">Manufacturer-mapped method</span></div><div class="grid setting-grid"><div class="cell"><span class="label">Nominal duct bottom</span><strong>${esc(ductBottom)}</strong></div><div class="cell"><span class="label">Nominal duct top</span><strong>${esc(ductTop)}</strong></div><div class="cell"><span class="label">Structural opening bottom</span><strong>${esc(openingBottom)}</strong></div><div class="cell"><span class="label">Structural opening top</span><strong>${esc(openingTop)}</strong></div><div class="cell"><span class="label">Bottom cut-line offset</span><strong>${esc(bottomOffset)}</strong></div></div><div class="instruction"><strong>Site instruction:</strong> ${esc(settingAnswer)}</div><div class="breakdown"><strong>Verified dimension chain:</strong> ${esc(settingWarning)}</div></section>
 <section class="section"><div class="section-head"><h2>Engineering data</h2><span class="verified">Keep duct, casing and opening separate</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Nominal duct / damper</span><strong>${esc(r.damper)}</strong></div><div class="cell"><span class="label">Finished opening</span><strong>${esc(r.finishedStage||r.opening)}</strong></div><div class="cell"><span class="label">Structural hole to cut</span><strong>${esc(r.cutStage||r.opening)}</strong></div><div class="cell"><span class="label">Casing projection below / above duct</span><strong>${esc(casingBottom)} / ${esc(casingTop)}</strong></div><div class="cell"><span class="label">Manufacturer clearance below / above casing</span><strong>${esc(clearanceBottom)} / ${esc(clearanceTop)}</strong></div><div class="cell"><span class="label">Aperture lining included</span><strong>${board?`${esc(fmt(board))} mm`:(r.includesLining?"Included by selected method":"No separate lining entered")}</strong></div></div></section>
 <section class="section"><div class="section-head"><h2>Finished opening setup</h2><span class="label">Schematic · not to scale</span></div><div class="diagram-wrap">${diagram}</div><p class="diagram-note">VentTools-generated schematic based on the selected verified calculation. It is not a copied manufacturer drawing.</p></section>
 <section class="section"><div class="section-head"><h2>Trade requirements</h2><span class="label">Read before installation</span></div><div class="requirements"><div class="req"><h3>Builder / dryliner</h3><ul>${list(builderItems)}</ul></div><div class="req"><h3>HVAC installer</h3><ul>${list(hvacItems)}</ul></div>${otherItems.length?`<div class="req" style="grid-column:1/-1;border-top:1px solid var(--line)"><h3>Additional critical requirements</h3><ul>${list(otherItems)}</ul></div>`:""}</div></section>
+<section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V6.5 RC12 MAIN CANDIDATE</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V6.5 RC12 DEV 4</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
@@ -1177,7 +1223,9 @@ async function buildFDSiteSheet(){
       ref,loc,manufacturer:man.label,product:r.product,reference:r.reference,
       damper:r.damper,opening:r.opening,finishedOpening:r.finishedStage||r.opening,
       structuralOpening:r.cutStage||r.opening,openingBottom,openingTop,ductBottom,ductTop,bottomOffset,
-      settingAnswer,settingWarning,source:`${p.guide} — ${p.revision}`
+      settingAnswer,settingWarning,source:`${p.guide} — ${p.revision}`,
+      verificationStatus:verification.status,verificationLabel:verification.label,issueLabel:verification.issueLabel,
+      canIssue:verification.canIssue,verificationChecks:verification.checks,traceability:verification.traceability
     };
     // Save the lightweight schedule row FIRST. This is the source of truth for the dashboard.
     const withoutDuplicate=Array.isArray(existing)?existing.filter(x=>x.id!==entry.id):[];
