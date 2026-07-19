@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.0-rc12-dev5";
+const VT_ENGINEERING_DB_VERSION="1.0.0-rc12-dev9";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -346,7 +346,7 @@ function applyFDVerificationTeaching(){
     Object.entries(manufacturer.products||{}).forEach(([productKey,product])=>{
       Object.entries(product.methods||{}).forEach(([methodKey,method])=>{
         const unsupported=/link|manual/i.test(String(method.type||""));
-        const mappedSetting=!!(method.settingOut && ["casing-edge","nominal-duct","table-centred"].includes(method.settingOut.basis));
+        const mappedSetting=!!((method.settingOut && ["casing-edge","nominal-duct","table-centred"].includes(method.settingOut.basis)) || method.dynamicSettingOut===true);
         method.engineeringVerification={
           manufacturerKey,productKey,methodKey,
           manufacturerVerified:true,
@@ -365,7 +365,8 @@ function applyFDVerificationTeaching(){
 function getFDVerification(r){
   const {man,p,m,manKey,productKey,methodKey}=currentFD();
   const taught=m?.engineeringVerification||{};
-  const settingMapped=!!(m?.settingOut && ["casing-edge","nominal-duct","table-centred"].includes(m.settingOut.basis));
+  const activeSetting=r?.settingOut||m?.settingOut;
+  const settingMapped=!!(activeSetting && ["casing-edge","nominal-duct","table-centred"].includes(activeSetting.basis));
   const checks={
     manufacturer:{pass:taught.manufacturerVerified===true && !!man?.label,label:"Manufacturer identified and verified",reason:taught.manufacturerVerified?"Manufacturer exists in the verified registry.":"Manufacturer verification flag is missing."},
     product:{pass:taught.productVerified===true && !!p?.label,label:"Product record identified and verified",reason:taught.productVerified?"Product is mapped to the selected manufacturer.":"Product verification flag is missing."},
@@ -373,7 +374,7 @@ function getFDVerification(r){
     sourceDocument:{pass:taught.sourceDocumentVerified===true && !!p?.manual,label:"Official source document linked",reason:p?.manual||"No official URL recorded."},
     sourceRevision:{pass:taught.sourceRevisionVerified===true && !!p?.revision,label:"Source revision recorded",reason:p?.revision||"No revision recorded."},
     openingCalculation:{pass:taught.openingRuleVerified===true && !!r && !r.error && !r.invalidSize && !r.isLinkOnly && r.statusType!=="manual",label:"Opening calculation verified",reason:r?.sourceStatus||"No calculated result."},
-    builderSettingOut:{pass:taught.builderSettingOutVerified===true && settingMapped && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified",reason:m?.settingOut?.source||"Nominal duct → casing → clearance → lining chain is not fully mapped."}
+    builderSettingOut:{pass:taught.builderSettingOutVerified===true && settingMapped && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified",reason:activeSetting?.source||"Nominal duct → casing → clearance → lining chain is not fully mapped."}
   };
   const failed=Object.entries(checks).filter(([,v])=>!v.pass).map(([key,v])=>({key,label:v.label,reason:v.reason}));
   let status="verified";
@@ -384,7 +385,7 @@ function getFDVerification(r){
     partial:{icon:"🟡",label:"Partially verified",issueLabel:"Engineering review required",canIssue:true},
     draft:{icon:"🔴",label:"Draft",issueLabel:"Do not issue",canIssue:false}
   }[status];
-  return {status,...meta,checks,failed,traceability:{manufacturer:man?.label||"—",product:p?.label||r?.product||"—",installationMethod:m?.label||r?.reference||"—",sourceDocument:p?.guide||p?.manualTitle||"—",sourceRevision:p?.revision||"—",sourceUrl:p?.manual||"",databaseVersion:VT_ENGINEERING_DB_VERSION,generatedAt:new Date().toISOString()},engineering:{manufacturerKey:manKey,productKey,methodKey,methodType:m?.type||"—",settingBasis:m?.settingOut?.basis||"unmapped",taughtBy:taught.taughtBy||"not registered"}};
+  return {status,...meta,checks,failed,traceability:{manufacturer:man?.label||"—",product:p?.label||r?.product||"—",installationMethod:m?.label||r?.reference||"—",sourceDocument:p?.guide||p?.manualTitle||"—",sourceRevision:p?.revision||"—",sourceUrl:p?.manual||"",databaseVersion:VT_ENGINEERING_DB_VERSION,generatedAt:new Date().toISOString()},engineering:{manufacturerKey:manKey,productKey,methodKey,methodType:m?.type||"—",settingBasis:activeSetting?.basis||"unmapped",taughtBy:taught.taughtBy||"not registered"}};
 }
 function renderFDVerification(r){
   window.__lastFDResult=r;
@@ -468,17 +469,17 @@ const FD_MANUFACTURERS={
   }},
   ACTIONAIR:{label:"Swegon (Actionair products)",products:{
     CSS:{label:"CSS — Circular fire/smoke damper",shape:"circle",manual:"https://www.swegon.com/globalassets/digizuite/10514-en-css_installation_en.pdf",guide:"Actionair CSS Installation Guide",revision:"LNNN00356 v6.0 • 27 May 2025",methods:{
-      CSS_DRY:{label:"Vertical — plasterboard wall",type:"css-dry",reference:"AA/F13413 / AA/F12820",min:10,max:40,step:10,defaultAllowance:30},
-      CSS_MASONRY:{label:"Vertical — masonry wall",type:"css-masonry",reference:"AA/F12822",squareMin:10,squareMax:40,circleMin:10,circleMax:30,step:10,defaultAllowance:30},
-      CSS_SLAB:{label:"Horizontal — concrete slab",type:"css-slab",reference:"AA/F12821",squareMin:10,squareMax:40,step:10,defaultAllowance:30}
+      CSS_DRY:{label:"Vertical — plasterboard wall",type:"css-dry",reference:"AA/F13440 / AA/F12820",min:10,max:40,step:10,defaultAllowance:30,dynamicSettingOut:true},
+      CSS_MASONRY:{label:"Vertical — masonry wall",type:"css-masonry",reference:"AA/F12822",squareMin:10,squareMax:40,circleMin:10,circleMax:30,step:10,defaultAllowance:30,dynamicSettingOut:true},
+      CSS_SLAB:{label:"Horizontal — concrete slab",type:"css-slab",reference:"AA/F12821",squareMin:10,squareMax:30,step:10,defaultAllowance:20,dynamicSettingOut:true}
     }},
     "DWFX-F":{label:"DWFX-F / DWFX-3F — Rectangular",shape:"rect",manual:"https://www.swegon.com/globalassets/digizuite/10506-en-smokeshield_fireshield_dwfx-f_installation_en.pdf",guide:"Actionair DWFX-F Installation Guide",revision:"LNNN00354 v6.0 • 17 March 2026",methods:{
-      DW_DRY_1:{label:"Vertical plasterboard wall — 1 × Type F board each face",type:"dwfx-dry-fixed",referenceSmoke:"AA/F13412",referenceFire:"AA/F13440",w:30,h:30,boardsW:2,boardsH:2},
-      DW_DRY_2:{label:"Vertical plasterboard wall — 2 × Type F boards each face",type:"dwfx-dry-range",referenceSmoke:"AA/F10704",referenceFire:"AA/F10705",smokeW:[10,52],smokeH:[10,40],fireW:[10,40],fireH:[10,40],boardsW:2,boardsH:2},
-      DW_UNDER_DRY:{label:"DWFX-3F plasterboard wall under concrete slab",type:"dwfx-under-dry",referenceSmoke:"AA/F11945",referenceFire:"AA/F11944",smokeW:[10,57],smokeH:[10,30],fireW:[10,60],fireH:[5,30],boardsW:2,boardsH:1},
-      DW_UNDER_MASONRY:{label:"DWFX-3F masonry wall under concrete slab",type:"dwfx-range",referenceSmoke:"AA/F12394",referenceFire:"AA/F12827",smokeW:[10,57],smokeH:[5,30],fireW:[10,80],fireH:[5,40],boardsW:0,boardsH:0},
-      DW_SHAFT:{label:"DWFX-F plasterboard shaftwall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13472",smokeOnly:true,w:30,h:30,boardsW:2,boardsH:2},
-      DW_COMPOSITE:{label:"DWFX-F composite panel wall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13396",smokeOnly:true,w:52,h:60,boardsW:0,boardsH:0},
+      DW_DRY_1:{label:"Vertical plasterboard wall — 1 × Type F board each face",type:"dwfx-dry-fixed",referenceSmoke:"AA/F13412",referenceFire:"AA/F13440",w:30,h:30,boardsW:2,boardsH:2,dynamicSettingOut:true},
+      DW_DRY_2:{label:"Vertical plasterboard wall — 2 × Type F boards each face",type:"dwfx-dry-range",referenceSmoke:"AA/F10704",referenceFire:"AA/F10705",smokeW:[10,52],smokeH:[10,40],fireW:[10,40],fireH:[10,40],boardsW:2,boardsH:2,dynamicSettingOut:true},
+      DW_UNDER_DRY:{label:"DWFX-3F plasterboard wall under concrete slab",type:"dwfx-under-dry",referenceSmoke:"AA/F11945",referenceFire:"AA/F11944",smokeW:[10,57],smokeH:[10,30],fireW:[10,60],fireH:[5,30],boardsW:2,boardsH:1,dynamicSettingOut:true},
+      DW_UNDER_MASONRY:{label:"DWFX-3F masonry wall under concrete slab",type:"dwfx-range",referenceSmoke:"AA/F12394",referenceFire:"AA/F12827",smokeW:[10,57],smokeH:[5,30],fireW:[10,80],fireH:[5,40],boardsW:0,boardsH:0,dynamicSettingOut:true},
+      DW_SHAFT:{label:"DWFX-F plasterboard shaftwall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13472",smokeOnly:true,w:30,h:30,boardsW:2,boardsH:2,dynamicSettingOut:true},
+      DW_COMPOSITE:{label:"DWFX-F composite panel wall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13396",smokeOnly:true,w:52,h:60,boardsW:0,boardsH:0,dynamicSettingOut:true},
       DW_MASONRY_LINK:{label:"DWFX-F masonry wall — use official hole sizer / drawing",type:"dwfx-link",referenceSmoke:"AA/F12493",referenceFire:"AA/F10707"},
       DW_TIMBER_LINK:{label:"DWFX-F timber stud partition — official drawing required",type:"dwfx-link",referenceSmoke:"AA/F13752",smokeOnly:true}
     }},
@@ -486,8 +487,8 @@ const FD_MANUFACTURERS={
       SPAN_STANDARD:{label:"SPAN slab installation — recommended opening",type:"actionair-span",reference:"SmokeShield PTC SPAN"}
     }},
     "HEVAC-IF":{label:"HEVAC / HVCA Installation Frame — Rectangular",shape:"rect",manual:"https://www.swegon.com/globalassets/digizuite/10508-en-smokeshield_hevac_hvca_installation_en.pdf",guide:"Actionair I/F Installation Guide",revision:"LNNN00352 v5.1 • 26 May 2022",methods:{
-      HEVAC_WALL:{label:"Vertical installation frame in masonry wall",type:"hevac-frame",referenceSmoke:"AA/F10702",referenceFire:"AA/F10703"},
-      HEVAC_SLAB:{label:"Horizontal installation frame in concrete slab — FireShield only",type:"hevac-frame",referenceFire:"AA/F10701",fireOnly:true}
+      HEVAC_WALL:{label:"Vertical installation frame in masonry wall",type:"hevac-frame",referenceSmoke:"AA/F10702",referenceFire:"AA/F10703",dynamicSettingOut:true},
+      HEVAC_SLAB:{label:"Horizontal installation frame in concrete slab — FireShield only",type:"hevac-frame",referenceFire:"AA/F10701",fireOnly:true,dynamicSettingOut:true}
     }}
   }},
   LINDAB:{label:"Lindab",products:{
@@ -654,8 +655,8 @@ function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="c
   $("fdWk25Wrap").style.display=wk25?"block":"none";
   const wkConfig=$("fdWk25Config")?.value||"single";
   const dwBasis=$("fdDwfxInputBasis")?.value||"NOMINAL",dwSmoke=$("fdDwfxVariant")?.value==="SMOKE",dwAuto=dwfx&&dwSmoke&&dwBasis==="NOMINAL";
-  $("fdWidthLabel").textContent=dwfx?(dwAuto?"Nominal duct width (mm)":"Measured overall casing width (mm)"):hevac?"Measured outside frame width (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly width (mm)":"Nominal duct width (mm)";
-  $("fdHeightLabel").textContent=dwfx?(dwAuto?"Nominal duct height (mm)":"Measured overall casing height (mm)"):hevac?"Measured outside frame height (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly height (mm)":"Nominal duct height (mm)";
+  $("fdWidthLabel").textContent=dwfx?(dwAuto?"Nominal duct width (mm)":"Measured overall casing width (mm)"):hevac?"Nominal duct width (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly width (mm)":"Nominal duct width (mm)";
+  $("fdHeightLabel").textContent=dwfx?(dwAuto?"Nominal duct height (mm)":"Measured overall casing height (mm)"):hevac?"Nominal duct height (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly height (mm)":"Nominal duct height (mm)";
   $("fdBoardWrap").style.display=["bsb-dry","bsb-rect-dry","bsb-circle-dry-lined","bsb-at-dry","css-dry"].includes(m.type)?"block":"none";
   $("fdWallBuildWrap").style.display=m.type==="css-dry"?"block":"none";
   $("fdShapeWrap").style.display=["css-masonry"].includes(m.type)?"block":"none";
@@ -696,6 +697,30 @@ function actionairSpanCase601(d){
   const caseW=d<151?275:(d<200?325:(d<950?d+125:(d<970?1075:d+105)));
   const caseH=d<151?272:(d<200?322:(d<950?d+122:(d<970?1072:d+102)));
   return {caseW,caseH};
+}
+function actionairSmokeRectCasing(w,h){
+  if(w<100||w>1000||h<100||h>1000)return null;
+  const bodyW=w<151?200:(w<200?250:w+50);
+  const bodyH=h<151?200:(h<200?250:h+50);
+  const topProjection=(bodyH-h)/2;
+  const bottomProjection=(bodyH-h)/2;
+  return {bodyW,bodyH,casingW:bodyW+28,casingH:bodyH,topProjection,bottomProjection};
+}
+function actionairHevacSmokeFrame(w,h){
+  if(w<100||w>1000||h<100||h>1000)return null;
+  const frameW=w<151?314:(w<200?364:w+114);
+  const frameH=h<151?340:(h<200?390:h+140);
+  return {frameW,frameH};
+}
+function actionairHevacFireFrame(w,h){
+  if(w<100||w>1250||h<100||h>1000)return null;
+  const frameW=w+114;
+  let frameH;
+  if(h<=249)frameH=h+114;
+  else if(h<=450)frameH=h+133;
+  else if(h<=650)frameH=h+140;
+  else frameH=h+170;
+  return {frameW,frameH};
 }
 function calculateActionairSpan(){
   const variant=$("fdSpanVariant").value;
@@ -802,15 +827,17 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
       const wa=parseFloat($("fdDwfxWAllowance").value)||0,ha=parseFloat($("fdDwfxHAllowance").value)||0;
       const basis=$("fdDwfxInputBasis")?.value||"NOMINAL";
       const automatic=actualVariant==="SMOKE"&&basis==="NOMINAL";
-      if(automatic&&(W<200||H<200||W>1000||H>1000)){
-        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Use measured casing mode",damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:"Automatic casing conversion is enabled for rectangular SmokeShield PTC sizes from 200 × 200 mm to 1000 × 1000 mm. Smaller dimensional bands use fixed-width casing arrangements and should be physically measured.",reference:ref,isLinkOnly:true,range:"Select “Measured overall casing size” and enter the casing including the 28 mm PTC shroud, excluding the peripheral flange."};
+      const autoDims=automatic?actionairSmokeRectCasing(W,H):null;
+      if(automatic&&!autoDims){
+        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Size outside published SmokeShield range",damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:"Published dimensional data covers nominal widths and heights from 100 mm to 1000 mm.",reference:ref,isLinkOnly:true,range:"Check the current Actionair DWFX-F dimensional table."};
       }else{
         let casingW=W,casingH=H,baseCasingW=null,baseCasingH=null,spigotW=null,spigotH=null,flangeW=null,flangeH=null;
         if(automatic){
           spigotW=W-5; spigotH=H-5;
-          baseCasingW=W+50; baseCasingH=H+100;
-          casingW=baseCasingW+28; casingH=baseCasingH;
-          flangeW=W+198; flangeH=H+195;
+          baseCasingW=autoDims.bodyW; baseCasingH=autoDims.bodyH;
+          casingW=autoDims.casingW; casingH=autoDims.casingH;
+          flangeW=W<151?398:(W<200?448:W+198);
+          flangeH=H<151?395:(H<200?445:H+195);
         }
         const finishedW=casingW+wa,finishedH=casingH+ha;
         const cutW=finishedW+(m.boardsW||0)*board,cutH=finishedH+(m.boardsH||0)*board;
@@ -818,15 +845,19 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
         const breakdown=automatic
           ?`Nominal duct ${fmt0(W)} × ${fmt0(H)} mm. Spigot ${fmt0(spigotW)} × ${fmt0(spigotH)} mm. Base casing ${fmt0(baseCasingW)} × ${fmt0(baseCasingH)} mm. PTC shroud adds 28 mm on the actuator side, giving the opening-measurement casing ${fmt0(casingW)} × ${fmt0(casingH)} mm. Overall peripheral flange ${fmt0(flangeW)} × ${fmt0(flangeH)} mm (not included in the opening calculation). Minimum actuator removal clearance: 120 mm.`
           :`Measured casing used directly: ${fmt0(casingW)} × ${fmt0(casingH)} mm${actualVariant==="SMOKE"?" including the PTC shroud":""}, excluding the peripheral flange.`;
-        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm${hasBoards?" cut size":""}`,damper:automatic?`${fmt0(W)} × ${fmt0(H)} mm nominal duct`:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening ${fmt0(finishedW)} × ${fmt0(finishedH)} mm: casing +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${hasBoards?`; cut size adds ${m.boardsW||0} × ${fmt0(board)} mm board to width and ${m.boardsH||0} × ${fmt0(board)} mm board to height`:""}`,reference:ref,variant:actualVariant,range:`${breakdown} Minimum separation: 200 mm between dampers in separate ducts and 75 mm from a damper to an adjacent wall or floor.`,nominalStage:automatic?`${fmt0(W)} × ${fmt0(H)} mm`:"Measured casing input",casingStage:automatic?`${fmt0(casingW)} × ${fmt0(casingH)} mm incl. PTC shroud`:`${fmt0(casingW)} × ${fmt0(casingH)} mm measured`,finishedStage:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm`,cutStage:`${fmt0(cutW)} × ${fmt0(cutH)} mm`,sourceStatus:automatic?"Derived from published manufacturer dimensions":"Manual casing measurement required",statusType:automatic?"derived":"manual",criticalRules:[`Permitted finished-opening allowance selected: +${fmt0(wa)} mm width and +${fmt0(ha)} mm height.`,`Include the 28 mm PTC shroud in the casing width; exclude the peripheral flange.`,hasBoards?`Structural cut includes the certified board build-up (${m.boardsW||0} board thicknesses in width and ${m.boardsH||0} in height).`:"No additional board build-up is applied by this selected method.",`Minimum spacing: 200 mm between separate dampers and 75 mm from adjacent wall/floor for this Actionair method.`,`Allow at least 120 mm actuator removal clearance.`]};
+        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm${hasBoards?" cut size":""}`,damper:automatic?`${fmt0(W)} × ${fmt0(H)} mm nominal duct`:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening ${fmt0(finishedW)} × ${fmt0(finishedH)} mm: casing +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${hasBoards?`; cut size adds ${m.boardsW||0} × ${fmt0(board)} mm board to width and ${m.boardsH||0} × ${fmt0(board)} mm board to height`:""}`,reference:ref,variant:actualVariant,range:`${breakdown} Minimum separation: 200 mm between dampers in separate ducts and 75 mm from a damper to an adjacent wall or floor.`,nominalStage:automatic?`${fmt0(W)} × ${fmt0(H)} mm`:"Measured casing input",casingStage:automatic?`${fmt0(casingW)} × ${fmt0(casingH)} mm incl. PTC shroud`:`${fmt0(casingW)} × ${fmt0(casingH)} mm measured`,finishedStage:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm`,cutStage:`${fmt0(cutW)} × ${fmt0(cutH)} mm`,sourceStatus:automatic?"Verified from Actionair DWFX-F dimensional data pages 14–15":"Manual casing measurement required",statusType:automatic?"verified":"manual",settingOut:automatic?{basis:"casing-edge",casingProjectionBottom:autoDims.bottomProjection,casingProjectionTop:autoDims.topProjection,bottomClearance:ha/2,topClearance:ha/2,source:`Actionair DWFX-F LNNN00354 v6.0 pages 3–9 and 14–15: SmokeShield casing derived from nominal duct size; selected finished-opening allowance split equally above and below the casing.`}:null,structuralLiningBottom:hasBoards?board:0,criticalRules:[`Permitted finished-opening allowance selected: +${fmt0(wa)} mm width and +${fmt0(ha)} mm height.`,`Include the 28 mm PTC shroud in the casing width; exclude the peripheral flange.`,hasBoards?`Structural cut includes the certified board build-up (${m.boardsW||0} board thicknesses in width and ${m.boardsH||0} in height).`:"No additional board build-up is applied by this selected method.",`Minimum spacing: 200 mm between separate dampers and 75 mm from adjacent wall/floor for this Actionair method.`,`Allow at least 120 mm actuator removal clearance.`]};
       }
     }
   }else if(productKey==="HEVAC-IF"){
     const gap=parseFloat($("fdHevacGap").value)||25;
     let variant=$("fdHevacVariant").value;if(m.fireOnly)variant="FIRE";
     const ref=variant==="SMOKE"?m.referenceSmoke:m.referenceFire;
-    const openW=W+2*gap,openH=H+2*gap;
-    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`Installation frame ${fmt0(W)} × ${fmt0(H)} mm`,rule:`Measured frame size + 2 × ${fmt0(gap)} mm clear mortar gap`,reference:ref,range:"Official drawing permits 5–75 mm from the installation-frame upstand to the aperture face all round."};
+    const frame=variant==="SMOKE"?actionairHevacSmokeFrame(W,H):actionairHevacFireFrame(W,H);
+    if(!frame){r={error:"Size outside the published Actionair I/F dimensional range."};}
+    else{
+      const openW=frame.frameW+2*gap,openH=frame.frameH+2*gap;
+      r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${variant==="SMOKE"?"SmokeShield PTC":"FireShield"} • ${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`Published I/F frame ${fmt0(frame.frameW)} × ${fmt0(frame.frameH)} mm + 2 × ${fmt0(gap)} mm clear mortar gap`,reference:ref,range:"Official drawing permits 5–75 mm from the installation-frame upstand to the aperture face all round.",nominalStage:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,casingStage:`${fmt0(frame.frameW)} × ${fmt0(frame.frameH)} mm installation frame`,finishedStage:`${fmt0(openW)} × ${fmt0(openH)} mm masonry opening`,cutStage:`${fmt0(openW)} × ${fmt0(openH)} mm`,sourceStatus:"Verified from Actionair I/F dimensional tables pages 9–11",statusType:"verified",settingOut:(()=>{const bottomProjection=variant==="SMOKE"?(((H<151?200:(H<200?250:H+50))-H)/2+57):57;const topProjection=frame.frameH-H-bottomProjection;return {basis:"casing-edge",casingProjectionBottom:bottomProjection,casingProjectionTop:topProjection,bottomClearance:gap,topClearance:gap,source:"Actionair I/F LNNN00352 v5.1 pages 9–11: nominal duct to installation-frame projections are derived from the published dimensional drawings; the selected mortar gap is then applied outside the frame."};})(),criticalRules:[`Installation frame: ${fmt0(frame.frameW)} × ${fmt0(frame.frameH)} mm.`,`Selected clear mortar gap: ${fmt0(gap)} mm all round (permitted 5–75 mm).`,`Ductwork must be independently supported with a break-away joint on both sides.`,`Minimum spacing: 200 mm between separate dampers and 75 mm to adjacent construction.`]};
+    }
   }else if(m.type==="wk25-fixed" || m.type==="wk25-range"){
  const config=$("fdWk25Config")?.value||"single",axis=$("fdWk25Axis")?.value||"horizontal",paired=config!=="single";
  if(paired&&!m.pairAllowed)r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Paired arrangement not certified",damper:`${fmt0(W)} × ${fmt0(H)} mm entered assembly`,rule:"Choose a method that permits paired dampers.",reference:m.reference,isLinkOnly:true,range:`Minimum separation to another damper: ${m.spacingA||m.spacingC} mm. Minimum distance to wall/floor: ${m.spacingB||m.spacingD} mm. ${m.note}`};
@@ -943,6 +974,19 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
   }
  }
  
+ if(r && !r.error && ["css-dry","css-masonry","css-slab"].includes(m.type)){
+   const nominalDia=Number(r.dia||parseFloat($("fdDiameter")?.value)||0);
+   const finishedHeight=Number(r.openH??r.openD??r.visualOpen);
+   const allowanceH=finishedHeight-nominalDia;
+   if(Number.isFinite(allowanceH)){
+     const cssBoard=m.type==="css-dry"?(parseFloat($("fdBoardThickness")?.value)||0):0;
+     r.settingOut={basis:"nominal-duct",bottomFinished:allowanceH/2,topFinished:allowanceH/2,source:"Actionair CSS LNNN00356 v6.0: overall casing diameter plus the selected permitted finished-opening allowance, with the casing centred in the aperture."};
+     if(cssBoard){r.includesLining=true;r.structuralLiningBottom=cssBoard;}
+     r.sourceStatus="Verified from Actionair CSS installation guide";
+     r.statusType="verified";
+   }
+ }
+
  const nominalStage=r.nominalStage||(r.shape==="circle"?r.damper:(r.damper||"—"));
  const casingStage=r.casingStage||(r.damper||"—");
  const finishedStage=r.finishedStage||(r.opening||"—");
@@ -1048,8 +1092,8 @@ function updateFDSettingOut(r){
   const {m}=currentFD();
   const ductH=Number(r.nomH ?? r.dia);
   const openingH=Number(r.openH ?? r.openD ?? r.visualOpen);
-  const board=r.includesLining?(parseFloat($("fdBoardThickness")?.value)||0):0;
-  const rule=m.settingOut;
+  const board=r.includesLining?(Number.isFinite(r.structuralLiningBottom)?Number(r.structuralLiningBottom):(parseFloat($("fdBoardThickness")?.value)||0)):0;
+  const rule=r.settingOut||m.settingOut;
   const casingMapped=rule?.basis==="casing-edge" && Number.isFinite(rule.casingProjectionBottom) && Number.isFinite(rule.bottomClearance);
   const nominalMapped=rule?.basis==="nominal-duct" && Number.isFinite(rule.bottomFinished);
   const tableMapped=rule?.basis==="table-centred" && Number.isFinite(openingH) && Number.isFinite(ductH);

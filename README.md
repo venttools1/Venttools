@@ -596,3 +596,7 @@ Structured source: `data/bsb-engineering-database.json`. The live calculator ret
 ## V6.5 RC12 DEV 8 — Official Resource Manager
 
 Replaced the manual-banner lookup with stable manufacturer/product resource IDs. Advanced Air 0160 and 2530 are resolved from both stored values and visible product codes, and a failed lookup now clears rather than retaining the previous banner.
+
+## RC12 DEV 9 — Actionair dimensional coordination
+
+Actionair CSS, supported SmokeShield DWFX-F methods and HEVAC/HVCA installation-frame methods now carry coordinated nominal-duct, casing/frame, opening and builder setting-out data from the current uploaded guides. Drawing-led and measured-only methods remain review controlled.
