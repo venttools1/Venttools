@@ -622,7 +622,7 @@ function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
 applyFDVerificationTeaching();
 
 function currentFD(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=p.methods[$("fdMethod").value];return{man,p,m,manKey:$("fdManufacturer").value,productKey:$("fdSeries").value,methodKey:$("fdMethod").value}}
-function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;s.appendChild(o)});fillFDMethods()}
+function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=String(k);o.textContent=v.label;o.dataset.manual=v.manual||"";o.dataset.manualTitle=v.manualTitle||v.guide||"";o.dataset.revision=v.revision||"";o.dataset.productLabel=(v.label||String(k)).split(" — ")[0];s.appendChild(o)});fillFDMethods()}
 function fillFDMethods(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=$("fdMethod");m.innerHTML="";Object.entries(p.methods).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});updateFDInputs();updateFDManualButtonLabel()}
 function setAllowanceOptions(min,max,step,def){const sel=$("fdAllowance");sel.innerHTML="";for(let n=min;n<=max;n+=step){const o=document.createElement("option");o.value=n;o.textContent=`${n} mm total (${n/2} mm nominal each side)`;if(n===def)o.selected=true;sel.appendChild(o)}}
 
@@ -1257,7 +1257,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V6.5 RC12 DEV 4 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V6.5 RC12 DEV 6 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
@@ -1268,7 +1268,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V6.5 RC12 DEV 4</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V6.5 RC12 DEV 6</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
@@ -1321,7 +1321,6 @@ function updateFDManualButtonLabel(){
   const productSelect=$("fdSeries");
   if(!link || !titleEl || !manufacturerSelect || !productSelect) return;
 
-  // Clear first so a failed lookup can never leave the previous product banner behind.
   link.removeAttribute("href");
   link.setAttribute("aria-disabled","true");
   link.innerHTML='<span aria-hidden="true">📄</span> Official manual not mapped';
@@ -1331,33 +1330,50 @@ function updateFDManualButtonLabel(){
   const rawProduct=String(productSelect.value||"").trim();
   const canonicalProduct=rawProduct.replace(/^160$/,"0160").replace(/^2630$/,"2530");
   const man=FD_MANUFACTURERS[manufacturerKey];
-  let p=man?.products?.[canonicalProduct]||man?.products?.[rawProduct];
+  const selectedOption=productSelect.options[productSelect.selectedIndex];
 
-  // Hard official Advanced Air aliases guard against numeric-looking IDs and old 2630 typo data.
+  // First use the document data attached directly to the selected option. This
+  // prevents any previous product banner surviving a failed object lookup.
+  let manual=String(selectedOption?.dataset?.manual||"").trim();
+  let documentTitle=String(selectedOption?.dataset?.manualTitle||"").trim();
+  let revision=String(selectedOption?.dataset?.revision||"").trim();
+  let productLabel=String(selectedOption?.dataset?.productLabel||canonicalProduct||rawProduct).trim();
+
+  const p=man?.products?.[canonicalProduct]||man?.products?.[rawProduct];
+  if(!manual && p){
+    manual=p.manual||"";
+    documentTitle=p.manualTitle||p.guide||"";
+    revision=p.revision||"";
+    productLabel=(p.label||productLabel).split(" — ")[0];
+  }
+
+  // Absolute official Advanced Air mapping for the two numeric-looking IDs.
   if(manufacturerKey==="ADVANCED_AIR"){
-    const aliases={
-      "0160":{url:ADVANCED_AIR_DOCUMENTS.IOM_0160.url,title:"0160 Installation Manual",revision:"Rev 1.0"},
-      "160":{url:ADVANCED_AIR_DOCUMENTS.IOM_0160.url,title:"0160 Installation Manual",revision:"Rev 1.0"},
-      "2530":{url:ADVANCED_AIR_DOCUMENTS.IOM_2530.url,title:"2530 Installation Manual",revision:"Rev 1.1"},
-      "2630":{url:ADVANCED_AIR_DOCUMENTS.IOM_2530.url,title:"2530 Installation Manual",revision:"Rev 1.1"}
-    };
-    const exact=aliases[rawProduct]||aliases[canonicalProduct];
-    if(exact){
-      p=p||{};
-      p={...p,manual:exact.url,manualTitle:exact.title,guide:`Advanced Air ${exact.title}`,revision:exact.revision};
+    const exactAdvancedAir={
+      "0160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.0"},
+      "160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.0"},
+      "2530":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"},
+      "2630":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"}
+    }[rawProduct]||({
+      "0160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.0"},
+      "2530":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"}
+    }[canonicalProduct]);
+    if(exactAdvancedAir){
+      manual=exactAdvancedAir.url;
+      documentTitle=exactAdvancedAir.title;
+      revision=exactAdvancedAir.revision;
+      productLabel=canonicalProduct;
     }
   }
-  if(!man || !p || !p.manual) return;
 
-  const productLabel=(p.label||canonicalProduct||rawProduct).split(" — ")[0];
-  const documentTitle=p.manualTitle||p.guide||`${productLabel} Installation Manual`;
-  link.href=p.manual;
+  if(!man || !manual) return;
+  link.href=manual;
   link.target="_blank";
   link.rel="noopener noreferrer";
   link.removeAttribute("aria-disabled");
   link.innerHTML=`<span aria-hidden="true">📄</span> Open Official ${man.label} ${productLabel} IOM`;
   link.setAttribute("aria-label",`Open official ${man.label} ${productLabel} installation manual`);
-  titleEl.textContent=`${man.label} • ${documentTitle} • ${p.revision||"current revision"}`;
+  titleEl.textContent=`${man.label} • ${documentTitle||`${productLabel} Installation Manual`} • ${revision||"current revision"}`;
 }
 
 
