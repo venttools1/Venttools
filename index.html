@@ -24,14 +24,6 @@
 
 </head>
 <body>
-<script>
-(function(){
-  const params=new URLSearchParams(location.search);
-  if(!params.has('calculator') && !params.has('stay')){
-    location.replace('pack-builder.html');
-  }
-})();
-</script>
 <div class="wrap">
 <section id="home" class="page active v5-home">
   <header class="v5-topbar">
@@ -66,6 +58,7 @@
         <button onclick="showPage('fireDamper')" class="v5-primary">Open Fire Damper Calculator</button>
         <button onclick="showPage('offset')" class="v5-secondary">Open Offset Calculator</button>
         <button onclick="showPage('ductulator')" class="v5-secondary v5-square-round-quick">▢→○ Square to Round</button>
+        <a href="pack-builder.html" class="v5-secondary" style="text-decoration:none;text-align:center">Open Project Pack</a>
         <button id="installVentToolsBtn" class="v5-install" hidden>📱 Install VentTools</button>
       </div>
     </div>
