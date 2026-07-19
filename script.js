@@ -938,7 +938,7 @@ function getFDSiteSheetDetails(){
           </div>
           <button type="button" class="fd-sheet-dialog-close" aria-label="Cancel and close">&times;</button>
         </div>
-        <p class="fd-sheet-dialog-copy">Add the job details that should appear on the builder instruction sheet.</p>
+        <p class="fd-sheet-dialog-copy">Add the project details for this damper. The verified calculation will be saved into the project pack.</p>
         <label class="fd-sheet-dialog-field">
           <span>Drawing reference / damper tag</span>
           <input id="fdSheetReference" type="text" inputmode="text" autocomplete="off" placeholder="For example FD-01" maxlength="80">
@@ -949,7 +949,7 @@ function getFDSiteSheetDetails(){
         </label>
         <div class="fd-sheet-dialog-actions">
           <button type="button" class="fd-sheet-dialog-cancel">Cancel</button>
-          <button type="button" class="fd-sheet-dialog-create">Create Sheet</button>
+          <button type="button" class="fd-sheet-dialog-create">Add to Pack</button>
         </div>
       </div>`;
     const style=document.createElement("style");
@@ -1044,11 +1044,22 @@ async function buildFDSiteSheet(){
 </main><script>function shareSheet(){const data={title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}'};if(navigator.share){navigator.share(data).catch(()=>{});return}window.print()}</script></body></html>`;
 
   try{
-    sessionStorage.setItem("venttoolsSiteSheetHtml",html);
+    const key="venttoolsProjectPackV1";
+    const existing=JSON.parse(localStorage.getItem(key)||"[]");
+    const entry={
+      id:"fd-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),
+      createdAt:new Date().toISOString(),
+      ref,loc,manufacturer:man.label,product:r.product,reference:r.reference,
+      damper:r.damper,opening:r.opening,finishedOpening:r.finishedStage||r.opening,
+      structuralOpening:r.cutStage||r.opening,openingBottom,openingTop,ductBottom,ductTop,bottomOffset,
+      settingAnswer,settingWarning,source:`${p.guide} — ${p.revision}`,html
+    };
+    existing.push(entry);
+    localStorage.setItem(key,JSON.stringify(existing));
     sessionStorage.setItem("venttoolsSiteSheetReturn",window.location.href);
-    window.location.assign("site-sheet.html");
+    window.location.assign("pack-builder.html");
   }catch(e){
-    fdMsg("warn","The site sheet could not be prepared on this device.");
+    fdMsg("warn","The damper could not be added to the project pack on this device.");
   }
 }
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nFinished opening: ${r.finishedStage||r.opening}\nStructural hole to cut: ${r.cutStage||r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
