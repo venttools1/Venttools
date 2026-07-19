@@ -308,6 +308,101 @@ const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450
 function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($('rectH').value)||0,area=w*h,eq=Math.sqrt((4*area)/Math.PI),near=nearestStandard(eq);$('eqRound').textContent=fmt(eq)+' mm';$('nearestRound').textContent='Ø '+fmt0(near);$('rectArea').textContent=fmt0(area)+' mm²';drawDuctulator(w,h,eq);return `Vent Tools - Rect to Round Ductulator\n\nRectangular duct: ${fmt0(w)} × ${fmt0(h)} mm\nArea: ${fmt0(area)} mm²\nSame-area round: Ø ${fmt(eq)} mm\nNearest standard spiral: Ø ${fmt0(near)} mm`}async function copyDuct(){let r=calculateDuct();try{await navigator.clipboard.writeText(r)}catch(e){}}function resetDuct(){$('rectW').value=600;$('rectH').value=300;calculateDuct()}['rectW','rectH'].forEach(id=>$(id).addEventListener('input',calculateDuct));$('copyDuctBtn').addEventListener('click',copyDuct);$('resetDuctBtn').addEventListener('click',resetDuct);angleUI();calculateOffset();calculateDuct();
 
 
+
+const VT_ENGINEERING_DB_VERSION="1.0.8-pack-status-refresh";
+const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
+function isVTEngineeringMode(){
+  try{
+    const params=new URLSearchParams(location.search);
+    if(params.get("engineering")==="1") return true;
+    return localStorage.getItem(VT_ENGINEERING_MODE_KEY)==="1";
+  }catch(_){return false}
+}
+function setVTEngineeringMode(enabled){
+  try{localStorage.setItem(VT_ENGINEERING_MODE_KEY,enabled?"1":"0")}catch(_){}
+  document.documentElement.classList.toggle("vt-engineering-mode",!!enabled);
+  const note=document.querySelector(".footer-live-note");
+  if(note) note.title=enabled?"Engineering mode enabled":"";
+  if(window.__lastFDResult) renderFDVerification(window.__lastFDResult);
+}
+function initVTEngineeringMode(){
+  document.documentElement.classList.toggle("vt-engineering-mode",isVTEngineeringMode());
+  const trigger=document.querySelector(".footer-live-note");
+  if(!trigger)return;
+  let taps=[];
+  trigger.addEventListener("click",()=>{
+    const now=Date.now(); taps=taps.filter(t=>now-t<4000); taps.push(now);
+    if(taps.length>=5){
+      taps=[];
+      const enabled=!isVTEngineeringMode();
+      setVTEngineeringMode(enabled);
+      const msg=enabled?"Engineering mode enabled":"Engineering mode hidden";
+      if(typeof fdMsg==="function")fdMsg("ok",msg);else alert(msg);
+    }
+  });
+}
+function applyFDVerificationTeaching(){
+  Object.entries(FD_MANUFACTURERS).forEach(([manufacturerKey,manufacturer])=>{
+    Object.entries(manufacturer.products||{}).forEach(([productKey,product])=>{
+      Object.entries(product.methods||{}).forEach(([methodKey,method])=>{
+        const unsupported=/link|manual/i.test(String(method.type||""));
+        const mappedSetting=!!((method.settingOut && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(method.settingOut.basis)) || method.dynamicSettingOut===true);
+        method.engineeringVerification={
+          manufacturerKey,productKey,methodKey,
+          manufacturerVerified:true,
+          productVerified:!!product.label,
+          installationMethodVerified:!!method.reference && !unsupported,
+          sourceDocumentVerified:!!product.manual,
+          sourceRevisionVerified:!!product.revision,
+          openingRuleVerified:!unsupported,
+          builderSettingOutVerified:mappedSetting,
+          taughtBy:"VentTools verified-method registry"
+        };
+      });
+    });
+  });
+}
+function getFDVerification(r){
+  const {man,p,m,manKey,productKey,methodKey}=currentFD();
+  const taught=m?.engineeringVerification||{};
+  const activeSetting=r?.settingOut||m?.settingOut;
+  const settingMapped=!!(activeSetting && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(activeSetting.basis));
+  const checks={
+    manufacturer:{pass:taught.manufacturerVerified===true && !!man?.label,label:"Manufacturer identified and verified",reason:taught.manufacturerVerified?"Manufacturer exists in the verified registry.":"Manufacturer verification flag is missing."},
+    product:{pass:taught.productVerified===true && !!p?.label,label:"Product record identified and verified",reason:taught.productVerified?"Product is mapped to the selected manufacturer.":"Product verification flag is missing."},
+    installationMethod:{pass:taught.installationMethodVerified===true && !!m?.reference && !r?.isLinkOnly,label:"Installation method verified",reason:taught.installationMethodVerified?"Method is tied to a recorded manufacturer reference.":"Method is drawing-led, link-only, or not yet verified."},
+    sourceDocument:{pass:taught.sourceDocumentVerified===true && !!p?.manual,label:"Official source document linked",reason:p?.manual||"No official URL recorded."},
+    sourceRevision:{pass:taught.sourceRevisionVerified===true && !!p?.revision,label:"Source revision recorded",reason:p?.revision||"No revision recorded."},
+    openingCalculation:{pass:taught.openingRuleVerified===true && !!r && !r.error && !r.invalidSize && !r.isLinkOnly && r.statusType!=="manual",label:"Opening calculation verified",reason:r?.sourceStatus||"No calculated result."},
+    finishedOpening:{pass:(r?.noBuilderOpening===true || r?.noSeparateFinishedOpening===true || !!r?.finishedStage) && !r?.invalidSize && !r?.isLinkOnly,label:"Finished opening verified",reason:r?.noSeparateFinishedOpening===true?"Manufacturer publishes one structural D-hole and a sealing/infill detail inside it; no separate finished clear-opening dimension is specified.":(r?.finishedStage||"The formed/finished aperture is not separately recorded.")},
+    apertureLining:{pass:!r?.includesLining || (r?.liningMapped===true && Number(r?.structuralLiningBottom)>0 && !!r?.cutStage && !!r?.finishedStage),label:"Aperture lining build-up verified",reason:!r?.includesLining?"Selected method does not add a separate aperture lining.":(r?.liningMapped===true&&Number(r?.structuralLiningBottom)>0?`One ${r.structuralLiningBottom} mm fire-rated lining layer is accounted for at each internal edge; opposite edges add ${2*Number(r.structuralLiningBottom)} mm per dimension.`:"Lining is required but its thickness/build-up is not mapped.")},
+    structuralCut:{pass:(r?.noBuilderOpening===true || !!r?.cutStage) && (!r?.includesLining || (r?.liningMapped===true && Number(r?.cutW)>Number(r?.finishedW) && Number(r?.cutH)>Number(r?.finishedH))),label:"Structural cut verified separately",reason:r?.cutStage||"The structural builder cut is not separately recorded."},
+    builderSettingOut:{pass:(r?.noBuilderOpening===true || (taught.builderSettingOutVerified===true && settingMapped)) && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified",reason:activeSetting?.source||"Nominal duct → casing → clearance → lining chain is not fully mapped."}
+  };
+  const failed=Object.entries(checks).filter(([,v])=>!v.pass).map(([key,v])=>({key,label:v.label,reason:v.reason}));
+  let status="verified";
+  if(r?.error || r?.invalidSize || r?.isLinkOnly || !checks.installationMethod.pass || !checks.openingCalculation.pass) status="draft";
+  else if(failed.length) status="partial";
+  const meta={
+    verified:{icon:"🟢",label:"Verified",issueLabel:"Ready to issue",canIssue:true},
+    partial:{icon:"🟡",label:"Partially verified",issueLabel:"Engineering review required",canIssue:true},
+    draft:{icon:"🔴",label:"Draft",issueLabel:"Do not issue",canIssue:false}
+  }[status];
+  return {status,...meta,checks,failed,traceability:{manufacturer:man?.label||"—",product:p?.label||r?.product||"—",installationMethod:m?.label||r?.reference||"—",sourceDocument:p?.guide||p?.manualTitle||"—",sourceRevision:p?.revision||"—",sourceUrl:p?.manual||"",databaseVersion:VT_ENGINEERING_DB_VERSION,generatedAt:new Date().toISOString()},engineering:{manufacturerKey:manKey,productKey,methodKey,methodType:m?.type||"—",settingBasis:activeSetting?.basis||"unmapped",taughtBy:taught.taughtBy||"not registered"}};
+}
+function renderFDVerification(r){
+  window.__lastFDResult=r;
+  const v=getFDVerification(r);r.verification=v;
+  let panel=document.getElementById("fdVerificationPanel");
+  if(!panel){panel=document.createElement("section");panel.id="fdVerificationPanel";panel.className="fd-verification-panel";document.getElementById("fdResultStatus")?.insertAdjacentElement("afterend",panel)}
+  const checks=Object.values(v.checks).map(c=>`<li class="${c.pass?'pass':'fail'}"><span>${c.pass?'✓':'!'}</span>${c.label}</li>`).join('');
+  panel.className=`fd-verification-panel ${v.status}`;
+  const debug=isVTEngineeringMode()?`<section class="fd-engineering-debug"><h4>Engineering mode</h4><dl><div><dt>Manufacturer key</dt><dd>${v.engineering.manufacturerKey}</dd></div><div><dt>Product key</dt><dd>${v.engineering.productKey}</dd></div><div><dt>Method key</dt><dd>${v.engineering.methodKey}</dd></div><div><dt>Method type</dt><dd>${v.engineering.methodType}</dd></div><div><dt>Setting-out basis</dt><dd>${v.engineering.settingBasis}</dd></div><div><dt>Registry</dt><dd>${v.engineering.taughtBy}</dd></div></dl>${v.failed.length?`<h4>Why it is not green</h4><ul>${v.failed.map(f=>`<li class="fail"><span>!</span><strong>${f.label}</strong><small>${f.reason||""}</small></li>`).join("")}</ul>`:`<p class="fd-engineering-all-pass">All required engineering checks pass.</p>`}</section>`:"";
+  panel.innerHTML=`<button type="button" class="fd-verification-head" aria-expanded="false"><span class="fd-verification-badge">${v.icon} ${v.label}</span><strong>${v.issueLabel}</strong><span class="chev">Details ▾</span></button><div class="fd-verification-body" hidden><h4>Engineering verification</h4><ul>${checks}</ul><h4>Engineering traceability</h4><dl><div><dt>Manufacturer</dt><dd>${v.traceability.manufacturer}</dd></div><div><dt>Product</dt><dd>${v.traceability.product}</dd></div><div><dt>Method</dt><dd>${v.traceability.installationMethod}</dd></div><div><dt>Source</dt><dd>${v.traceability.sourceDocument}</dd></div><div><dt>Revision</dt><dd>${v.traceability.sourceRevision}</dd></div><div><dt>Database</dt><dd>${v.traceability.databaseVersion}</dd></div></dl>${debug}</div>`;
+  const btn=panel.querySelector('button'),body=panel.querySelector('.fd-verification-body');btn.onclick=()=>{const open=body.hidden;body.hidden=!open;btn.setAttribute('aria-expanded',String(open));btn.querySelector('.chev').textContent=open?'Details ▴':'Details ▾'};
+  return v;
+}
+
 const ADVANCED_AIR_DOCUMENTS={
   IOM_0160:{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual"},
   IOM_2530:{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual"},
@@ -318,32 +413,33 @@ const ADVANCED_AIR_DOCUMENTS={
 const FD_MANUFACTURERS={
   BSB:{label:"BSB",products:{
     "FSD-TD":{label:"FSD-TD — Rectangular fire/smoke damper",shape:"rect",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",guide:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904",methods:{
-      M5:{label:"M5 — Drywall, non-cleated frameless",type:"bsb-rect-dry",finishedW:121,finishedH:96,reference:"FSD-TD M5",wall:"Symmetrical drywall: 50 mm steel frame, 2 × 12.5 mm D&F fire boards each side",seal:"Two-layer plasterboard pattress each side; void filling is not required",classification:"See BSB method M5",note:"Finished aperture allows 10 mm top/bottom, 10 mm non-actuator side and 35 mm actuator side."},
-      M6:{label:"M6 — Drywall, pattress and cleat",type:"bsb-rect-dry",finishedW:156,finishedH:96,reference:"FSD-TD M6",wall:"Symmetrical drywall: 50 mm steel frame, 2 × 12.5 mm D&F fire boards each side",seal:"Lined opening with tested pattress and cleat arrangement",classification:"See BSB method M6",note:"Use every fixing position and ensure screws pick up the aperture track."},
-      M9:{label:"M9 — Drywall, AF Easy Fix angle frame",type:"bsb-rect-dry",finishedW:122,finishedH:99,reference:"FSD-TD M9",wall:"Symmetrical drywall: 50 mm steel frame, 2 × 12.5 mm D&F fire boards each side",seal:"Lined opening; Easy Fix angle frame fixed through the tested pilot holes",classification:"See BSB method M9",note:"Use the inner row of pilot holes for drywall."},
-      M10:{label:"M10 — Masonry wall, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,reference:"FSD-TD M10",wall:"Masonry wall matching the BSB tested construction",seal:"Easy Fix angle frame; void behind the frame does not require filling where stated",classification:"See BSB method M10",note:"Use the outer pilot holes and keep fixing anchors at least 20 mm from aperture edges."},
-      M11:{label:"M11 — Masonry floor, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,reference:"FSD-TD M11",wall:"Masonry floor, minimum 150 mm, density 580 kg/m³",seal:"Easy Fix angle frame; no need to fill the opening void",classification:"E 120 (ho i←o) S",note:"Finished aperture: nominal width +122 mm and nominal height +99 mm."}
+      M5:{label:"M5 — Drywall, non-cleated frameless",type:"bsb-rect-dry",finishedW:121,finishedH:96,reference:"FSD-TD M5",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Two-layer plasterboard pattress each side; void filling is not required",classification:"See BSB method M5",note:"Finished aperture allows 10 mm top/bottom, 10 mm non-actuator side and 35 mm actuator side.",settingOut:{basis:"casing-edge",casingProjectionBottom:38,casingProjectionTop:38,bottomClearance:10,topClearance:10,source:"BSB FSD-TD M5 sections 8.1.2 and 8.2.9: finished aperture is nominal height +96 mm, with 10 mm clearance above and below the damper case; the damper is positioned centrally. This gives a 38 mm casing projection beyond the nominal duct at both top and bottom."}},
+      M6:{label:"M6 — Drywall, pattress and cleat",type:"bsb-rect-dry",finishedW:156,finishedH:96,settingOut:{basis:"nominal-duct",bottomFinished:48,topFinished:48,source:"BSB FSD-TD M6: nominal height +96 mm and damper positioned centrally in the lined opening."},reference:"FSD-TD M6",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening with tested pattress and cleat arrangement",classification:"See BSB method M6",note:"Use every fixing position and ensure screws pick up the aperture track."},
+      M9:{label:"M9 — Drywall, AF Easy Fix angle frame",type:"bsb-rect-dry",finishedW:122,finishedH:99,casingAddW:102,casingAddH:79,clearanceLeft:10,clearanceRight:10,clearanceBottom:10,clearanceTop:10,reference:"FSD-TD M9",settingOut:{basis:"casing-edge",casingProjectionBottom:39.5,casingProjectionTop:39.5,bottomClearance:10,topClearance:10,source:"BSB FSD-TD M9: overall casing is derived from the published nominal-size build-up and the finished aperture provides 10 mm clearance above and below the casing."},wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening; Easy Fix angle frame fixed through the tested pilot holes",classification:"See BSB method M9",note:"Finished aperture includes the manufacturer-specified installation/expansion gaps around the casing. Use the inner row of pilot holes for drywall."},
+      M10:{label:"M10 — Masonry wall, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,settingOut:{basis:"nominal-duct",bottomFinished:49.5,topFinished:49.5,source:"BSB FSD-TD M10: published opening height is nominal +99 mm and the damper is positioned centrally."},reference:"FSD-TD M10",wall:"Masonry wall matching the BSB tested construction",seal:"Easy Fix angle frame; void behind the frame does not require filling where stated",classification:"See BSB method M10",note:"Use the outer pilot holes and keep fixing anchors at least 20 mm from aperture edges."},
+      M11:{label:"M11 — Masonry floor, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,settingOut:{basis:"nominal-duct",bottomFinished:49.5,topFinished:49.5,source:"BSB FSD-TD M11: published opening height is nominal +99 mm and the damper is positioned centrally."},reference:"FSD-TD M11",wall:"Masonry floor, minimum 150 mm, density 580 kg/m³",seal:"Easy Fix angle frame; no need to fill the opening void",classification:"E 120 (ho i←o) S",note:"Finished aperture: nominal width +122 mm and nominal height +99 mm."}
     }},
     "FD-C":{label:"FD-C — Circular fire damper",shape:"circle",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_c_series_iom.pdf",guide:"BSB FD-C Installation, Operation and Maintenance Instructions",revision:"V62904",minSize:100,maxSize:315,methods:{
-      M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; opening lined with fire-rated wall board",note:"Finished aperture is square and nominal diameter +20 mm."},
-      M10:{label:"M10 — Masonry wall",type:"bsb-circle-solid",add:20,reference:"FD-C M10",wall:"Masonry wall matching the tested detail",seal:"Follow the tested BSB masonry sealing and plate fixing arrangement",note:"Opening is nominal diameter +20 mm."},
-      M11:{label:"M11 — Masonry floor",type:"bsb-circle-solid",add:20,reference:"FD-C M11",wall:"Concrete/masonry floor matching the tested detail",seal:"Follow the tested BSB floor sealing and plate fixing arrangement",note:"Opening is nominal diameter +20 mm."},
+      M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; opening lined with fire-rated wall board",note:"Finished aperture is square and nominal diameter +20 mm.",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FD-C M9: 10 mm nominal gap all round"}},
+      M10:{label:"M10 — Masonry wall",type:"bsb-circle-solid",add:20,reference:"FD-C M10",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FD M10: opening is 10 mm larger than the casing on each side and the damper is centred."},wall:"Masonry wall matching the tested detail",seal:"Follow the tested BSB masonry sealing and plate fixing arrangement",note:"Opening is nominal diameter +20 mm."},
+      M11:{label:"M11 — Masonry floor",type:"bsb-circle-solid",add:20,reference:"FD-C M11",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FD M11: opening is 10 mm larger than the casing on each side and the damper is centred."},wall:"Concrete/masonry floor matching the tested detail",seal:"Follow the tested BSB floor sealing and plate fixing arrangement",note:"Opening is nominal diameter +20 mm."},
       M14:{label:"M14 — Flexible fire curtain",type:"bsb-circle-trim",add:10,reference:"FD-C M14",wall:"Tested flexible fire-curtain construction",seal:"Trim opening to the BSB tested fire-curtain detail",note:"Use nominal diameter with up to 10 mm trim tolerance."}
     }},
     "FSD-C":{label:"FSD-C — Circular fire/smoke damper",shape:"circle",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_c_iom_11zon.pdf",guide:"BSB FSD-C Installation, Operation and Maintenance Instructions",revision:"V62904",minSize:100,maxSize:315,methods:{
-      M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FSD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; line opening to the tested BSB detail",note:"Use every installation-plate fixing position."},
-      M10:{label:"M10 — Masonry wall",type:"bsb-circle-solid",add:20,reference:"FSD-C M10",wall:"Masonry wall matching the tested detail",seal:"Tested plate and penetration-seal arrangement",note:"Opening is nominal diameter +20 mm."},
+      M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FSD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; line opening to the tested BSB detail",note:"Use every installation-plate fixing position.",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FSD-C M9: 10 mm nominal gap all round"}},
+      M10:{label:"M10 — Masonry wall",type:"bsb-circle-solid",add:20,reference:"FSD-C M10",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FSD-C M10: nominal diameter +20 mm opening, damper centred."},wall:"Masonry wall matching the tested detail",seal:"Tested plate and penetration-seal arrangement",note:"Opening is nominal diameter +20 mm."},
       M11:{label:"M11 — Masonry floor / Batt infill",type:"bsb-circle-solid",add:20,reference:"FSD-C M11",wall:"Masonry floor matching the tested detail",seal:"Ablative Batt infill where required by the selected drawing",note:"Use all fixing holes and the exact Batt arrangement."},
       M14:{label:"M14 — Flexible fire curtain",type:"bsb-circle-trim",add:10,reference:"FSD-C M14",wall:"Tested flexible fire-curtain construction",seal:"Trim and fix only as shown in the BSB drawing",note:"Use nominal diameter with up to 10 mm trim tolerance."}
     }},
     "MFD-IC":{label:"MFD-IC — Motorised insulated circular fire damper",shape:"circle",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2026/06/MFD-IC-IOM.pdf",guide:"BSB MFD-IC Installation, Operation and Maintenance Instructions",revision:"V012606",minSize:100,maxSize:315,methods:{
-      M9:{label:"M9 — Drywall, Batt installation — opening NOT lined",type:"bsb-circle-square-fixed",add:40,reference:"MFD-IC M9",wall:"Group A 50 mm steel stud; 2 × 12.5 mm Type F board each side",seal:"Two layers of 50 mm ablative-coated Batt; seal exposed insulation faces",note:"The wall opening must not be lined. Fix the plate into the steel track using all applicable holes."},
-      M10:{label:"M10 — Masonry wall, Batt infill",type:"bsb-circle-square-fixed",add:40,reference:"MFD-IC M10",wall:"Masonry wall, minimum 100 mm and density 600 kg/m³",seal:"Ablative-coated Batt infill",note:"Use fire-rated steel anchors and all fixing positions."},
-      M11:{label:"M11 — Masonry floor, Batt infill",type:"bsb-circle-square-fixed",add:40,reference:"MFD-IC M11",wall:"Concrete floor, minimum 150 mm and density 600 kg/m³",seal:"Ablative-coated Batt infill",note:"Use fire-rated steel anchors and all fixing positions."},
-      M15:{label:"M15 — Masonry floor, mortar infill",type:"bsb-circle-square-fixed",add:40,reference:"MFD-IC M15",wall:"Concrete floor, minimum 150 mm and density 600 kg/m³",seal:"Tested mortar infill arrangement",note:"Follow the current M15 drawing for mortar depth and fixing detail."}
+      M9:{label:"M9 — Drywall, Batt installation — opening NOT lined",type:"bsb-circle-square-table",openingTable:{100:140,125:165,150:190,160:200,200:240,250:290,300:340,315:355},settingOut:{basis:"table-centred",source:"BSB MFD-IC M9 opening table; damper positioned centrally and opening is not lined."},reference:"MFD-IC M9",wall:"Group A 50 mm steel stud; 2 × 12.5 mm Type F board each side",seal:"Two layers of 50 mm ablative-coated Batt; seal exposed insulation faces",note:"The wall opening must not be lined. Fix the plate into the steel track using all applicable holes."},
+      M10:{label:"M10 — Masonry wall, Batt infill",type:"bsb-circle-square-table",openingTable:{100:140,125:165,150:190,160:200,200:240,250:290,300:340,315:355},settingOut:{basis:"table-centred",source:"BSB MFD-IC M10 opening table; damper positioned centrally."},reference:"MFD-IC M10",wall:"Masonry wall, minimum 100 mm and density 600 kg/m³",seal:"Ablative-coated Batt infill",note:"Use fire-rated steel anchors and all fixing positions."},
+      M11:{label:"M11 — Masonry floor, Batt infill",type:"bsb-circle-square-table",openingTable:{100:140,125:165,150:190,160:200,200:240,250:290,300:340,315:355},settingOut:{basis:"table-centred",source:"BSB MFD-IC M11 opening table; damper positioned centrally."},reference:"MFD-IC M11",wall:"Concrete floor, minimum 150 mm and density 600 kg/m³",seal:"Ablative-coated Batt infill",note:"Use fire-rated steel anchors and all fixing positions."},
+      M15:{label:"M15 — Masonry floor, mortar infill",type:"bsb-circle-round-table",openingTable:{100:178.5,125:203.5,150:228.5,160:238.5,200:278.5,250:328.5,300:378.5,315:393.5},settingOut:{basis:"table-centred",source:"BSB MFD-IC M15 published round opening table; damper positioned centrally."},reference:"MFD-IC M15",wall:"Concrete floor, minimum 150 mm and density 600 kg/m³",seal:"Tested mortar infill arrangement",note:"Follow the current M15 drawing for mortar depth and fixing detail."}
     }},
     "AT-FSD":{label:"AT-FSD — Air-transfer fire/smoke damper",shape:"rect",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/at_fsd_iom_compressed.pdf",guide:"BSB AT-FSD Installation, Operation and Maintenance Instructions",revision:"V12204",methods:{
-      AT_OFFICIAL:{label:"Unducted air-transfer installation — official drawing required",type:"bsb-link",reference:"AT-FSD tested installation",note:"AT-FSD opening dimensions depend on the ordered damper assembly and supporting construction. Use the current BSB dimensional drawing rather than a generic nominal-duct formula."}
+      M9:{label:"M9 — Drywall, fully lined unducted opening",type:"bsb-at-dry",reference:"AT-FSD M9",wall:"Tested drywall construction, fully lined on all four internal sides",seal:"No intumescent mastic is required for fire integrity; it may be used only where an airtight everyday joint is required",classification:"E 120 (ve i→o) S",note:"Actual sleeve is 10 mm below nominal size, giving 5 mm clearance per side. Finished aperture is the ordered nominal size with the BSB +5/-0 mm tolerance.",settingOut:{basis:"nominal-duct",bottomFinished:0,topFinished:0,source:"BSB AT-FSD IOM 10.7–10.9: finished aperture is nominal size and the sleeve is nominal minus 10 mm."}},
+      M10:{label:"M10 — Masonry wall, unducted opening",type:"bsb-at-solid",reference:"AT-FSD M10",wall:"Masonry/concrete wall with lintel over the aperture where required",seal:"No intumescent mastic is required for fire integrity; it may be used only where an airtight everyday joint is required",classification:"E 120 (ve i→o) S",note:"Use 5 mm diameter × 40 mm minimum steel fixings through the outer flange holes. Actual sleeve is 10 mm below nominal size.",settingOut:{basis:"nominal-duct",bottomFinished:0,topFinished:0,source:"BSB AT-FSD IOM 10.7–10.8 and M10 drawing."}}
     }}
   }},
   ADVANCED_AIR:{label:"Advanced Air",products:{
@@ -357,7 +453,10 @@ const FD_MANUFACTURERS={
       HEVAC:{label:"HEVAC frame — rigid wall E120",type:"advanced-hevac-2530",reference:"2530 HEVAC • E120",wall:"Rigid wall, minimum 150 mm",seal:"HEVAC frame with turnback tabs and 4:1 mortar mix",classification:"E120 S",note:"The damper must remain able to move within the HEVAC frame. Do not fill mortar onto the damper spigots."}
     }},
     "26SCD":{label:"26SCD — Smoke control damper",shape:"rect",documentId:"IOM_26SCD",manual:ADVANCED_AIR_DOCUMENTS.IOM_26SCD.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_26SCD.title,guide:"Advanced Air 26SCD Installation, Operation and Maintenance Manual",revision:"Rev 1.0 • April 2026",methods:{
-      OFFICIAL:{label:"AFS wall / remote installation — official opening table required",type:"advanced-link",reference:"26SCD tested installation",note:"The 26SCD has wall and remote-from-wall methods. VentTools will not apply the 0160/2530 opening table without the exact selected 26SCD dimensional table."}
+      AFS_FLEX:{label:"AFS — two-hour flexible wall",type:"advanced-26scd-afs",reference:"26SCD IOM page 5 • E120 S500",wall:"Flexible supporting construction, minimum 122 mm; minimum 150 mm for multi-section dampers",seal:"Two layers of 50 mm, 140 kg/m³ fire batt with fire-batt sealant and intumescent mastic",classification:"E120 S500",dynamicSettingOut:true,note:"Published minimum and maximum openings are based on the damper being centralised in the opening."},
+      AFS_RIGID:{label:"AFS — two-hour rigid wall",type:"advanced-26scd-afs",reference:"26SCD IOM page 6 • E120 S500",wall:"Rigid blockwork, masonry or homogeneous concrete wall, minimum 122 mm; minimum 150 mm for multi-section dampers",seal:"Two layers of 50 mm, 140 kg/m³ fire batt with fire-batt sealant and intumescent mastic",classification:"E120 S500",dynamicSettingOut:true,note:"Published minimum and maximum openings are based on the damper being centralised in the opening."},
+      REMOTE_INLINE:{label:"Remote from wall — duct mounted in-line",type:"advanced-26scd-remote",reference:"26SCD IOM page 7 • E120 S500",wall:"Remote duct-mounted installation using fire-rated ductwork tested to BS EN 1366-8",seal:"Ductwork and insulation system to the tested duct supplier's installation",classification:"E120 S500",settingOut:{basis:"not-applicable",source:"26SCD IOM page 7: remote duct-mounted in-line method; no separate damper wall opening is formed."},note:"The damper is supported in-line in the fire-rated ductwork. No separate builder opening is calculated for the damper body."},
+      REMOTE_SIDE:{label:"Remote from wall — duct mounted side",type:"advanced-26scd-remote",reference:"26SCD IOM page 8 • E120 S500",wall:"Remote side-mounted installation using fire-rated ductwork tested to BS EN 1366-8",seal:"High-temperature ceramic sealant at damper-to-duct joint; tested duct insulation system",classification:"E120 S500",settingOut:{basis:"not-applicable",source:"26SCD IOM page 8: remote duct-mounted side method; no separate damper wall opening is formed."},note:"The damper is mounted to the side of the fire-rated ductwork and independently supported. No separate builder opening is calculated for the damper body."}
     }},
     "0400MAN":{label:"0400MAN — Circular fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
       FLEX_60:{label:"60 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400MAN flexible wall • E60",wall:"Flexible wall, minimum 106 mm, two layers of 12.5 mm Type F board each side",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square, tolerance ±4 mm."},
@@ -368,25 +467,29 @@ const FD_MANUFACTURERS={
     "0400FME":{label:"0400FME — Circular motorised fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
       FLEX_60:{label:"60 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400FME flexible wall • E60 S",wall:"Flexible wall, minimum 106 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square."},
       FLEX_120:{label:"120 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400FME flexible wall • E120 S",wall:"Flexible wall, minimum 131 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square."},
-      RIGID:{label:"Rigid wall — square/circular opening",type:"advanced-circle-fixed",add:35,openingShape:"square",reference:"0400FME rigid wall",wall:"Rigid wall matching the selected tested construction",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening: nominal diameter +35 mm."}
+      RIGID_60:{label:"60 minute rigid wall — square/circular opening",type:"advanced-circle-fixed",add:35,openingShape:"square",reference:"0400FME rigid wall • E60 S",wall:"Rigid wall, minimum 106 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening: nominal diameter +35 mm; published tolerance ±25 mm."},
+      RIGID_120:{label:"120 minute rigid wall — square/circular opening",type:"advanced-circle-fixed",add:35,openingShape:"square",reference:"0400FME rigid wall • E120 S",wall:"Rigid wall, minimum 131 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening: nominal diameter +35 mm; published tolerance ±25 mm."}
     }},
     "0500MAN":{label:"0500MAN — Circular floor fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
       FLOOR:{label:"Rigid floor — compound infill E120",type:"advanced-circle-floor",add:10,reference:"0500MAN floor • E120",wall:"Aerated concrete floor, minimum 150 mm, density 575 kg/m³ ±50 kg/m³",seal:"Silverseal HS Compound, minimum 100 mm thick",note:"Minimum opening is nominal diameter +10 mm. Maximum permitted opening is 1800 × 1800 mm."}
+    }},
+    "0500FME":{label:"0500FME — Circular motorised floor fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
+      FLOOR:{label:"Rigid floor — compound infill E120 S",type:"advanced-circle-floor",add:10,reference:"0500FME floor • E120 S",wall:"Aerated concrete floor, minimum 150 mm, density 575 kg/m³ ±50 kg/m³",seal:"Silverseal HS Compound, minimum 100 mm thick",note:"Minimum opening is nominal diameter +10 mm. Maximum permitted opening is 1800 × 1800 mm."}
     }}
   }},
   ACTIONAIR:{label:"Swegon (Actionair products)",products:{
     CSS:{label:"CSS — Circular fire/smoke damper",shape:"circle",manual:"https://www.swegon.com/globalassets/digizuite/10514-en-css_installation_en.pdf",guide:"Actionair CSS Installation Guide",revision:"LNNN00356 v6.0 • 27 May 2025",methods:{
-      CSS_DRY:{label:"Vertical — plasterboard wall",type:"css-dry",reference:"AA/F13413 / AA/F12820",min:10,max:40,step:10,defaultAllowance:30},
-      CSS_MASONRY:{label:"Vertical — masonry wall",type:"css-masonry",reference:"AA/F12822",squareMin:10,squareMax:40,circleMin:10,circleMax:30,step:10,defaultAllowance:30},
-      CSS_SLAB:{label:"Horizontal — concrete slab",type:"css-slab",reference:"AA/F12821",squareMin:10,squareMax:40,step:10,defaultAllowance:30}
+      CSS_DRY:{label:"Vertical — plasterboard wall",type:"css-dry",reference:"AA/F13440 / AA/F12820",min:10,max:40,step:10,defaultAllowance:30,dynamicSettingOut:true},
+      CSS_MASONRY:{label:"Vertical — masonry wall",type:"css-masonry",reference:"AA/F12822",squareMin:10,squareMax:40,circleMin:10,circleMax:30,step:10,defaultAllowance:30,dynamicSettingOut:true},
+      CSS_SLAB:{label:"Horizontal — concrete slab",type:"css-slab",reference:"AA/F12821",squareMin:10,squareMax:30,step:10,defaultAllowance:20,dynamicSettingOut:true}
     }},
     "DWFX-F":{label:"DWFX-F / DWFX-3F — Rectangular",shape:"rect",manual:"https://www.swegon.com/globalassets/digizuite/10506-en-smokeshield_fireshield_dwfx-f_installation_en.pdf",guide:"Actionair DWFX-F Installation Guide",revision:"LNNN00354 v6.0 • 17 March 2026",methods:{
-      DW_DRY_1:{label:"Vertical plasterboard wall — 1 × Type F board each face",type:"dwfx-dry-fixed",referenceSmoke:"AA/F13412",referenceFire:"AA/F13440",w:30,h:30,boardsW:2,boardsH:2},
-      DW_DRY_2:{label:"Vertical plasterboard wall — 2 × Type F boards each face",type:"dwfx-dry-range",referenceSmoke:"AA/F10704",referenceFire:"AA/F10705",smokeW:[10,52],smokeH:[10,40],fireW:[10,40],fireH:[10,40],boardsW:2,boardsH:2},
-      DW_UNDER_DRY:{label:"DWFX-3F plasterboard wall under concrete slab",type:"dwfx-under-dry",referenceSmoke:"AA/F11945",referenceFire:"AA/F11944",smokeW:[10,57],smokeH:[10,30],fireW:[10,60],fireH:[5,30],boardsW:2,boardsH:1},
-      DW_UNDER_MASONRY:{label:"DWFX-3F masonry wall under concrete slab",type:"dwfx-range",referenceSmoke:"AA/F12394",referenceFire:"AA/F12827",smokeW:[10,57],smokeH:[5,30],fireW:[10,80],fireH:[5,40],boardsW:0,boardsH:0},
-      DW_SHAFT:{label:"DWFX-F plasterboard shaftwall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13472",smokeOnly:true,w:30,h:30,boardsW:2,boardsH:2},
-      DW_COMPOSITE:{label:"DWFX-F composite panel wall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13396",smokeOnly:true,w:52,h:60,boardsW:0,boardsH:0},
+      DW_DRY_1:{label:"Vertical plasterboard wall — 1 × Type F board each face",type:"dwfx-dry-fixed",referenceSmoke:"AA/F13412",referenceFire:"AA/F13440",w:30,h:30,boardsW:2,boardsH:2,dynamicSettingOut:true},
+      DW_DRY_2:{label:"Vertical plasterboard wall — 2 × Type F boards each face",type:"dwfx-dry-range",referenceSmoke:"AA/F10704",referenceFire:"AA/F10705",smokeW:[10,52],smokeH:[10,40],fireW:[10,40],fireH:[10,40],boardsW:2,boardsH:2,dynamicSettingOut:true},
+      DW_UNDER_DRY:{label:"DWFX-3F plasterboard wall under concrete slab",type:"dwfx-under-dry",referenceSmoke:"AA/F11945",referenceFire:"AA/F11944",smokeW:[10,57],smokeH:[10,30],fireW:[10,60],fireH:[5,30],boardsW:2,boardsH:1,dynamicSettingOut:true},
+      DW_UNDER_MASONRY:{label:"DWFX-3F masonry wall under concrete slab",type:"dwfx-range",referenceSmoke:"AA/F12394",referenceFire:"AA/F12827",smokeW:[10,57],smokeH:[5,30],fireW:[10,80],fireH:[5,40],boardsW:0,boardsH:0,dynamicSettingOut:true},
+      DW_SHAFT:{label:"DWFX-F plasterboard shaftwall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13472",smokeOnly:true,w:30,h:30,boardsW:2,boardsH:2,dynamicSettingOut:true},
+      DW_COMPOSITE:{label:"DWFX-F composite panel wall — SmokeShield only",type:"dwfx-fixed",referenceSmoke:"AA/F13396",smokeOnly:true,w:52,h:60,boardsW:0,boardsH:0,dynamicSettingOut:true},
       DW_MASONRY_LINK:{label:"DWFX-F masonry wall — use official hole sizer / drawing",type:"dwfx-link",referenceSmoke:"AA/F12493",referenceFire:"AA/F10707"},
       DW_TIMBER_LINK:{label:"DWFX-F timber stud partition — official drawing required",type:"dwfx-link",referenceSmoke:"AA/F13752",smokeOnly:true}
     }},
@@ -394,8 +497,8 @@ const FD_MANUFACTURERS={
       SPAN_STANDARD:{label:"SPAN slab installation — recommended opening",type:"actionair-span",reference:"SmokeShield PTC SPAN"}
     }},
     "HEVAC-IF":{label:"HEVAC / HVCA Installation Frame — Rectangular",shape:"rect",manual:"https://www.swegon.com/globalassets/digizuite/10508-en-smokeshield_hevac_hvca_installation_en.pdf",guide:"Actionair I/F Installation Guide",revision:"LNNN00352 v5.1 • 26 May 2022",methods:{
-      HEVAC_WALL:{label:"Vertical installation frame in masonry wall",type:"hevac-frame",referenceSmoke:"AA/F10702",referenceFire:"AA/F10703"},
-      HEVAC_SLAB:{label:"Horizontal installation frame in concrete slab — FireShield only",type:"hevac-frame",referenceFire:"AA/F10701",fireOnly:true}
+      HEVAC_WALL:{label:"Vertical installation frame in masonry wall",type:"hevac-frame",referenceSmoke:"AA/F10702",referenceFire:"AA/F10703",dynamicSettingOut:true},
+      HEVAC_SLAB:{label:"Horizontal installation frame in concrete slab — FireShield only",type:"hevac-frame",referenceFire:"AA/F10701",fireOnly:true,dynamicSettingOut:true}
     }}
   }},
   LINDAB:{label:"Lindab",products:{
@@ -458,9 +561,80 @@ WK25_FLOOR_WEICH:{label:"Floor — Fire Batt / Weichschott",type:"wk25-fixed",re
   }}
 };
 function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
+
+
+// RC10 Lindab engineering enrichment.
+// Builder setting-out is enabled only where the selected Lindab installation
+// drawing defines a nominal-size opening allowance that is centred on the damper.
+(function applyLindabEngineeringMapping(){
+  const lindab=FD_MANUFACTURERS.LINDAB;
+  if(!lindab)return;
+  const centred=(method,source)=>{
+    method.settingOut={basis:"table-centred",source};
+    method.packReady=true;
+    method.verificationStatus="manufacturer-mapped";
+  };
+  const addCommon=(method,extra=[])=>{
+    method.engineeringNotes=[
+      "Position the damper centrally within the tested opening shown by the selected Lindab installation detail.",
+      "Connected ductwork must be independently supported so its weight is not carried by the damper or penetration seal.",
+      "Keep access available for inspection, actuator operation and removal of connected ductwork.",
+      ...extra
+    ];
+  };
+
+  const fnc=lindab.products.FNC1;
+  if(fnc){
+    centred(fnc.methods.FNC1_WET30,"FNC1 installation booklet rev 20-12, wall installation diagrams: nominal Ø +30 mm");
+    centred(fnc.methods.FNC1_DRY10,"FNC1 installation booklet rev 20-12, acrylic-seal wall diagrams: nominal Ø +10 mm");
+    centred(fnc.methods.FNC1_FLOOR,"FNC1 installation booklet rev 20-12, floor installation diagram");
+    Object.values(fnc.methods).forEach(m=>addCommon(m,["Allow approximately 200 mm clear working space at the control mechanism where practicable.","Inspection hatches are recommended on both sides of connected ductwork."]));
+  }
+
+  ["WH25","WH45"].forEach(productKey=>{
+    const product=lindab.products[productKey]; if(!product)return;
+    Object.values(product.methods).forEach(m=>{
+      centred(m,`${productKey} Lindab installation booklet, selected tested installation drawing`);
+      addCommon(m,["Observe the method-specific minimum distance to adjacent construction and other dampers shown in the booklet.","Allow approximately 200 mm clear working space at the control mechanism where practicable."]);
+    });
+  });
+
+  ["WK25","WK45"].forEach(productKey=>{
+    const product=lindab.products[productKey]; if(!product)return;
+    Object.values(product.methods).forEach(m=>{
+      if(m.type==="wk25-range"){
+        m.settingOut={basis:"table-centred",source:`${productKey} installation booklet, selected opening range; VentTools uses the documented recommended minimum allowance`};
+        m.packReady=true;
+      }else if(m.type==="wk25-fixed" || m.type==="lindab-rect-fixed"){
+        m.settingOut={basis:"table-centred",source:`${productKey} installation booklet, selected fixed opening detail`};
+        m.packReady=true;
+      }
+      addCommon(m,[m.spacingA!=null?`Recorded minimum separation field A: ${m.spacingA} mm for this method.`:"",m.spacingB!=null?`Recorded minimum edge-distance field B: ${m.spacingB} mm for this method.`:""] .filter(Boolean));
+    });
+  });
+
+  const wks=lindab.products.WKS25;
+  if(wks){
+    const map={
+      WKS25_RIGID:{source:"WKS25 booklet rev 25-03 pp.2,18: square hole b+50 / h+50",wall:"Vertical rigid wall, minimum 100 mm, 550 kg/m³",seal:"Plasterboard sheet on motor side / dry sealing with binders",spacing:0,edge:0},
+      WKS25_LIGHT:{source:"WKS25 booklet rev 25-03 pp.2,20: square hole b+75 / h+75",wall:"Vertical light wall Type A or F, minimum 100 mm",seal:"Plasterboard strip/sheet on motor side / dry sealing with binders",spacing:0,edge:0},
+      WKS25_GYPSUM:{source:"WKS25 booklet rev 25-03 pp.3,27-28: square hole b+50 / h+50",wall:"Solid gypsum-block wall, 70 or 100 mm, 995 kg/m³",seal:"Plasterboard sheet on motor side / dry sealing with binders",spacing:200,edge:75},
+      WKS25_SHAFT:{source:"WKS25 booklet rev 25-03 pp.4,30: square hole b+90 / h+90",wall:"Vertical shaft wall, minimum 90 mm",seal:"Plasterboard sheet on motor side / dry sealing with binders",spacing:200,edge:75}
+    };
+    Object.entries(wks.methods).forEach(([key,m])=>{
+      const d=map[key]; if(!d)return;
+      m.wall=d.wall;m.seal=d.seal;m.spacing=d.spacing;m.edge=d.edge;
+      centred(m,d.source);
+      addCommon(m,["Raise and use the factory fixing flaps as shown in the WKS25 booklet.","No more than two dampers may be paired; three or more are prohibited.","Two vertically paired dampers must not both have vertical blade axes.",`Minimum independent-damper separation recorded for this method: ${d.spacing} mm.`,`Minimum distance to adjacent wall/floor/ceiling recorded for this method: ${d.edge} mm.`]);
+    });
+  }
+})();
+
+applyFDVerificationTeaching();
+
 function currentFD(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=p.methods[$("fdMethod").value];return{man,p,m,manKey:$("fdManufacturer").value,productKey:$("fdSeries").value,methodKey:$("fdMethod").value}}
-function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;s.appendChild(o)});fillFDMethods()}
-function fillFDMethods(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=$("fdMethod");m.innerHTML="";Object.entries(p.methods).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});updateFDInputs()}
+function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=String(k);o.textContent=v.label;o.dataset.manual=v.manual||"";o.dataset.manualTitle=v.manualTitle||v.guide||"";o.dataset.revision=v.revision||"";o.dataset.productLabel=(v.label||String(k)).split(" — ")[0];s.appendChild(o)});fillFDMethods()}
+function fillFDMethods(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=$("fdMethod");m.innerHTML="";Object.entries(p.methods).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});updateFDInputs();refreshFDManualResource()}
 function setAllowanceOptions(min,max,step,def){const sel=$("fdAllowance");sel.innerHTML="";for(let n=min;n<=max;n+=step){const o=document.createElement("option");o.value=n;o.textContent=`${n} mm total (${n/2} mm nominal each side)`;if(n===def)o.selected=true;sel.appendChild(o)}}
 
 function setNumericOptions(id,min,max,def){const s=$(id);s.innerHTML="";for(let n=min;n<=max;n++){const o=document.createElement("option");o.value=n;o.textContent=n+" mm";if(n===def)o.selected=true;s.appendChild(o)}}
@@ -491,9 +665,9 @@ function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="c
   $("fdWk25Wrap").style.display=wk25?"block":"none";
   const wkConfig=$("fdWk25Config")?.value||"single";
   const dwBasis=$("fdDwfxInputBasis")?.value||"NOMINAL",dwSmoke=$("fdDwfxVariant")?.value==="SMOKE",dwAuto=dwfx&&dwSmoke&&dwBasis==="NOMINAL";
-  $("fdWidthLabel").textContent=dwfx?(dwAuto?"Nominal duct width (mm)":"Measured overall casing width (mm)"):hevac?"Measured outside frame width (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly width (mm)":"Nominal duct width (mm)";
-  $("fdHeightLabel").textContent=dwfx?(dwAuto?"Nominal duct height (mm)":"Measured overall casing height (mm)"):hevac?"Measured outside frame height (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly height (mm)":"Nominal duct height (mm)";
-  $("fdBoardWrap").style.display=["bsb-dry","bsb-rect-dry","bsb-circle-dry-lined","css-dry"].includes(m.type)?"block":"none";
+  $("fdWidthLabel").textContent=dwfx?(dwAuto?"Nominal duct width (mm)":"Measured overall casing width (mm)"):hevac?"Nominal duct width (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly width (mm)":"Nominal duct width (mm)";
+  $("fdHeightLabel").textContent=dwfx?(dwAuto?"Nominal duct height (mm)":"Measured overall casing height (mm)"):hevac?"Nominal duct height (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly height (mm)":"Nominal duct height (mm)";
+  $("fdBoardWrap").style.display=["bsb-dry","bsb-rect-dry","bsb-circle-dry-lined","bsb-at-dry","css-dry"].includes(m.type)?"block":"none";
   $("fdWallBuildWrap").style.display=m.type==="css-dry"?"block":"none";
   $("fdShapeWrap").style.display=["css-masonry"].includes(m.type)?"block":"none";
   $("fdAllowanceWrap").style.display=["css-dry","css-masonry","css-slab"].includes(m.type)?"block":"none";
@@ -533,6 +707,30 @@ function actionairSpanCase601(d){
   const caseW=d<151?275:(d<200?325:(d<950?d+125:(d<970?1075:d+105)));
   const caseH=d<151?272:(d<200?322:(d<950?d+122:(d<970?1072:d+102)));
   return {caseW,caseH};
+}
+function actionairSmokeRectCasing(w,h){
+  if(w<100||w>1000||h<100||h>1000)return null;
+  const bodyW=w<151?200:(w<200?250:w+50);
+  const bodyH=h<151?200:(h<200?250:h+50);
+  const topProjection=(bodyH-h)/2;
+  const bottomProjection=(bodyH-h)/2;
+  return {bodyW,bodyH,casingW:bodyW+28,casingH:bodyH,topProjection,bottomProjection};
+}
+function actionairHevacSmokeFrame(w,h){
+  if(w<100||w>1000||h<100||h>1000)return null;
+  const frameW=w<151?314:(w<200?364:w+114);
+  const frameH=h<151?340:(h<200?390:h+140);
+  return {frameW,frameH};
+}
+function actionairHevacFireFrame(w,h){
+  if(w<100||w>1250||h<100||h>1000)return null;
+  const frameW=w+114;
+  let frameH;
+  if(h<=249)frameH=h+114;
+  else if(h<=450)frameH=h+133;
+  else if(h<=650)frameH=h+140;
+  else frameH=h+170;
+  return {frameW,frameH};
 }
 function calculateActionairSpan(){
   const variant=$("fdSpanVariant").value;
@@ -604,7 +802,30 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     const finishedW=W+m.finishedW,finishedH=H+m.finishedH;
     const lined=m.type==="bsb-rect-dry";
     const cutW=finishedW+(lined?2*b:0),cutH=finishedH+(lined?2*b:0);
-    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm ${lined?"structural cut":"finished aperture"}`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`BSB case/frame allowance: +${fmt0(m.finishedW)} mm width and +${fmt0(m.finishedH)} mm height, giving ${fmt0(finishedW)} × ${fmt0(finishedH)} mm finished aperture${lined?`; structural cut then adds ${fmt(b)} mm lining to both sides of each dimension`:"; no aperture lining added by VentTools"}`,reference:m.reference,range:m.note,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:`Width: ${fmt0(W)} + ${fmt0(m.finishedW)} = ${fmt0(finishedW)} mm; height: ${fmt0(H)} + ${fmt0(m.finishedH)} = ${fmt0(finishedH)} mm`,finishedStage:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm${lined?" before aperture lining":""}`,cutStage:lined?`Width: ${fmt0(finishedW)} + 2 × ${fmt(b)} mm aperture lining = ${fmt0(cutW)} mm; height: ${fmt0(finishedH)} + 2 × ${fmt(b)} mm aperture lining = ${fmt0(cutH)} mm`:`${fmt0(cutW)} × ${fmt0(cutH)} mm`,sourceStatus:"Verified from manufacturer method",statusType:"verified",includesLining:lined,criticalRules:[`Supporting construction: ${m.wall}.`,`BSB case/frame build-up: nominal ${fmt0(W)} × ${fmt0(H)} mm plus ${fmt0(m.finishedW)} mm width and ${fmt0(m.finishedH)} mm height = ${fmt0(finishedW)} × ${fmt0(finishedH)} mm finished aperture.`,`Opening treatment: ${lined?`line the aperture with ${fmt(b)} mm fire-rated board on every side; the structural cut therefore gains ${fmt0(2*b)} mm overall in width and height`:"do not add a board lining unless the selected BSB drawing requires it"}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Minimum clear structural separation: 200 mm between separate damper casings.`,`Minimum distance from damper casing to adjacent wall, floor or ceiling: 75 mm.`,m.note,"Other services must not share the damper opening."]};
+    const hasMappedCasing=Number.isFinite(m.casingAddW)&&Number.isFinite(m.casingAddH);
+    const casingW=hasMappedCasing?W+m.casingAddW:null,casingH=hasMappedCasing?H+m.casingAddH:null;
+    const casingText=hasMappedCasing
+      ?`Overall damper casing: ${fmt0(W)} + ${fmt0(m.casingAddW)} = ${fmt0(casingW)} mm wide; ${fmt0(H)} + ${fmt0(m.casingAddH)} = ${fmt0(casingH)} mm high. No physical damper measurement is required for this recorded size method.`
+      :`Published finished-aperture allowance: nominal +${fmt0(m.finishedW)} mm width and +${fmt0(m.finishedH)} mm height.`;
+    const clearanceText=hasMappedCasing
+      ?`Tested aperture clearance: ${fmt0(m.clearanceLeft)} mm left + ${fmt0(m.clearanceRight)} mm right, and ${fmt0(m.clearanceBottom)} mm below + ${fmt0(m.clearanceTop)} mm above the casing.`
+      :"";
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm ${lined?"structural cut":"finished aperture"}`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`${casingText}${clearanceText?` ${clearanceText}`:""} Finished aperture: ${fmt0(finishedW)} × ${fmt0(finishedH)} mm${lined?`; structural cut adds one ${fmt(b)} mm lining board at each opposite edge (${fmt0(2*b)} mm overall per dimension)`:"; no aperture lining added by VentTools"}`,reference:m.reference,range:m.note,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm ordered nominal size`,casingStage:hasMappedCasing?`${fmt0(casingW)} × ${fmt0(casingH)} mm overall casing — derived from manufacturer dimensions; no site measurement required`:`Published method allowance — see finished opening stage`,finishedStage:hasMappedCasing?`${fmt0(finishedW)} × ${fmt0(finishedH)} mm lined aperture, including tested casing clearances`:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm${lined?" before aperture lining":""}`,cutStage:lined?`Width: ${fmt0(finishedW)} + 2 × ${fmt(b)} mm aperture lining = ${fmt0(cutW)} mm; height: ${fmt0(finishedH)} + 2 × ${fmt(b)} mm aperture lining = ${fmt0(cutH)} mm`:`${fmt0(cutW)} × ${fmt0(cutH)} mm`,sourceStatus:"Verified from manufacturer method",statusType:"verified",includesLining:lined,liningMapped:lined,structuralLiningBottom:lined?b:0,finishedW,finishedH,cutW,cutH,criticalRules:[`Supporting construction: ${m.wall}.`,`BSB case/frame build-up: nominal ${fmt0(W)} × ${fmt0(H)} mm plus ${fmt0(m.finishedW)} mm width and ${fmt0(m.finishedH)} mm height = ${fmt0(finishedW)} × ${fmt0(finishedH)} mm finished aperture.`,`Opening treatment: ${lined?`fit one ${fmt(b)} mm fire-rated lining board to each internal edge of the aperture. That adds ${fmt(b)} mm at the left and right (${fmt0(2*b)} mm overall width) and ${fmt(b)} mm at the top and bottom (${fmt0(2*b)} mm overall height). The two wall-face boards are not added again`:"do not add a board lining unless the selected BSB drawing requires it"}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Minimum clear structural separation: 200 mm between separate damper casings.`,`Minimum distance from damper casing to adjacent wall, floor or ceiling: 75 mm.`,m.note,"Other services must not share the damper opening."]};
+  }else if(m.type==="bsb-at-dry" || m.type==="bsb-at-solid"){
+    const lined=m.type==="bsb-at-dry";
+    const b=parseFloat($("fdBoardThickness").value)||12.5;
+    const finishedW=W,finishedH=H;
+    const cutW=finishedW+(lined?2*b:0),cutH=finishedH+(lined?2*b:0);
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,
+      opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm ${lined?"structural cut":"finished masonry aperture"}`,
+      damper:`${fmt0(W)} × ${fmt0(H)} mm ordered nominal opening`,
+      rule:lined?`Finished lined aperture = ordered nominal size. Structural cut adds 2 × ${fmt(b)} mm aperture lining in each dimension.`:`Finished masonry aperture = ordered nominal size (+5/-0 mm manufacturer tolerance).`,
+      reference:m.reference,range:m.note,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm ordered nominal aperture`,
+      casingStage:`${fmt0(W-10)} × ${fmt0(H-10)} mm actual sleeve (nominal minus 10 mm)`,
+      finishedStage:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm finished aperture (+5/-0 mm tolerance)`,
+      cutStage:lined?`${fmt0(finishedW)} + 2 × ${fmt(b)} = ${fmt0(cutW)} mm wide; ${fmt0(finishedH)} + 2 × ${fmt(b)} = ${fmt0(cutH)} mm high`:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm`,
+      sourceStatus:"Verified from manufacturer method",statusType:"verified",includesLining:lined,liningMapped:lined,structuralLiningBottom:lined?b:0,finishedW,finishedH,cutW,cutH,
+      criticalRules:[`Supporting construction: ${m.wall}.`,lined?`Opening treatment: fully line all four internal sides with ${fmt(b)} mm fire-rated plasterboard and track.`:"Opening treatment: form the masonry aperture to the ordered nominal size.",`Damper fixing: ${lined?"3.5 mm × 38 mm drywall screws through the outer flange holes into the aperture track":"5 mm diameter × 40 mm minimum steel fixings through the outer flange holes"}.`,`Certified joint treatment: ${m.seal}.`,`Position the damper centrally in the prepared opening.`,`This is an unducted air-transfer damper; no duct connection is required.`,`Minimum separation: 200 mm between separate dampers and 75 mm to adjacent wall or floor.`,m.note]};
   }else if(productKey==="DWFX-F"){
     const variant=$("fdDwfxVariant").value,board=parseFloat($("fdDwfxBoard").value)||0;
     if(m.smokeOnly&&variant!=="SMOKE")$("fdDwfxVariant").value="SMOKE";
@@ -616,15 +837,17 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
       const wa=parseFloat($("fdDwfxWAllowance").value)||0,ha=parseFloat($("fdDwfxHAllowance").value)||0;
       const basis=$("fdDwfxInputBasis")?.value||"NOMINAL";
       const automatic=actualVariant==="SMOKE"&&basis==="NOMINAL";
-      if(automatic&&(W<200||H<200||W>1000||H>1000)){
-        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Use measured casing mode",damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:"Automatic casing conversion is enabled for rectangular SmokeShield PTC sizes from 200 × 200 mm to 1000 × 1000 mm. Smaller dimensional bands use fixed-width casing arrangements and should be physically measured.",reference:ref,isLinkOnly:true,range:"Select “Measured overall casing size” and enter the casing including the 28 mm PTC shroud, excluding the peripheral flange."};
+      const autoDims=automatic?actionairSmokeRectCasing(W,H):null;
+      if(automatic&&!autoDims){
+        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Size outside published SmokeShield range",damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:"Published dimensional data covers nominal widths and heights from 100 mm to 1000 mm.",reference:ref,isLinkOnly:true,range:"Check the current Actionair DWFX-F dimensional table."};
       }else{
         let casingW=W,casingH=H,baseCasingW=null,baseCasingH=null,spigotW=null,spigotH=null,flangeW=null,flangeH=null;
         if(automatic){
           spigotW=W-5; spigotH=H-5;
-          baseCasingW=W+50; baseCasingH=H+100;
-          casingW=baseCasingW+28; casingH=baseCasingH;
-          flangeW=W+198; flangeH=H+195;
+          baseCasingW=autoDims.bodyW; baseCasingH=autoDims.bodyH;
+          casingW=autoDims.casingW; casingH=autoDims.casingH;
+          flangeW=W<151?398:(W<200?448:W+198);
+          flangeH=H<151?395:(H<200?445:H+195);
         }
         const finishedW=casingW+wa,finishedH=casingH+ha;
         const cutW=finishedW+(m.boardsW||0)*board,cutH=finishedH+(m.boardsH||0)*board;
@@ -632,21 +855,26 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
         const breakdown=automatic
           ?`Nominal duct ${fmt0(W)} × ${fmt0(H)} mm. Spigot ${fmt0(spigotW)} × ${fmt0(spigotH)} mm. Base casing ${fmt0(baseCasingW)} × ${fmt0(baseCasingH)} mm. PTC shroud adds 28 mm on the actuator side, giving the opening-measurement casing ${fmt0(casingW)} × ${fmt0(casingH)} mm. Overall peripheral flange ${fmt0(flangeW)} × ${fmt0(flangeH)} mm (not included in the opening calculation). Minimum actuator removal clearance: 120 mm.`
           :`Measured casing used directly: ${fmt0(casingW)} × ${fmt0(casingH)} mm${actualVariant==="SMOKE"?" including the PTC shroud":""}, excluding the peripheral flange.`;
-        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm${hasBoards?" cut size":""}`,damper:automatic?`${fmt0(W)} × ${fmt0(H)} mm nominal duct`:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening ${fmt0(finishedW)} × ${fmt0(finishedH)} mm: casing +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${hasBoards?`; cut size adds ${m.boardsW||0} × ${fmt0(board)} mm board to width and ${m.boardsH||0} × ${fmt0(board)} mm board to height`:""}`,reference:ref,variant:actualVariant,range:`${breakdown} Minimum separation: 200 mm between dampers in separate ducts and 75 mm from a damper to an adjacent wall or floor.`,nominalStage:automatic?`${fmt0(W)} × ${fmt0(H)} mm`:"Measured casing input",casingStage:automatic?`${fmt0(casingW)} × ${fmt0(casingH)} mm incl. PTC shroud`:`${fmt0(casingW)} × ${fmt0(casingH)} mm measured`,finishedStage:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm`,cutStage:`${fmt0(cutW)} × ${fmt0(cutH)} mm`,sourceStatus:automatic?"Derived from published manufacturer dimensions":"Manual casing measurement required",statusType:automatic?"derived":"manual",criticalRules:[`Permitted finished-opening allowance selected: +${fmt0(wa)} mm width and +${fmt0(ha)} mm height.`,`Include the 28 mm PTC shroud in the casing width; exclude the peripheral flange.`,hasBoards?`Structural cut includes the certified board build-up (${m.boardsW||0} board thicknesses in width and ${m.boardsH||0} in height).`:"No additional board build-up is applied by this selected method.",`Minimum spacing: 200 mm between separate dampers and 75 mm from adjacent wall/floor for this Actionair method.`,`Allow at least 120 mm actuator removal clearance.`]};
+        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm${hasBoards?" cut size":""}`,damper:automatic?`${fmt0(W)} × ${fmt0(H)} mm nominal duct`:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening ${fmt0(finishedW)} × ${fmt0(finishedH)} mm: casing +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${hasBoards?`; cut size adds ${m.boardsW||0} × ${fmt0(board)} mm board to width and ${m.boardsH||0} × ${fmt0(board)} mm board to height`:""}`,reference:ref,variant:actualVariant,range:`${breakdown} Minimum separation: 200 mm between dampers in separate ducts and 75 mm from a damper to an adjacent wall or floor.`,nominalStage:automatic?`${fmt0(W)} × ${fmt0(H)} mm`:"Measured casing input",casingStage:automatic?`${fmt0(casingW)} × ${fmt0(casingH)} mm incl. PTC shroud`:`${fmt0(casingW)} × ${fmt0(casingH)} mm measured`,finishedStage:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm`,cutStage:`${fmt0(cutW)} × ${fmt0(cutH)} mm`,sourceStatus:automatic?"Verified from Actionair DWFX-F dimensional data pages 14–15":"Manual casing measurement required",statusType:automatic?"verified":"manual",settingOut:automatic?{basis:"casing-edge",casingProjectionBottom:autoDims.bottomProjection,casingProjectionTop:autoDims.topProjection,bottomClearance:ha/2,topClearance:ha/2,source:`Actionair DWFX-F LNNN00354 v6.0 pages 3–9 and 14–15: SmokeShield casing derived from nominal duct size; selected finished-opening allowance split equally above and below the casing.`}:null,structuralLiningBottom:hasBoards?board:0,criticalRules:[`Permitted finished-opening allowance selected: +${fmt0(wa)} mm width and +${fmt0(ha)} mm height.`,`Include the 28 mm PTC shroud in the casing width; exclude the peripheral flange.`,hasBoards?`Structural cut includes the certified board build-up (${m.boardsW||0} board thicknesses in width and ${m.boardsH||0} in height).`:"No additional board build-up is applied by this selected method.",`Minimum spacing: 200 mm between separate dampers and 75 mm from adjacent wall/floor for this Actionair method.`,`Allow at least 120 mm actuator removal clearance.`]};
       }
     }
   }else if(productKey==="HEVAC-IF"){
     const gap=parseFloat($("fdHevacGap").value)||25;
     let variant=$("fdHevacVariant").value;if(m.fireOnly)variant="FIRE";
     const ref=variant==="SMOKE"?m.referenceSmoke:m.referenceFire;
-    const openW=W+2*gap,openH=H+2*gap;
-    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`Installation frame ${fmt0(W)} × ${fmt0(H)} mm`,rule:`Measured frame size + 2 × ${fmt0(gap)} mm clear mortar gap`,reference:ref,range:"Official drawing permits 5–75 mm from the installation-frame upstand to the aperture face all round."};
+    const frame=variant==="SMOKE"?actionairHevacSmokeFrame(W,H):actionairHevacFireFrame(W,H);
+    if(!frame){r={error:"Size outside the published Actionair I/F dimensional range."};}
+    else{
+      const openW=frame.frameW+2*gap,openH=frame.frameH+2*gap;
+      r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${variant==="SMOKE"?"SmokeShield PTC":"FireShield"} • ${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`Published I/F frame ${fmt0(frame.frameW)} × ${fmt0(frame.frameH)} mm + 2 × ${fmt0(gap)} mm clear mortar gap`,reference:ref,range:"Official drawing permits 5–75 mm from the installation-frame upstand to the aperture face all round.",nominalStage:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,casingStage:`${fmt0(frame.frameW)} × ${fmt0(frame.frameH)} mm installation frame`,finishedStage:`${fmt0(openW)} × ${fmt0(openH)} mm masonry opening`,cutStage:`${fmt0(openW)} × ${fmt0(openH)} mm`,sourceStatus:"Verified from Actionair I/F dimensional tables pages 9–11",statusType:"verified",settingOut:(()=>{const bottomProjection=variant==="SMOKE"?(((H<151?200:(H<200?250:H+50))-H)/2+57):57;const topProjection=frame.frameH-H-bottomProjection;return {basis:"casing-edge",casingProjectionBottom:bottomProjection,casingProjectionTop:topProjection,bottomClearance:gap,topClearance:gap,source:"Actionair I/F LNNN00352 v5.1 pages 9–11: nominal duct to installation-frame projections are derived from the published dimensional drawings; the selected mortar gap is then applied outside the frame."};})(),criticalRules:[`Installation frame: ${fmt0(frame.frameW)} × ${fmt0(frame.frameH)} mm.`,`Selected clear mortar gap: ${fmt0(gap)} mm all round (permitted 5–75 mm).`,`Ductwork must be independently supported with a break-away joint on both sides.`,`Minimum spacing: 200 mm between separate dampers and 75 mm to adjacent construction.`]};
+    }
   }else if(m.type==="wk25-fixed" || m.type==="wk25-range"){
  const config=$("fdWk25Config")?.value||"single",axis=$("fdWk25Axis")?.value||"horizontal",paired=config!=="single";
  if(paired&&!m.pairAllowed)r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Paired arrangement not certified",damper:`${fmt0(W)} × ${fmt0(H)} mm entered assembly`,rule:"Choose a method that permits paired dampers.",reference:m.reference,isLinkOnly:true,range:`Minimum separation to another damper: ${m.spacingA||m.spacingC} mm. Minimum distance to wall/floor: ${m.spacingB||m.spacingD} mm. ${m.note}`};
  else if(config==="pair-stack"&&axis==="vertical")r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Orientation not permitted",damper:`${fmt0(W)} × ${fmt0(H)} mm entered assembly`,rule:"Two vertically stacked WK25 dampers must not both have vertical blade axes.",reference:"WK25 booklet page 2",isLinkOnly:true,range:"Select horizontal or mixed blade-axis arrangement."};
- else{const aw=m.type==="wk25-fixed"?m.w:m.recommendedW,ah=m.type==="wk25-fixed"?m.h:m.recommendedH,openW=W+aw,openH=H+ah,sd=m.spacingA||m.spacingC,se=m.spacingB||m.spacingD,rr=m.type==="wk25-range"?`Permitted allowance: width +${m.minW} to +${m.maxW} mm; height +${m.minH} to +${m.maxH} mm.`:`Fixed allowance: width +${m.w} mm; height +${m.h} mm.`;
- r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm${m.type==="wk25-range"?" recommended":""}`,damper:`${fmt0(W)} × ${fmt0(H)} mm ${paired?"measured joined assembly":"nominal damper"}`,rule:`${rr} ${paired?"Use the approved Lindab pairing kit and intumescent gasket.":""}`,reference:m.reference,range:`Construction: ${m.wall}. Seal: ${m.seal}. Minimum separation to another independent damper/assembly: ${sd} mm. Minimum distance to adjacent wall/floor: ${se} mm. ${m.note}`};}
+ else{const aw=m.type==="wk25-fixed"?m.w:m.recommendedW,ah=m.type==="wk25-fixed"?m.h:m.recommendedH,openW=W+aw,openH=H+ah,sd=m.spacingA||m.spacingC,se=m.spacingB||m.spacingD,rr=m.type==="wk25-range"?`Permitted structural D-hole allowance: width +${m.minW} to +${m.maxW} mm; height +${m.minH} to +${m.maxH} mm.`:`Fixed structural D-hole allowance: width +${m.w} mm; height +${m.h} mm.`;
+ const dHole=`${fmt0(openW)} × ${fmt0(openH)} mm`;
+ r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${dHole}${m.type==="wk25-range"?" recommended structural D-hole":" structural D-hole"}`,damper:`${fmt0(W)} × ${fmt0(H)} mm ${paired?"measured joined assembly":"nominal damper"}`,rule:`${rr} The sealing material and any plasterboard/calcium-silicate infill are installed within this published D-hole; they are not a separate reveal lining to add outside it. ${paired?"Use the approved Lindab pairing kit and intumescent gasket.":""}`,reference:m.reference,range:`Construction: ${m.wall}. Seal: ${m.seal}. Minimum separation to another independent damper/assembly: ${sd} mm. Minimum distance to adjacent wall/floor: ${se} mm. ${m.note}`,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:`${fmt0(W)} × ${fmt0(H)} mm nominal damper`,finishedStage:"Not published separately — sealing/infill is formed inside the structural D-hole",cutStage:`${dHole} structural D-hole`,noSeparateFinishedOpening:true,sourceStatus:`Verified from Lindab WK25 installation booklet ${m.reference}`,statusType:"verified",settingOut:{basis:"table-centred",source:`Lindab WK25 ${m.reference}: structural D-hole is centred on the nominal damper/approved assembly using the selected documented allowance.`},criticalRules:[`Structural D-hole: ${dHole}.`,m.type==="wk25-range"?`Permitted D-hole range: width +${m.minW} to +${m.maxW} mm and height +${m.minH} to +${m.maxH} mm.`:`Use the fixed D-hole allowance shown by the selected detail.`,`Do not subtract plasterboard or calcium-silicate infill from the D-hole and do not add it again outside the D-hole.`,`Certified sealing arrangement: ${m.seal}.`,`Minimum separation to another independent damper/assembly: ${sd} mm.`,`Minimum distance to adjacent wall/floor: ${se} mm.`,m.note]};}
 }else if(m.type==="lindab-rect-fixed"){
     const openW=W+m.w,openH=H+m.h;
     const critical=[`Supporting construction: ${m.wall||m.note||"See official Lindab method"}.`,`Certified sealing arrangement: ${m.seal||"See official Lindab method"}.`,`Opening allowance: +${m.w} mm width and +${m.h} mm height.`,m.spacing!==undefined?`Minimum separation between independent dampers: ${m.spacing} mm.`:"Check the official separation detail.",m.edge!==undefined?`Minimum distance to adjacent wall/floor/ceiling: ${m.edge} mm.`:"Check the official edge-distance detail.",m.note||"Install exactly to the selected certified detail."];
@@ -667,6 +895,29 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
   }else if(m.type==="advanced-rect-fixed"){
     const openW=W+m.addW,openH=H+m.addH;
     r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`Nominal width +${m.addW} mm; nominal height +${m.addH} mm`,reference:m.reference,range:`Tolerance ±${m.tolerance} mm.`,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:"Manufacturer fixed opening allowance",finishedStage:`${fmt0(openW)} × ${fmt0(openH)} mm`,cutStage:`${fmt0(openW)} × ${fmt0(openH)} mm`,sourceStatus:"Verified from manufacturer method",statusType:"verified",includesLining:false,criticalRules:[`Supporting construction: ${m.wall}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Opening tolerance: ±${m.tolerance} mm.`,`Use all specified retaining-flange fixings at the stated centres.`,m.note]};
+  }else if(m.type==="advanced-26scd-afs"){
+    const widthMin=W>=200?W+194:(W>=175?W+219:394);
+    const widthMax=W>=200?W+310:(W>=175?W+335:510);
+    const heightMin=H>=200?H+100:(H>=175?H+125:300);
+    const heightMax=H>=200?H+310:(H>=175?H+335:510);
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:widthMin,openH:heightMin,
+      opening:`${fmt0(widthMin)} × ${fmt0(heightMin)} mm minimum opening to form`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,
+      rule:"26SCD AFS published opening table, with width and height bands applied independently",reference:m.reference,
+      range:`Published opening range: ${fmt0(widthMin)}–${fmt0(widthMax)} mm wide × ${fmt0(heightMin)}–${fmt0(heightMax)} mm high.`,
+      nominalStage:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,casingStage:"26SCD casing, AFS rails/brackets and fire-batt zone included in the published method",
+      finishedStage:`${fmt0(widthMin)} × ${fmt0(heightMin)} mm minimum opening to form`,cutStage:`${fmt0(widthMin)} × ${fmt0(heightMin)} mm minimum structural opening`,
+      finishedW:widthMin,finishedH:heightMin,cutW:widthMin,cutH:heightMin,includesLining:false,
+      sourceStatus:"Verified from Advanced Air 26SCD IOM opening table",statusType:"verified",
+      settingOut:{basis:"table-centred",source:`${m.reference}: published opening table states the damper is centralised in the opening.`},
+      criticalRules:[`Supporting construction: ${m.wall}.`,`Certified penetration seal: ${m.seal}.`,`Use the published minimum/maximum opening band for each nominal dimension.`,`The damper must be centralised unless the later AFS non-centralised guidance is followed in full.`,`Use M10 drop rods and the tested AFS rail/bracket/Z-piece support.`,`Leave at least 10 mm duct expansion clearance and independently support ductwork within one metre.`,`Provide access doors on both sides for DW145 compliance.`,m.note]};
+  }else if(m.type==="advanced-26scd-remote"){
+    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,
+      opening:"No separate damper opening — remote duct-mounted method",damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,
+      rule:"The selected tested method mounts the damper in or beside fire-rated ductwork remote from the wall.",reference:m.reference,
+      nominalStage:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,casingStage:"Damper supported from M10 drop rods / AFS support as shown in the selected remote method",
+      finishedStage:"Not applicable — no separate wall opening for the damper body",cutStage:"Not applicable — coordinate the fire-rated duct penetration separately",
+      sourceStatus:"Verified from Advanced Air 26SCD remote-from-wall method",statusType:"verified",includesLining:false,noBuilderOpening:true,settingOut:m.settingOut,
+      criticalRules:[`Tested construction: ${m.wall}.`,`Certified sealing arrangement: ${m.seal}.`,`Use self-tapping steel fixings at 150 mm centres where stated.`,`Maintain the permitted overlap and 10 mm duct expansion allowance.`,`Support the damper and ductwork exactly as shown in the selected remote method.`,`Leave the actuator uncovered and provide access for maintenance.`,m.note]};
   }else if(m.type==="advanced-link"){
     r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W,openH:H,opening:"Official product opening table required",damper:`${fmt0(W)} × ${fmt0(H)} mm entered size`,rule:"No 0160/2530 opening rule has been reused for this product.",reference:m.reference,isLinkOnly:true,range:m.note,sourceStatus:"Official drawing required",statusType:"manual",criticalRules:[m.note,"Select the exact wall or remote installation from the current Advanced Air IOM.","Do not form an opening from another Advanced Air product table."]};
   }else if(m.type==="lindab-link"){
@@ -675,13 +926,33 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
  }
  else if(productKey!=="SPAN"){const dia=parseFloat($("fdDiameter").value)||0;r={shape:"circle",manufacturer:man.label,product:productKey,method:methodKey,dia,damper:`Ø ${fmt0(dia)} mm`,reference:m.reference};
   if(m.type==="bsb-circle-dry-lined"){
-    const b=parseFloat($("fdBoardThickness").value)||12.5,finished=dia+m.add,cut=finished+2*b;r.visualOpen=r.openD=cut;r.apertureShape="square";r.opening=`${fmt0(cut)} × ${fmt0(cut)} mm structural cut`;r.rule=`Finished square aperture ${fmt0(finished)} mm; cut adds 2 × ${fmt(b)} mm lining board`;r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=`${fmt0(finished)} × ${fmt0(finished)} mm`;r.cutStage=`${fmt0(finished)} + 2 × ${fmt(b)} mm aperture lining = ${fmt0(cut)} mm each way`;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";r.includesLining=true;r.criticalRules=[`Supporting construction: ${m.wall}.`,`The drywall opening must be lined with fire-rated board.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Minimum clear structural separation: 200 mm between separate damper casings.`,`Minimum distance from casing to adjacent construction: 75 mm.`,m.note,"Provide adjacent access for commissioning, servicing and cleaning."];
+    const b=parseFloat($("fdBoardThickness").value)||12.5,finished=dia+m.add,cut=finished+2*b;r.visualOpen=r.openD=cut;r.apertureShape="square";r.opening=`${fmt0(cut)} × ${fmt0(cut)} mm structural cut`;r.rule=`Finished square aperture ${fmt0(finished)} mm; cut adds 2 × ${fmt(b)} mm lining board`;r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=`${fmt0(finished)} × ${fmt0(finished)} mm`;r.cutStage=`${fmt0(finished)} + 2 × ${fmt(b)} mm aperture lining = ${fmt0(cut)} mm each way`;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";r.includesLining=true;r.liningMapped=true;r.structuralLiningBottom=b;r.finishedW=finished;r.finishedH=finished;r.cutW=cut;r.cutH=cut;r.criticalRules=[`Supporting construction: ${m.wall}.`,`The drywall opening must be lined with one fire-rated board around each internal edge; wall-face board layers are not added again.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Minimum clear structural separation: 200 mm between separate damper casings.`,`Minimum distance from casing to adjacent construction: 75 mm.`,m.note,"Provide adjacent access for commissioning, servicing and cleaning."];
   }
   else if(m.type==="bsb-circle-solid"){
     const open=dia+m.add;r.visualOpen=r.openD=open;r.apertureShape="square";r.opening=`${fmt0(open)} × ${fmt0(open)} mm finished aperture`;r.rule=`Nominal diameter +${m.add} mm`;r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";r.criticalRules=[`Supporting construction: ${m.wall}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Use all installation-plate fixing positions.`,`Minimum clear structural separation: 200 mm between separate damper casings, except where a specific tested Batt detail states otherwise.`,`Minimum distance from casing to adjacent construction: 75 mm unless the selected tested drawing states a reduced distance.`,m.note];
   }
   else if(m.type==="bsb-circle-trim"){
     r.visualOpen=r.openD=dia+m.add;r.apertureShape="circle";r.opening=`Ø ${fmt0(dia)} mm nominal — maximum trim Ø ${fmt0(dia+m.add)} mm`;r.rule=`Nominal diameter with up to +${m.add} mm trim tolerance`;r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";r.criticalRules=[`Supporting construction: ${m.wall}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,m.note,"Do not apply the standard drywall or masonry opening rule to this method."];
+  }
+  else if(m.type==="bsb-circle-square-table"){
+    const open=Number(m.openingTable?.[dia]);
+    if(!Number.isFinite(open)){
+      r.opening="Size outside published BSB table";r.rule="Select a listed MFD-IC diameter";r.invalidSize=true;
+    }else{
+      r.visualOpen=r.openD=open;r.apertureShape="square";r.opening=`${fmt(open)} × ${fmt(open)} mm square opening`;r.rule=`Published BSB opening table for Ø${fmt0(dia)} mm`;
+      r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer opening table";r.statusType="verified";
+      r.criticalRules=[`Supporting construction: ${m.wall}.`,`Opening treatment: ${m.reference==="MFD-IC M9"?"the opening must NOT be lined":"do not add aperture lining; fit the tested two-layer ablative Batt arrangement"}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Duct connection: connect in accordance with DW144/DW145 using aluminium rivets as breakaway fixings.`,`Supports: connected ductwork must be independently and adequately supported.`,`Minimum clear separation: 200 mm between damper casings and 75 mm to adjacent construction.`,`Use every required installation-plate fixing position.`,m.note];
+    }
+  }
+  else if(m.type==="bsb-circle-round-table"){
+    const open=Number(m.openingTable?.[dia]);
+    if(!Number.isFinite(open)){
+      r.opening="Size outside published BSB table";r.rule="Select a listed MFD-IC diameter";r.invalidSize=true;
+    }else{
+      r.visualOpen=r.openD=open;r.apertureShape="circle";r.opening=`Ø ${fmt(open)} mm opening`;r.rule=`Published BSB M15 mortar-infill opening table for Ø${fmt0(dia)} mm`;
+      r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer opening table";r.statusType="verified";
+      r.criticalRules=[`Supporting construction: ${m.wall}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Duct connection: connect in accordance with DW144/DW145 using aluminium rivets as breakaway fixings.`,`Supports: connected ductwork must be independently and adequately supported.`,`Use fire-rated steel fixings and every required installation-plate fixing position.`,`Minimum clear separation: 200 mm between damper casings and 75 mm to adjacent construction.`,m.note];
+    }
   }
   else if(m.type==="bsb-circle-square-fixed"){
     const open=dia+m.add;r.visualOpen=r.openD=open;r.apertureShape="square";r.opening=`${fmt0(open)} × ${fmt0(open)} mm square opening`;r.rule=`Nominal diameter +${m.add} mm`;r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";r.criticalRules=[`Supporting construction: ${m.wall}.`,`Opening treatment: ${m.reference==="MFD-IC M9"?"the opening must NOT be lined":"do not add lining unless shown in the selected drawing"}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Minimum clear separation: 200 mm between damper casings and 75 mm to adjacent construction.`,`Use all required installation-plate fixing holes.`,m.note];
@@ -691,6 +962,8 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     r.opening=r.apertureShape==="square"?`${fmt0(open)} × ${fmt0(open)} mm opening to form`:`Ø ${fmt0(open)} mm opening`;
     r.rule=`Nominal diameter +${m.add} mm`;
     r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;
+    r.finishedW=open;r.finishedH=open;r.cutW=open;r.cutH=open;
+    r.settingOut={basis:"table-centred",source:`${m.reference}: published opening is centred on the nominal circular duct.`};
     r.sourceStatus="Verified from manufacturer opening table";r.statusType="verified";r.includesLining=false;
     r.criticalRules=[`Supporting construction: ${m.wall}.`,`Certified penetration seal: ${m.seal}.`,`The published opening is the opening to form; where the wall is letterboxed, do not add the board thickness again.`,m.note,"Populate all pre-drilled flange fixing holes.","Leave the stated 10 mm duct expansion clearance and independently support connected ductwork within 1 metre."];
   }
@@ -700,34 +973,70 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     r.rule=`Minimum opening = nominal diameter +${m.add} mm`;
     r.range="Maximum opening: 1800 × 1800 mm.";
     r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;
+    r.finishedW=open;r.finishedH=open;r.cutW=open;r.cutH=open;
+    r.settingOut={basis:"table-centred",source:`${m.reference}: minimum opening is formed around the nominal circular damper.`};
     r.sourceStatus="Verified from manufacturer method";r.statusType="verified";r.includesLining=false;
     r.criticalRules=[`Supporting construction: ${m.wall}.`,`Certified infill: ${m.seal}.`,`Minimum opening: nominal diameter +${m.add} mm; maximum 1800 × 1800 mm.`,"Use shuttering and the compound manufacturer's tested mixing/curing instructions.","Independently support connected ductwork within 1 metre.",m.note];
   }
-  else if(m.type==="css-dry"){const a=parseFloat($("fdAllowance").value)||30,b=parseFloat($("fdBoardThickness").value)||12.5,finished=dia+a,cut=finished+2*b;r.visualOpen=cut;r.apertureShape="square";r.opening=`${fmt0(cut)} × ${fmt0(cut)} mm cut size`;r.rule=`Finished square opening Ø casing +${fmt0(a)} mm; cut size +2 × ${fmt(b)} mm board`;r.reference=$("fdWallBuild").value;r.range=`Permitted finished-opening allowance: ${m.min}–${m.max} mm total.`}
-  else if(m.type==="css-masonry"){const a=parseFloat($("fdAllowance").value)||30,shape=$("fdApertureShape").value,open=dia+a;r.visualOpen=open;r.apertureShape=shape;r.opening=shape==="square"?`${fmt0(open)} × ${fmt0(open)} mm square`:`Ø ${fmt0(open)} mm circular`;r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=shape==="square"?`Permitted square allowance: ${m.squareMin}–${m.squareMax} mm total.`:`Permitted circular allowance: ${m.circleMin}–${m.circleMax} mm total.`}
-  else if(m.type==="css-slab"){const a=parseFloat($("fdAllowance").value)||30,open=dia+a;r.visualOpen=open;r.apertureShape="square";r.opening=`${fmt0(open)} × ${fmt0(open)} mm square`;r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=`Supported square-opening allowance: ${m.squareMin}–${m.squareMax} mm total. Circular slab opening is not enabled because the current guide text and drawing conflict.`}
+  else if(m.type==="css-dry"){
+    const a=parseFloat($("fdAllowance").value)||30,b=parseFloat($("fdBoardThickness").value)||12.5,finished=dia+a,cut=finished+2*b;
+    r.visualOpen=cut;r.openD=cut;r.apertureShape="square";r.opening=`${fmt0(cut)} × ${fmt0(cut)} mm structural cut`;
+    r.rule=`Finished square opening = casing Ø +${fmt0(a)} mm; structural cut adds 2 × ${fmt(b)} mm aperture lining`;
+    r.reference=$("fdWallBuild").value;r.range=`Permitted finished-opening allowance: ${m.min}–${m.max} mm total.`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm overall casing`;
+    r.finishedStage=`${fmt0(finished)} × ${fmt0(finished)} mm finished opening`;
+    r.cutStage=`${fmt0(finished)} + 2 × ${fmt(b)} mm lining = ${fmt0(cut)} mm each way`;
+    r.finishedW=finished;r.finishedH=finished;r.cutW=cut;r.cutH=cut;
+    r.includesLining=true;r.liningMapped=true;r.structuralLiningBottom=b;
+    r.sourceStatus="Verified from Actionair CSS installation guide and selected permitted opening allowance";r.statusType="verified";
+  }
+  else if(m.type==="css-masonry"){
+    const a=parseFloat($("fdAllowance").value)||30,shape=$("fdApertureShape").value,open=dia+a;
+    r.visualOpen=open;r.openD=open;r.apertureShape=shape;r.opening=shape==="square"?`${fmt0(open)} × ${fmt0(open)} mm square opening`:`Ø ${fmt0(open)} mm circular opening`;
+    r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=shape==="square"?`Permitted square allowance: ${m.squareMin}–${m.squareMax} mm total.`:`Permitted circular allowance: ${m.circleMin}–${m.circleMax} mm total.`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm overall casing`;r.finishedStage=r.opening;r.cutStage=r.opening;
+    r.finishedW=open;r.finishedH=open;r.cutW=open;r.cutH=open;r.includesLining=false;
+    r.sourceStatus="Verified from Actionair CSS installation guide and selected permitted opening allowance";r.statusType="verified";
+  }
+  else if(m.type==="css-slab"){
+    const a=parseFloat($("fdAllowance").value)||30,open=dia+a;
+    r.visualOpen=open;r.openD=open;r.apertureShape="square";r.opening=`${fmt0(open)} × ${fmt0(open)} mm square opening`;
+    r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=`Supported square-opening allowance: ${m.squareMin}–${m.squareMax} mm total. Circular slab opening is not enabled because the current guide text and drawing conflict.`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm overall casing`;r.finishedStage=r.opening;r.cutStage=r.opening;
+    r.finishedW=open;r.finishedH=open;r.cutW=open;r.cutH=open;r.includesLining=false;
+    r.sourceStatus="Verified from Actionair CSS installation guide and selected permitted opening allowance";r.statusType="verified";
+  }
   else if(m.type==="lindab-circle-fixed"){
     const open=dia+m.add;r.visualOpen=open;r.apertureShape=m.openingShape||"circle";r.openD=open;
-    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm`:`${fmt0(open)} × ${fmt0(open)} mm square`;
-    r.rule=`Nominal diameter +${m.add} mm`;r.range=m.note;
-    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";
-    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Opening allowance: nominal diameter +${m.add} mm.`,`Use only the sealing system shown for the selected certified method.`,"Verify wall/floor thickness, fire classification and size range in the current Lindab booklet."];
+    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm structural wall opening`:`${fmt0(open)} × ${fmt0(open)} mm structural wall opening`;
+    r.rule=`Manufacturer D hole size: nominal diameter +${m.add} mm`;r.range=m.note;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;
+    r.finishedStage=`No separate finished clear-opening dimension published — use the structural D-hole and install the specified sealing/infill within it`;
+    r.cutStage=r.opening;r.finishedW=null;r.finishedH=null;r.cutW=open;r.cutH=open;r.includesLining=false;r.noSeparateFinishedOpening=true;
+    r.sourceStatus="Verified from Lindab manufacturer D-hole method";r.statusType="verified";
+    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Structural D-hole allowance: nominal diameter +${m.add} mm.`,`The specified plasterboard, rock wool, mortar or putty is sealing/infill within this opening; VentTools does not add it again as aperture lining.`,`Use only the sealing system shown for the selected certified method.`,"Verify wall/floor thickness, fire classification and size range in the current Lindab booklet."];
   }
   else if(m.type==="lindab-circle-range"){
     const open=dia+m.recommendedAdd;r.visualOpen=open;r.apertureShape=m.openingShape||"circle";r.openD=open;
-    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm selected`:`${fmt0(open)} × ${fmt0(open)} mm selected`;
-    r.rule=`Selected opening: nominal diameter +${m.recommendedAdd} mm`;
-    r.range=`Permitted allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
-    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";
-    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Permitted opening allowance: +${m.minAdd} to +${m.maxAdd} mm.`,`Selected allowance: +${m.recommendedAdd} mm.`,`Use only the sealing system shown for the selected certified method.`,"Verify the current Lindab booklet before construction."];
+    r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm structural wall opening selected`:`${fmt0(open)} × ${fmt0(open)} mm structural wall opening selected`;
+    r.rule=`Selected manufacturer D hole: nominal diameter +${m.recommendedAdd} mm`;
+    r.range=`Permitted D-hole allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;
+    r.finishedStage=`No separate finished clear-opening dimension published — use the selected structural D-hole and install the specified sealing within it`;
+    r.cutStage=r.opening;r.finishedW=null;r.finishedH=null;r.cutW=open;r.cutH=open;r.includesLining=false;r.noSeparateFinishedOpening=true;
+    r.sourceStatus="Verified from Lindab manufacturer D-hole range";r.statusType="verified";
+    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Permitted structural D-hole allowance: +${m.minAdd} to +${m.maxAdd} mm.`,`Selected allowance: +${m.recommendedAdd} mm.`,`Sealing material occupies the clearance inside the D hole; do not add its thickness to the structural cut.`,`Use only the sealing system shown for the selected certified method.`,"Verify the current Lindab booklet before construction."];
   }
   else if(m.type==="lindab-circle-square-range"){
     const open=dia+m.recommendedAdd;r.visualOpen=open;r.apertureShape="square";r.openD=open;
-    r.opening=`${fmt0(open)} × ${fmt0(open)} mm square selected`;
-    r.rule=`Selected square opening: nominal diameter +${m.recommendedAdd} mm`;
-    r.range=`Permitted square allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
-    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=r.opening;r.cutStage=r.opening;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";
-    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Square opening allowance: +${m.minAdd} to +${m.maxAdd} mm.`,`Selected allowance: +${m.recommendedAdd} mm.`,`Use only the sealing system shown for the selected certified method.`,"Verify the current Lindab booklet before construction."];
+    r.opening=`${fmt0(open)} × ${fmt0(open)} mm square structural wall opening selected`;
+    r.rule=`Selected manufacturer D hole: nominal diameter +${m.recommendedAdd} mm`;
+    r.range=`Permitted square D-hole allowance: +${m.minAdd} to +${m.maxAdd} mm. ${m.note||""}`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;
+    r.finishedStage=`No separate finished clear-opening dimension published — the 12.5 mm plasterboard arch/infill is a face sealing component and rock wool fills the space within the structural D-hole`;
+    r.cutStage=r.opening;r.finishedW=null;r.finishedH=null;r.cutW=open;r.cutH=open;r.includesLining=false;r.noSeparateFinishedOpening=true;
+    r.sourceStatus="Verified from Lindab manufacturer D-hole range";r.statusType="verified";
+    r.criticalRules=[m.note||"Use the supporting construction stated in the official method.",`Square structural D-hole allowance: +${m.minAdd} to +${m.maxAdd} mm.`,`Selected allowance: +${m.recommendedAdd} mm.`,`The 12.5 mm plasterboard arch/infill is a face sealing component around the penetration; it is not a four-sided reveal lining to subtract from D and it is not added outside the D-hole.`,`Use only the sealing system shown for the selected certified method.`,"Verify the current Lindab booklet before construction."];
   }
   if((man.label==="Lindab" || man.label==="BSB" || man.label==="Advanced Air") && p.minSize && (dia<p.minSize || dia>p.maxSize)){
     r.opening="Size outside manual range";
@@ -737,6 +1046,19 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
   }
  }
  
+ if(r && !r.error && ["css-dry","css-masonry","css-slab"].includes(m.type)){
+   const nominalDia=Number(r.dia||parseFloat($("fdDiameter")?.value)||0);
+   const finishedHeight=Number(r.finishedH??r.openH??r.openD??r.visualOpen);
+   const allowanceH=finishedHeight-nominalDia;
+   if(Number.isFinite(allowanceH)){
+     const cssBoard=m.type==="css-dry"?(parseFloat($("fdBoardThickness")?.value)||0):0;
+     r.settingOut={basis:"nominal-duct",bottomFinished:allowanceH/2,topFinished:allowanceH/2,source:"Actionair CSS LNNN00356 v6.0: overall casing diameter plus the selected permitted finished-opening allowance, with the casing centred in the aperture."};
+     if(cssBoard){r.includesLining=true;r.liningMapped=true;r.structuralLiningBottom=cssBoard;}
+     r.sourceStatus="Verified from Actionair CSS installation guide";
+     r.statusType="verified";
+   }
+ }
+
  const nominalStage=r.nominalStage||(r.shape==="circle"?r.damper:(r.damper||"—"));
  const casingStage=r.casingStage||(r.damper||"—");
  const finishedStage=r.finishedStage||(r.opening||"—");
@@ -753,7 +1075,13 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
    "The selected wall/floor construction, sealing system and accessories must match the tested installation method.",
    "Do not substitute materials or alter the tested arrangement without manufacturer approval."
  ].filter(Boolean);
- const criticalRules=(r.criticalRules&&r.criticalRules.length?r.criticalRules:genericRules);
+ let criticalRules=(r.criticalRules&&r.criticalRules.length?r.criticalRules:genericRules);
+ if(man.label==="BSB" && productKey!=="AT-FSD"){
+   const hasDuct=criticalRules.some(x=>/aluminium rivet|breakaway|duct connection/i.test(String(x)));
+   const hasSupport=criticalRules.some(x=>/independently supported|independent support/i.test(String(x)));
+   if(!hasDuct)criticalRules=[...criticalRules,"Duct connection: connect in accordance with DW144/DW145 using aluminium rivets as breakaway fixings."];
+   if(!hasSupport)criticalRules=[...criticalRules,"Supports: connected ductwork must be independently and adequately supported."];
+ }
  $("fdOpeningLabel").textContent=r.includesLining
    ?"Structural Hole to Cut (including aperture lining)"
    :"Opening Required by Selected Method";
@@ -777,37 +1105,440 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
    if(hasStructuredRange){
      $("fdRangeMinW").textContent=`${fmt0(r.minOpenW)} mm`;
      $("fdRangeMinH").textContent=`${fmt0(r.minOpenH)} mm`;
+     $("fdRangeSelectedW").textContent=`${fmt0(r.openW)} mm`;
+     $("fdRangeSelectedH").textContent=`${fmt0(r.openH)} mm`;
      $("fdRangeMaxW").textContent=`${fmt0(r.maxOpenW)} mm`;
      $("fdRangeMaxH").textContent=`${fmt0(r.maxOpenH)} mm`;
      $("fdRangeNote").textContent=r.rangeNote||"The minimum published opening is used as the main result.";
    }
  }
- $("fdCriticalRules").innerHTML=`<ul class="fd-checklist">${criticalRules.map(x=>`<li><span aria-hidden="true">✓</span><span>${x}</span></li>`).join("")}</ul>`;
- $("fdManualLink").href=p.manual;
+ renderFDInstallationRequirements([...(criticalRules||[]),...((m&&m.engineeringNotes)||[])]);
+ renderFDVerification(r);
+ refreshFDManualResource();
+ updateFDSettingOut(r);
  drawFD(r);const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
 else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);
-else fdMsg("ok",`✅ Independent VentTools result based on ${man.label} published installation guidance.${hasStructuredRange?" Permitted minimum and maximum openings are shown below.":range} Verify the current official manual before construction.`);return r}
+else fdMsg("ok",`✅ Verified from the selected ${man.label} tested installation method.${hasStructuredRange?" Permitted minimum and maximum openings are shown below.":range} The stated opening includes the manufacturer-specified casing build-up and installation/expansion gaps where published. Verify the current official manual before construction.`);return r}
+
+function renderFDInstallationRequirements(rules){
+  const groups={construction:[],duct:[],supports:[],access:[],position:[],critical:[]};
+  const clean=(rules||[]).filter(Boolean);
+  clean.forEach(rule=>{
+    const t=String(rule).toLowerCase();
+    if(/ductwork|duct connection|expansion gap|expansion clearance|spigot|overlap|rivet|breakaway|duct seal|connected duct/.test(t)){groups.duct.push(rule);return;}
+    if(/hanger|drop-rod|drop rod|independently supported|independent support|support within|afs rails|support rail/.test(t)){groups.supports.push(rule);return;}
+    if(/actuator|access|commissioning|servicing|cleaning|maintenance/.test(t)){groups.access.push(rule);return;}
+    if(/separation|distance from|adjacent construction|adjacent wall|adjacent floor|adjacent ceiling|centred|centered|position|orientation/.test(t)){groups.position.push(rule);return;}
+    if(/supporting construction|wall|floor|opening treatment|penetration seal|sealing\/fixing|sealing arrangement|fire batt|mortar|plaster|board lining|lined opening/.test(t)){groups.construction.push(rule);return;}
+    groups.critical.push(rule);
+  });
+  const map={
+    construction:"fdReqConstruction",duct:"fdReqDuct",supports:"fdReqSupports",
+    access:"fdReqAccess",position:"fdReqPosition",critical:"fdReqCritical"
+  };
+  Object.entries(map).forEach(([key,id])=>{
+    const el=$(id); if(!el)return;
+    const content=el.querySelector(".fd-requirement-content");
+    if(!content)return;
+    const items=groups[key];
+    if(key==="duct" && !items.length){
+      el.hidden=false;
+      content.innerHTML='<p class="fd-no-specific-data">No manufacturer-specific duct connection detail is recorded for this selected method. Check the current official installation manual before connecting the ductwork.</p>';
+      return;
+    }
+    el.hidden=!items.length;
+    if(items.length)content.innerHTML=`<ul class="fd-checklist">${items.map(x=>`<li><span aria-hidden="true">✓</span><span>${x}</span></li>`).join("")}</ul>`;
+  });
+}
+
+function updateFDSettingOut(r){
+  const ids=["fdSetOpeningBottom","fdSetOpeningTop","fdSetDuctBottom","fdSetDuctTop","fdSetBottomOffset"];
+  const clear=()=>ids.forEach(id=>{if($(id))$(id).textContent="—"});
+  const answer=$("fdSettingAnswer"),warning=$("fdSettingWarning"),status=$("fdSettingStatus");
+  if(!r || r.error || r.isLinkOnly || r.invalidSize){
+    clear();
+    if(answer)answer.textContent="A setting-out answer is not available for this selection.";
+    if(status){status.textContent="Check manual";status.className="fd-setting-badge warning";}
+    return;
+  }
+  const {m}=currentFD();
+  if(r.noBuilderOpening===true){
+    clear();
+    if(answer)answer.innerHTML="<strong>No separate damper opening is formed.</strong> Coordinate the fire-rated duct penetration and supports to the selected remote-from-wall method.";
+    if(warning)warning.textContent=r.settingOut?.source||m?.settingOut?.source||"See the official remote-from-wall installation drawing.";
+    if(status){status.textContent="Verified remote method";status.className="fd-setting-badge verified";}
+    return;
+  }
+  const ductH=Number(r.nomH ?? r.dia);
+  const openingH=Number(r.openH ?? r.openD ?? r.visualOpen);
+  const board=r.includesLining?(Number.isFinite(r.structuralLiningBottom)?Number(r.structuralLiningBottom):(parseFloat($("fdBoardThickness")?.value)||0)):0;
+  const rule=r.settingOut||m.settingOut;
+  const casingMapped=rule?.basis==="casing-edge" && Number.isFinite(rule.casingProjectionBottom) && Number.isFinite(rule.bottomClearance);
+  const nominalMapped=rule?.basis==="nominal-duct" && Number.isFinite(rule.bottomFinished);
+  const tableMapped=rule?.basis==="table-centred" && Number.isFinite(openingH) && Number.isFinite(ductH);
+  if(!casingMapped && !nominalMapped && !tableMapped){
+    clear();
+    if($("fdSetDuctBottom"))$("fdSetDuctBottom").textContent=`${fmt(parseFloat($("fdDatumLevel")?.value)||0)} mm AFFL`;
+    if(answer)answer.innerHTML="<strong>Do not guess the hole start.</strong> This method has not yet been fully mapped from nominal duct edge → damper casing edge → manufacturer clearance → structural lining.";
+    if(warning)warning.textContent="No centred or user-entered assumption has been applied. VentTools will show a setting-out instruction only after every part of that dimension chain has been verified from the official method.";
+    if(status){status.textContent="Manual check required";status.className="fd-setting-badge warning";}
+    return;
+  }
+  const casingBottom=casingMapped?Number(rule.casingProjectionBottom):0;
+  const casingTop=casingMapped?Number(rule.casingProjectionTop):0;
+  const tableHalf=tableMapped?(openingH-ductH)/2:NaN;
+  const clearanceBottom=tableMapped?tableHalf:(casingMapped?Number(rule.bottomClearance):Number(rule.bottomFinished));
+  const clearanceTop=tableMapped?tableHalf:(casingMapped?Number(rule.topClearance):Number(rule.topFinished));
+  const bottomOffset=casingBottom+clearanceBottom+board;
+  const topOffset=Number.isFinite(clearanceTop)?(casingTop+clearanceTop+board):NaN;
+  const ductBottom=parseFloat($("fdDatumLevel")?.value)||0;
+  const openingBottom=ductBottom-bottomOffset;
+  const ductTop=Number.isFinite(ductH)?ductBottom+ductH:NaN;
+  const openingTop=Number.isFinite(ductTop)?ductTop+topOffset:(Number.isFinite(openingH)?openingBottom+openingH:NaN);
+  if($("fdSetOpeningBottom"))$("fdSetOpeningBottom").textContent=`${fmt(openingBottom)} mm AFFL`;
+  if($("fdSetOpeningTop"))$("fdSetOpeningTop").textContent=Number.isFinite(openingTop)?`${fmt(openingTop)} mm AFFL`:"—";
+  if($("fdSetDuctBottom"))$("fdSetDuctBottom").textContent=`${fmt(ductBottom)} mm AFFL`;
+  if($("fdSetDuctTop"))$("fdSetDuctTop").textContent=Number.isFinite(ductTop)?`${fmt(ductTop)} mm AFFL`:"—";
+  if($("fdSetBottomOffset"))$("fdSetBottomOffset").textContent=`${fmt(bottomOffset)} mm`;
+  if(answer)answer.innerHTML=`Mark the bottom of the <strong>structural opening</strong> <strong>${fmt(bottomOffset)} mm below the bottom of the nominal duct</strong>. This is the cut line before the aperture lining is fitted.`;
+  if(warning){
+    const chain=casingMapped
+      ? `${fmt(casingBottom)} mm from nominal duct to casing edge + ${fmt(clearanceBottom)} mm manufacturer gap below the casing`
+      : `${fmt(clearanceBottom)} mm manufacturer gap below the nominal duct edge`;
+    warning.textContent=`Breakdown: ${chain}${board?` + ${fmt(board)} mm aperture lining`:""} = ${fmt(bottomOffset)} mm. Source: ${rule.source} Confirm the selected method and official drawing before cutting.`;
+  }
+  if(status){status.textContent="Verified setting-out";status.className="fd-setting-badge verified";}
+}
+
+function getFDSiteSheetDetails(){
+  return new Promise(resolve=>{
+    document.getElementById("fdSiteSheetDetailsOverlay")?.remove();
+    const overlay=document.createElement("div");
+    overlay.id="fdSiteSheetDetailsOverlay";
+    overlay.setAttribute("role","presentation");
+    overlay.innerHTML=`
+      <div class="fd-sheet-dialog" role="dialog" aria-modal="true" aria-labelledby="fdSheetDialogTitle">
+        <div class="fd-sheet-dialog-head">
+          <div>
+            <span class="fd-sheet-dialog-kicker">VentTools site instruction</span>
+            <h2 id="fdSheetDialogTitle">Sheet details</h2>
+          </div>
+          <button type="button" class="fd-sheet-dialog-close" aria-label="Cancel and close">&times;</button>
+        </div>
+        <p class="fd-sheet-dialog-copy">Add the project details for this damper. The verified calculation will be saved into the project pack.</p>
+        <label class="fd-sheet-dialog-field">
+          <span>Drawing reference / damper tag</span>
+          <input id="fdSheetReference" type="text" inputmode="text" autocomplete="off" placeholder="For example FD-01" maxlength="80">
+        </label>
+        <label class="fd-sheet-dialog-field">
+          <span>Location</span>
+          <input id="fdSheetLocation" type="text" inputmode="text" autocomplete="off" placeholder="For example Level 1 corridor" maxlength="120">
+        </label>
+        <div class="fd-sheet-dialog-actions">
+          <button type="button" class="fd-sheet-dialog-cancel">Cancel</button>
+          <button type="button" class="fd-sheet-dialog-create">Save to Pack</button>
+        </div>
+      </div>`;
+    const style=document.createElement("style");
+    style.textContent=`
+      #fdSiteSheetDetailsOverlay{position:fixed;inset:0;z-index:99999;display:grid;place-items:end center;padding:16px;background:rgba(10,20,32,.62);backdrop-filter:blur(3px)}
+      .fd-sheet-dialog{width:min(100%,560px);max-height:calc(100dvh - 32px);overflow:auto;background:#fff;border-radius:22px;padding:20px;box-shadow:0 24px 70px rgba(0,0,0,.3);color:#142234}
+      .fd-sheet-dialog-head{display:flex;align-items:flex-start;justify-content:space-between;gap:16px}.fd-sheet-dialog-head h2{margin:3px 0 0;font-size:24px;line-height:1.15}.fd-sheet-dialog-kicker{display:block;color:#075a93;font-size:11px;font-weight:800;letter-spacing:.08em;text-transform:uppercase}
+      .fd-sheet-dialog-close{border:0;background:#eef3f6;border-radius:50%;width:40px;height:40px;font-size:28px;line-height:1;cursor:pointer;color:#263746}.fd-sheet-dialog-copy{margin:14px 0 18px;color:#5c6b7a;font-size:14px}
+      .fd-sheet-dialog-field{display:block;margin-top:14px}.fd-sheet-dialog-field span{display:block;margin-bottom:7px;font-size:13px;font-weight:800}.fd-sheet-dialog-field input{display:block;width:100%;min-height:52px;padding:12px 14px;border:1px solid #bfcbd5;border-radius:12px;background:#fff;color:#142234;font:inherit;font-size:16px;outline:none}.fd-sheet-dialog-field input:focus{border-color:#075a93;box-shadow:0 0 0 3px rgba(7,90,147,.14)}
+      .fd-sheet-dialog-actions{display:grid;grid-template-columns:1fr 1.35fr;gap:10px;margin-top:22px}.fd-sheet-dialog-actions button{min-height:50px;border-radius:12px;font:inherit;font-weight:800;cursor:pointer}.fd-sheet-dialog-cancel{border:1px solid #bfcbd5;background:#fff;color:#263746}.fd-sheet-dialog-create{border:1px solid #075a93;background:#075a93;color:#fff}
+      @media(min-width:620px){#fdSiteSheetDetailsOverlay{place-items:center}.fd-sheet-dialog{padding:24px}}
+    `;
+    overlay.appendChild(style);
+    document.body.appendChild(overlay);
+    const refInput=overlay.querySelector("#fdSheetReference");
+    const locInput=overlay.querySelector("#fdSheetLocation");
+    const finish=value=>{overlay.remove();resolve(value)};
+    overlay.querySelector(".fd-sheet-dialog-close").addEventListener("click",()=>finish(null));
+    overlay.querySelector(".fd-sheet-dialog-cancel").addEventListener("click",()=>finish(null));
+    overlay.querySelector(".fd-sheet-dialog-create").addEventListener("click",()=>finish({
+      ref:refInput.value.trim()||"Not entered",
+      loc:locInput.value.trim()||"Not entered"
+    }));
+    overlay.addEventListener("click",e=>{if(e.target===overlay)finish(null)});
+    overlay.addEventListener("keydown",e=>{
+      if(e.key==="Escape")finish(null);
+      if(e.key==="Enter" && e.target.tagName==="INPUT") overlay.querySelector(".fd-sheet-dialog-create").click();
+    });
+    requestAnimationFrame(()=>refInput.focus());
+  });
+}
+
+
+const VT_PACK_DB="venttoolsProjectPackDB";
+const VT_PACK_STORE="siteSheets";
+function vtOpenPackDB(){
+  return new Promise((resolve,reject)=>{
+    const req=indexedDB.open(VT_PACK_DB,1);
+    req.onupgradeneeded=()=>{if(!req.result.objectStoreNames.contains(VT_PACK_STORE))req.result.createObjectStore(VT_PACK_STORE,{keyPath:"id"})};
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error||new Error("Could not open project database"));
+  });
+}
+async function vtSaveSheetDocument(entry,html){
+  const db=await vtOpenPackDB();
+  await new Promise((resolve,reject)=>{
+    const tx=db.transaction(VT_PACK_STORE,"readwrite");
+    tx.objectStore(VT_PACK_STORE).put({id:entry.id,entry,html,updatedAt:new Date().toISOString()});
+    tx.oncomplete=resolve;
+    tx.onerror=()=>reject(tx.error||new Error("Could not save project pack record"));
+    tx.onabort=()=>reject(tx.error||new Error("Project pack save was aborted"));
+  });
+  const verified=await new Promise((resolve,reject)=>{
+    const tx=db.transaction(VT_PACK_STORE,"readonly");
+    const req=tx.objectStore(VT_PACK_STORE).get(entry.id);
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error||new Error("Could not verify project pack record"));
+  });
+  db.close();
+  if(!verified?.entry?.id || verified.entry.id!==entry.id) throw new Error("Saved damper could not be verified");
+  return verified;
+}
+
+function showPackSaveSuccess(entry){
+  document.getElementById("vtPackSaveSuccess")?.remove();
+  const overlay=document.createElement("div");
+  overlay.id="vtPackSaveSuccess";
+  overlay.innerHTML=`<div class="vt-save-card" role="dialog" aria-modal="true" aria-labelledby="vtSaveTitle">
+    <div class="vt-save-tick" aria-hidden="true">✓</div>
+    <h2 id="vtSaveTitle">Saved to Project Pack</h2>
+    <p><strong>${String(entry.ref||"Damper")}</strong> has been saved and verified.</p>
+    <div class="vt-save-actions"><button type="button" class="vt-stay">Stay here</button><button type="button" class="vt-back">Back to Pack</button></div>
+  </div><style>
+  #vtPackSaveSuccess{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:18px;background:rgba(10,20,32,.64);backdrop-filter:blur(3px)}
+  .vt-save-card{width:min(100%,430px);padding:26px 22px;border-radius:22px;background:#fff;color:#142234;text-align:center;box-shadow:0 25px 70px rgba(0,0,0,.32)}
+  .vt-save-tick{display:grid;place-items:center;width:72px;height:72px;margin:0 auto 15px;border-radius:50%;background:#e8f8ef;color:#167047;font-size:42px;font-weight:900}.vt-save-card h2{margin:0 0 8px}.vt-save-card p{margin:0;color:#5a6978}.vt-save-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:22px}.vt-save-actions button{min-height:50px;border-radius:12px;font:inherit;font-weight:800}.vt-stay{border:1px solid #bcc8d2;background:#fff;color:#263746}.vt-back{border:1px solid #075a93;background:#075a93;color:#fff}
+  </style>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector(".vt-stay").onclick=()=>overlay.remove();
+  overlay.querySelector(".vt-back").onclick=()=>window.location.assign("pack-builder.html?added="+encodeURIComponent(entry.id));
+}
+
+async function buildFDSiteSheet(){
+  const saveStatus=document.getElementById("fdSavePrimaryStatus");
+  const setSaveStatus=(text,state="")=>{if(saveStatus){saveStatus.textContent=text;saveStatus.className="fd-save-primary-status"+(state?" "+state:"")}};
+  setSaveStatus("Preparing save…","is-saving");
+  const r=calcFD();
+  const verification=r?getFDVerification(r):null;
+  if(verification?.status==="draft"){
+    fdMsg("warn","🔴 Draft calculations cannot be saved or issued. Open the verification details to see what is missing.");
+    setSaveStatus("Draft — cannot be issued","is-error");
+    return;
+  }
+  if(!r || r.error || r.invalidSize){
+    fdMsg("warn","Select a valid damper and method first.");
+    setSaveStatus("Complete a valid calculation first","is-error");
+    return;
+  }
+
+  if(verification?.status==="partial" && !confirm("This calculation is only partially verified. Save it for engineering review? It will be marked REVIEW REQUIRED and cannot be issued without confirmation.")){setSaveStatus("Not saved yet");return;}
+  const details=await getFDSiteSheetDetails();
+  if(!details){setSaveStatus("Not saved yet");return;}
+  const {ref,loc}=details;
+  const {man,p,m}=currentFD();
+  const esc=v=>String(v??"").replace(/[&<>\"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;",'\"':"&quot;","'":"&#39;"}[c]));
+  const datum=parseFloat($("fdDatumLevel")?.value)||0;
+  const openingBottom=$("fdSetOpeningBottom")?.textContent||"Manual setting-out check required";
+  const openingTop=$("fdSetOpeningTop")?.textContent||"—";
+  const ductBottom=$("fdSetDuctBottom")?.textContent||`${fmt(datum)} mm AFFL`;
+  const ductTop=$("fdSetDuctTop")?.textContent||"—";
+  const bottomOffset=$("fdSetBottomOffset")?.textContent||"—";
+  const settingAnswer=$("fdSettingAnswer")?.textContent?.trim()||"Confirm the official manufacturer setting-out method before cutting.";
+  const settingWarning=$("fdSettingWarning")?.textContent?.trim()||"No unverified assumption has been applied.";
+  const generated=new Date().toLocaleString("en-GB",{dateStyle:"medium",timeStyle:"short"});
+  const requirements=[];
+  document.querySelectorAll("#fdRequirementsGrid .fd-requirement-group:not([hidden]) li span:last-child").forEach(el=>requirements.push(el.textContent.trim()));
+  const builderItems=requirements.filter(x=>/wall|floor|board|track|opening|batt|mortar|separation|construction|lined|fixing/i.test(x));
+  const hvacItems=requirements.filter(x=>/duct|rivet|support|actuator|access|thermal|commission|orientation/i.test(x));
+  const otherItems=requirements.filter(x=>!builderItems.includes(x)&&!hvacItems.includes(x));
+  const rule=m?.settingOut||{};
+  const board=r.includesLining?(Number(r.structuralLiningBottom)||parseFloat($("fdBoardThickness")?.value)||0):0;
+  const casingBottom=Number.isFinite(Number(rule.casingProjectionBottom))?`${fmt(Number(rule.casingProjectionBottom))} mm`:"Not separately published";
+  const casingTop=Number.isFinite(Number(rule.casingProjectionTop))?`${fmt(Number(rule.casingProjectionTop))} mm`:"Not separately published";
+  const clearanceBottom=Number.isFinite(Number(rule.bottomClearance))?`${fmt(Number(rule.bottomClearance))} mm`:Number.isFinite(Number(rule.bottomFinished))?`${fmt(Number(rule.bottomFinished))} mm`:"See selected method";
+  const clearanceTop=Number.isFinite(Number(rule.topClearance))?`${fmt(Number(rule.topClearance))} mm`:Number.isFinite(Number(rule.topFinished))?`${fmt(Number(rule.topFinished))} mm`:"See selected method";
+  const list=items=>items.length?items.map(x=>`<li>${esc(x)}</li>`).join(""):'<li>Follow the selected official manufacturer installation drawing.</li>';
+  const isCircle=r.shape==="circle";
+  const diagram=isCircle
+    ? `<svg viewBox="0 0 560 400" role="img" aria-label="Circular structural opening and nominal damper schematic"><rect x="20" y="20" width="520" height="330" rx="18" class="construction"/><circle cx="280" cy="185" r="132" class="opening"/><circle cx="280" cy="185" r="91" class="damper"/><text x="280" y="181" text-anchor="middle" class="diagram-title">Nominal damper</text><text x="280" y="207" text-anchor="middle" class="diagram-value">${esc(r.damper)}</text><text x="280" y="43" text-anchor="middle" class="diagram-label">${diagramLabel}</text><line x1="148" y1="370" x2="412" y2="370" class="dimension"/><path d="M148 361v18M412 361v18" class="dimension"/><text x="280" y="396" text-anchor="middle" class="diagram-dimension">${esc(r.opening)}</text></svg>`
+    : `<svg viewBox="0 0 660 430" role="img" aria-label="Rectangular structural opening and nominal damper schematic"><rect x="24" y="20" width="612" height="355" rx="18" class="construction"/><rect x="105" y="72" width="450" height="250" class="opening"/><rect x="172" y="120" width="316" height="154" class="damper"/><text x="330" y="191" text-anchor="middle" class="diagram-title">Nominal damper</text><text x="330" y="218" text-anchor="middle" class="diagram-value">${esc(r.damper)}</text><text x="330" y="56" text-anchor="middle" class="diagram-label">${diagramLabel}</text><line x1="105" y1="397" x2="555" y2="397" class="dimension"/><path d="M105 388v18M555 388v18" class="dimension"/><text x="330" y="425" text-anchor="middle" class="diagram-dimension">${esc(r.opening)}</text></svg>`;
+
+  const html=`<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=yes,viewport-fit=cover"><meta name="color-scheme" content="light"><title>${esc(ref)} — VentTools Site Instruction Sheet</title>
+<style>
+:root{--ink:#142234;--muted:#5c6b7a;--line:#d7e0e8;--soft:#f3f6f8;--blue:#075a93;--blue-dark:#063e67;--blue-soft:#eaf5fc;--amber:#9a6500;--amber-soft:#fff7df;--green:#176b45;--white:#fff}
+*{box-sizing:border-box}html{width:100%;min-width:0;background:#e9eef2}body{width:100%;min-width:0;margin:0;font-family:Arial,Helvetica,sans-serif;color:var(--ink);line-height:1.45;-webkit-font-smoothing:antialiased}.toolbar{position:sticky;top:0;z-index:20;display:flex;gap:10px;justify-content:center;padding:12px max(12px,env(safe-area-inset-right)) 12px max(12px,env(safe-area-inset-left));background:rgba(20,34,52,.96);box-shadow:0 4px 18px rgba(0,0,0,.18)}button{appearance:none;border:0;border-radius:9px;padding:11px 15px;font:700 14px Arial;cursor:pointer}.primary{background:#fff;color:var(--blue-dark)}.secondary{background:#2f465d;color:#fff}.sheet{width:calc(100% - 32px);max-width:210mm;min-height:297mm;margin:22px auto;background:#fff;box-shadow:0 10px 38px rgba(20,34,52,.16);padding:15mm}.report-header{display:grid;grid-template-columns:1fr auto;gap:20px;align-items:start;border-bottom:4px solid var(--blue);padding-bottom:14px}.brand{display:flex;gap:12px;align-items:center}.mark{width:52px;height:52px;border-radius:12px;background:var(--blue);color:#fff;display:grid;place-items:center;font-size:23px;font-weight:900}.eyebrow,.label{font-size:10px;line-height:1.2;letter-spacing:.09em;text-transform:uppercase;font-weight:800;color:var(--muted)}h1{font-size:27px;line-height:1.1;margin:3px 0 0;color:var(--blue-dark)}h2{font-size:16px;margin:0;color:var(--blue-dark)}.doc-meta{text-align:right;font-size:12px;color:var(--muted)}.doc-meta strong{display:block;color:var(--ink);font-size:13px}.identity{display:grid;grid-template-columns:repeat(4,1fr);gap:10px;margin-top:14px}.field{border:1px solid var(--line);border-radius:9px;padding:10px 11px;min-height:60px}.field strong{display:block;margin-top:5px;font-size:14px;overflow-wrap:anywhere}.hero{margin-top:14px;border:2px solid #78b9df;background:var(--blue-soft);border-radius:12px;padding:17px;text-align:center}.hero .value{display:block;font-size:30px;line-height:1.15;font-weight:900;color:var(--blue-dark);margin-top:5px}.hero p{margin:8px 0 0;font-size:12px;color:#3f5a6f}.section{margin-top:14px;border:1px solid var(--line);border-radius:11px;overflow:hidden;break-inside:avoid}.section-head{display:flex;justify-content:space-between;gap:10px;align-items:center;padding:10px 13px;background:var(--soft);border-bottom:1px solid var(--line)}.verified{font-size:10px;font-weight:800;color:var(--green);text-transform:uppercase;letter-spacing:.06em}.grid{display:grid}.setting-grid{grid-template-columns:repeat(5,1fr)}.engineering-grid{grid-template-columns:repeat(3,1fr)}.cell{padding:11px 12px;border-right:1px solid var(--line);border-bottom:1px solid var(--line);min-height:67px}.cell:nth-child(5n){border-right:0}.engineering-grid .cell:nth-child(3n){border-right:0}.cell strong{display:block;margin-top:5px;font-size:14px}.instruction{padding:13px;border-top:1px solid var(--line);background:#fbfcfd;font-size:13px}.instruction strong{color:var(--blue-dark)}.breakdown{padding:11px 13px;background:var(--amber-soft);border-top:1px solid #ead49e;font-size:12px;color:#634b18}.diagram-wrap{padding:12px 14px 6px}.diagram-wrap svg{display:block;width:100%;max-height:290px}.construction{fill:#f1f3f5;stroke:#65798b;stroke-width:4}.opening{fill:#d9edf8;stroke:#0875b6;stroke-width:5}.damper{fill:#fff;stroke:#273b4d;stroke-width:5}.diagram-title{font-size:19px;font-weight:800;fill:#142234}.diagram-value{font-size:17px;fill:#405263}.diagram-label{font-size:14px;font-weight:800;fill:#0875b6}.dimension{stroke:#142234;stroke-width:3;fill:none}.diagram-dimension{font-size:18px;font-weight:800;fill:#142234}.diagram-note{margin:0;padding:0 14px 12px;text-align:center;font-size:10px;color:var(--muted)}.requirements{display:grid;grid-template-columns:1fr 1fr}.req{padding:13px 15px}.req+ .req{border-left:1px solid var(--line)}.req h3{font-size:14px;margin:0 0 8px;color:var(--blue-dark)}ul{margin:0;padding-left:20px}li{margin:0 0 7px;font-size:12px}.warning{margin-top:14px;border:1px solid #dfbd62;background:var(--amber-soft);border-radius:10px;padding:12px 14px;font-size:12px}.warning strong{color:#714b00}.signoff{display:grid;grid-template-columns:2fr 1fr 1fr;gap:10px;margin-top:14px}.sign{border-bottom:1px solid #70808f;min-height:44px;padding-top:24px;font-size:10px;color:var(--muted)}footer{display:flex;justify-content:space-between;gap:16px;margin-top:15px;padding-top:10px;border-top:1px solid var(--line);font-size:9px;color:var(--muted)}
+@media screen and (max-width:760px){html{background:#fff}.toolbar{width:100%;max-width:100vw}.sheet{max-width:none!important}.diagram-wrap,.section,.identity,.hero{max-width:100%}.toolbar{justify-content:stretch}.toolbar button{flex:1;min-width:0}.sheet{width:100%!important;min-height:0;margin:0;box-shadow:none;padding:18px 14px 28px}.report-header{grid-template-columns:1fr}.doc-meta{text-align:left}.identity{grid-template-columns:1fr 1fr}.hero .value{font-size:26px}.setting-grid,.engineering-grid{grid-template-columns:1fr 1fr}.cell,.cell:nth-child(5n),.engineering-grid .cell:nth-child(3n){border-right:1px solid var(--line)}.cell:nth-child(2n){border-right:0}.requirements{grid-template-columns:1fr}.req+ .req{border-left:0;border-top:1px solid var(--line)}.signoff{grid-template-columns:1fr}footer{display:block}footer span{display:block;margin-top:4px}}
+@media(max-width:430px){.identity{grid-template-columns:1fr}.setting-grid,.engineering-grid{grid-template-columns:1fr}.cell,.cell:nth-child(2n){border-right:0}.brand{align-items:flex-start}.mark{width:45px;height:45px}h1{font-size:23px}}
+@page{size:A4;margin:11mm}@media print{html,body{background:#fff}.toolbar{display:none!important}.sheet{width:auto;min-height:auto;margin:0;padding:0;box-shadow:none}.report-header{padding-bottom:10px}.identity,.hero,.section,.warning,.signoff{break-inside:avoid}.hero{padding:12px}.hero .value{font-size:25px}.section{margin-top:10px}.cell{min-height:55px;padding:8px 9px}.diagram-wrap svg{max-height:230px}.req{padding:10px 12px}li{margin-bottom:4px;font-size:10.5px}.warning{margin-top:10px;padding:9px 11px}.signoff{margin-top:10px}footer{margin-top:10px}}
+.verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
+<div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
+<main class="sheet">
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.0.9 · Independent site aid</span></div></header>
+<section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
+<section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
+<section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
+<section class="section"><div class="section-head"><h2>Setting-out levels</h2><span class="verified">Manufacturer-mapped method</span></div><div class="grid setting-grid"><div class="cell"><span class="label">Nominal duct bottom</span><strong>${esc(ductBottom)}</strong></div><div class="cell"><span class="label">Nominal duct top</span><strong>${esc(ductTop)}</strong></div><div class="cell"><span class="label">Structural opening bottom</span><strong>${esc(openingBottom)}</strong></div><div class="cell"><span class="label">Structural opening top</span><strong>${esc(openingTop)}</strong></div><div class="cell"><span class="label">Bottom cut-line offset</span><strong>${esc(bottomOffset)}</strong></div></div><div class="instruction"><strong>Site instruction:</strong> ${esc(settingAnswer)}</div><div class="breakdown"><strong>Verified dimension chain:</strong> ${esc(settingWarning)}</div></section>
+<section class="section"><div class="section-head"><h2>Engineering data</h2><span class="verified">Keep duct, casing and opening separate</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Nominal duct / damper</span><strong>${esc(r.damper)}</strong></div><div class="cell"><span class="label">Finished opening</span><strong>${esc(r.finishedStage||r.opening)}</strong></div><div class="cell"><span class="label">Structural hole to cut</span><strong>${esc(r.cutStage||r.opening)}</strong></div><div class="cell"><span class="label">Casing projection below / above duct</span><strong>${esc(casingBottom)} / ${esc(casingTop)}</strong></div><div class="cell"><span class="label">Manufacturer clearance below / above casing</span><strong>${esc(clearanceBottom)} / ${esc(clearanceTop)}</strong></div><div class="cell"><span class="label">Aperture lining included</span><strong>${board?`${esc(fmt(board))} mm`:(r.includesLining?"Included by selected method":"No separate lining entered")}</strong></div></div></section>
+<section class="section"><div class="section-head"><h2>Finished opening setup</h2><span class="label">Schematic · not to scale</span></div><div class="diagram-wrap">${diagram}</div><p class="diagram-note">VentTools-generated schematic based on the selected verified calculation. It is not a copied manufacturer drawing.</p></section>
+<section class="section"><div class="section-head"><h2>Trade requirements</h2><span class="label">Read before installation</span></div><div class="requirements"><div class="req"><h3>Builder / dryliner</h3><ul>${list(builderItems)}</ul></div><div class="req"><h3>HVAC installer</h3><ul>${list(hvacItems)}</ul></div>${otherItems.length?`<div class="req" style="grid-column:1/-1;border-top:1px solid var(--line)"><h3>Additional critical requirements</h3><ul>${list(otherItems)}</ul></div>`:""}</div></section>
+<section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
+<div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
+<div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.9</span></footer>
+</main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
+
+  try{
+    const key="venttoolsProjectPackV1";
+    const existing=JSON.parse(localStorage.getItem(key)||"[]");
+    const entry={
+      id:"fd-"+Date.now()+"-"+Math.random().toString(36).slice(2,8),
+      createdAt:new Date().toISOString(),updatedAt:new Date().toISOString(),
+      ref,loc,manufacturer:man.label,product:r.product,reference:r.reference,
+      damper:r.damper,opening:r.opening,finishedOpening:r.finishedStage||r.opening,
+      structuralOpening:r.cutStage||r.opening,openingBottom,openingTop,ductBottom,ductTop,bottomOffset,
+      settingAnswer,settingWarning,source:`${p.guide} — ${p.revision}`,
+      verificationStatus:verification.status,verificationLabel:verification.label,issueLabel:verification.issueLabel,
+      canIssue:verification.canIssue,verificationChecks:verification.checks,traceability:verification.traceability,engineering:verification.engineering
+    };
+    // Save the lightweight schedule row FIRST. This is the source of truth for the dashboard.
+    const withoutDuplicate=Array.isArray(existing)?existing.filter(x=>x.id!==entry.id):[];
+    withoutDuplicate.push(entry);
+    localStorage.setItem(key,JSON.stringify(withoutDuplicate));
+
+    // Read it back before showing success. Navigation is never used as the save trigger.
+    const verifiedList=JSON.parse(localStorage.getItem(key)||"[]");
+    const verifiedEntry=Array.isArray(verifiedList)?verifiedList.find(x=>x.id===entry.id):null;
+    if(!verifiedEntry) throw new Error("Project Pack row did not verify");
+
+    // Save the full report separately. Failure here must never remove the dashboard row.
+    try{localStorage.setItem("venttoolsSiteSheetHtml:"+entry.id,html)}catch(reportStorageError){}
+    try{await vtSaveSheetDocument(entry,html)}catch(databaseError){}
+
+    setSaveStatus(`✓ ${entry.ref} saved to Project Pack`,"is-saved");
+    showPackSaveSuccess(entry);
+  }catch(e){
+    console.error("VentTools Save to Pack failed",e);
+    setSaveStatus("Save failed — please try again","is-error");
+    fdMsg("warn","Save failed before verification. Please check that browser storage is enabled and try again.");
+  }
+}
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nFinished opening: ${r.finishedStage||r.opening}\nStructural hole to cut: ${r.cutStage||r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
-function resetFD(){$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
-if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",()=>{fillFDMethods();updateFDManualButtonLabel()});
-$("fdWk25Config")?.addEventListener("change",updateFDInputs);
-$("fdWk25Axis")?.addEventListener("change",calcFD);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
-$("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
+function resetFD(){$("fdDatumLevel")&&( $("fdDatumLevel").value=2400);$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
+
+const FD_OFFICIAL_RESOURCES={
+  "BSB::FSD-TD":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",title:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904"},
+  "BSB::FD-C":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_c_series_iom.pdf",title:"BSB FD-C Installation, Operation and Maintenance Instructions",revision:"V62904"},
+  "BSB::FSD-C":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_c_iom_11zon.pdf",title:"BSB FSD-C Installation, Operation and Maintenance Instructions",revision:"V62904"},
+  "BSB::MFD-IC":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2026/06/MFD-IC-IOM.pdf",title:"BSB MFD-IC Installation, Operation and Maintenance Instructions",revision:"V012606"},
+  "BSB::AT-FSD":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/at_fsd_iom_compressed.pdf",title:"BSB AT-FSD Installation, Operation and Maintenance Instructions",revision:"V12204"},
+  "ADVANCED_AIR::0160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.0"},
+  "ADVANCED_AIR::2530":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::26SCD":{url:"https://www.advancedair.co.uk/app/uploads/26SCD_IOM_Rev1.0.pdf",title:"26SCD Installation Manual",revision:"Rev 1.0"},
+  "ADVANCED_AIR::0400MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0400FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0500MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0500FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0400FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0500MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0500FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"}
+};
+
+function canonicalFDProductKey(manufacturerKey,select){
+  const raw=String(select?.value||"").trim();
+  const label=String(select?.options?.[select.selectedIndex]?.textContent||"").trim();
+  // Product display labels always begin with the stable model code. Using the
+  // label as a second source prevents numeric-looking IDs such as 0160 and 2530
+  // from ever retaining a previous product resource.
+  const labelCode=(label.split(/\s+[—-]\s+/)[0]||"").trim();
+  let key=raw || labelCode;
+  if(/^0?160$/i.test(raw)||/^0?160$/i.test(labelCode)) key="0160";
+  else if(/^(2530|2630)$/i.test(raw)||/^(2530|2630)$/i.test(labelCode)) key="2530";
+  else if(labelCode) key=labelCode;
+  return key;
+}
+
+function resolveFDOfficialResource(){
+  const manufacturerSelect=$("fdManufacturer");
+  const productSelect=$("fdSeries");
+  if(!manufacturerSelect||!productSelect)return null;
+  const manufacturerKey=String(manufacturerSelect.value||"").trim();
+  const productKey=canonicalFDProductKey(manufacturerKey,productSelect);
+  const man=FD_MANUFACTURERS[manufacturerKey];
+  const product=man?.products?.[productKey]||man?.products?.[String(productSelect.value||"").trim()];
+  const resourceKey=`${manufacturerKey}::${productKey}`;
+  const registry=FD_OFFICIAL_RESOURCES[resourceKey];
+  if(registry)return {manufacturerKey,productKey,man,product,...registry,onlineUrl:registry.url,url:registry.url,offline:false};
+  if(product?.manual)return {
+    manufacturerKey,productKey,man,product,
+    url:product.manual,
+    title:product.manualTitle||product.guide||`${productKey} Installation Manual`,
+    revision:product.revision||"Current revision"
+  };
+  return {manufacturerKey,productKey,man,product,url:"",title:"",revision:""};
+}
 
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");
-  if(!link) return;
-  const {p}=currentFD();
-  const manufacturer=$("fdManufacturer").value;
-  const product=$("fdSeries")?.value||"";
-  link.innerHTML=p.manualTitle
-    ? `<span aria-hidden="true">📄</span> Open Official ${p.manualTitle}`
-    : manufacturer==="BSB"
-      ? '<span aria-hidden="true">📄</span> Open Official BSB Installation Manual'
-      : manufacturer==="LINDAB"
-        ? `<span aria-hidden="true">📄</span> Open Official ${product} Installation Booklet`
-        : '<span aria-hidden="true">📄</span> Open Official Swegon / Actionair Installation Guide';
+  const titleEl=$("fdManualTitle");
+  if(!link||!titleEl)return;
+
+  // Clear first. A failed lookup can never leave the previous damper visible.
+  link.removeAttribute("href");
+  link.removeAttribute("target");
+  link.setAttribute("aria-disabled","true");
+  link.innerHTML='<span aria-hidden="true">📄</span> Official manual not mapped';
+  titleEl.textContent="Official documentation not yet mapped for this product.";
+
+  const resource=resolveFDOfficialResource();
+  if(!resource?.man||!resource.url)return;
+  const productLabel=(resource.product?.label||resource.productKey).split(/\s+[—-]\s+/)[0];
+  link.href=resource.url;
+  link.target="_blank";
+  link.rel="noopener noreferrer";
+  link.removeAttribute("aria-disabled");
+  link.innerHTML=`<span aria-hidden="true">📄</span> Open ${resource.offline?"Offline ":"Official "}${resource.man.label} ${productLabel} IOM`;
+  link.setAttribute("aria-label",`Open official ${resource.man.label} ${productLabel} installation manual`);
+  titleEl.textContent=`${resource.man.label} • ${resource.title} • ${resource.revision}${resource.offline?" • bundled offline copy":""}`;
+  link.dataset.resourceKey=`${resource.manufacturerKey}::${resource.productKey}`;
 }
+
+function refreshFDManualResource(){
+  updateFDManualButtonLabel();
+  // Repeat after the current select/calculation event has completed. This guards
+  // against any later result renderer writing an older product resource.
+  requestAnimationFrame(updateFDManualButtonLabel);
+  setTimeout(updateFDManualButtonLabel,0);
+}
+
+// Initialise the fire-damper UI only after the official resource registry is ready.
+if($("fdSeries")){
+  $("fdManufacturer").addEventListener("change",fillFDProducts);
+  $("fdSeries").addEventListener("change",()=>{fillFDMethods();refreshFDManualResource()});
+  $("fdManufacturer").addEventListener("change",refreshFDManualResource,true);
+  $("fdSeries").addEventListener("change",refreshFDManualResource,true);
+  $("fdWk25Config")?.addEventListener("change",updateFDInputs);
+  $("fdWk25Axis")?.addEventListener("change",calcFD);
+  $("fdMethod").addEventListener("change",updateFDInputs);
+  $("fdApertureShape").addEventListener("change",updateFDInputs);
+  ["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));
+  $("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
+  $("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);
+  ["fdDatumLevel"].forEach(id=>$(id)?.addEventListener("input",()=>updateFDSettingOut(calcFD())));
+  $("fdHevacVariant").addEventListener("change",calcFD);
+  $("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});
+  ["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));
+  $("fdCopyBtn").addEventListener("click",copyFD);
+  document.querySelectorAll("[data-save-pack]").forEach(btn=>btn.addEventListener("click",buildFDSiteSheet));
+  $("fdResetBtn").addEventListener("click",resetFD);
+  fillFDProducts();
+}
+
 
 
 ['up','over','dia','minStraight','rmFactor','angleCustom'].forEach(id=>{
@@ -959,3 +1690,6 @@ function initialiseVentToolsSite(){
   showPage(allowed.includes(requested)?requested:"home");
 }
 window.addEventListener("DOMContentLoaded",initialiseVentToolsSite);
+
+
+document.addEventListener("DOMContentLoaded",initVTEngineeringMode);

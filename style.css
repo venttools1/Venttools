@@ -898,3 +898,51 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 /* V6.3.0 standalone legal and information pages */
 .standalone-home-link{display:inline-block;text-decoration:none;color:inherit}
 .standalone-legal .contact-home-btn{text-align:center;text-decoration:none}
+
+/* V6.4.2 fire-damper manual and setting-out layout */
+.fd-manual-banner{margin-top:16px;padding:16px;border:1px solid var(--line,#d7e0e8);border-left:5px solid #064b82;border-radius:14px;background:#f6f9fc;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
+.fd-manual-banner-copy strong{display:block;margin:4px 0 6px;font-size:1rem;color:#142033}.fd-manual-banner-copy p{margin:0;color:#465568;line-height:1.45}.fd-manual-banner .fd-manual-primary{margin:0;white-space:normal;text-align:center;max-width:310px}
+.fd-setting-out{margin-top:18px;padding:16px;border:1px solid #cbd8e5;border-radius:16px;background:#fbfdff}.fd-setting-out-head{display:flex;align-items:flex-start;justify-content:space-between;gap:12px;margin-bottom:12px}.fd-setting-out h3{margin:2px 0 0;color:#142033}.fd-setting-badge{font-size:.78rem;font-weight:800;padding:5px 9px;border-radius:999px;background:#e7f0f8;color:#064b82}.fd-setting-controls{margin-top:10px}.fd-setting-results{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:10px;margin-top:14px}.fd-setting-results>div{padding:11px;border:1px solid #d9e2ea;border-radius:12px;background:#fff}.fd-setting-results span{display:block;font-size:.78rem;color:#5c6875;margin-bottom:4px}.fd-setting-results strong{font-size:1rem;color:#142033}.fd-setting-warning{margin:12px 0 0;padding:10px 12px;border-radius:10px;background:#fff7e6;color:#6f4b00;font-size:.86rem;line-height:1.4}.fd-reference-details{margin-top:14px;border:1px solid #d9e2ea;border-radius:14px;background:#fff;overflow:hidden}.fd-reference-details>summary{cursor:pointer;padding:14px 16px;font-weight:850;color:#064b82}.fd-reference-details[open]>summary{border-bottom:1px solid #e3e9ef}.fd-reference-details>*:not(summary){margin-left:16px;margin-right:16px}.fd-reference-details .fd-independent-note{margin-bottom:16px}
+@media(max-width:720px){.fd-manual-banner{grid-template-columns:1fr}.fd-manual-banner .fd-manual-primary{max-width:none;width:100%}.fd-setting-results{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media(max-width:460px){.fd-setting-results{grid-template-columns:1fr}}
+
+/* V6.4.2 — manual-led quick setting-out answer */
+.fd-setting-out-answer{margin:12px 0 14px;padding:16px;border-radius:12px;background:#eaf4ff;border:1px solid #a9cdec;color:#10243a;font-size:1.05rem;line-height:1.5}
+.fd-setting-out-answer strong{color:#063e70}
+.fd-setting-level-card{display:flex;flex-direction:column;justify-content:center;padding:12px 14px;border:1px solid var(--line,#d7e0e8);border-radius:12px;background:#fff}
+.fd-setting-level-card span{font-size:.8rem;color:#5d6a79}
+.fd-setting-level-card strong{font-size:1.15rem;color:#142033;margin-top:4px}
+.fd-setting-badge.verified{background:#dff5e8;color:#08623c}
+.fd-setting-badge.warning{background:#fff1cf;color:#805400}
+
+/* V6.5 RC3 grouped manufacturer installation requirements */
+.fd-requirements-grid{display:grid;gap:12px;margin:14px 0 16px}
+.fd-requirement-group{border:1px solid #d9e2ea;border-radius:13px;background:#fbfdff;overflow:hidden}
+.fd-requirement-group h4{display:flex;align-items:center;gap:8px;margin:0;padding:12px 14px;background:#f1f6fa;color:#142033;font-size:.95rem}
+.fd-requirement-content{padding:12px 14px}
+.fd-requirement-content .fd-checklist{margin:0}
+.fd-duct-connection{border-color:#b8d8c4;background:#fbfffc}
+.fd-duct-connection h4{background:#eaf7ee;color:#14532d}
+.fd-no-specific-data{margin:0;color:#5c6875;font-size:.88rem;line-height:1.45}
+
+/* RC9 prominent Project Pack save action */
+.fd-save-primary-wrap{margin-top:18px;padding:14px;border:2px solid #b7dfc8;background:#f0fbf5;border-radius:16px}
+.fd-save-primary{width:100%;display:flex;align-items:center;justify-content:center;gap:12px;min-height:68px;padding:14px 16px;border:0;border-radius:13px;background:#177245;color:#fff;font:inherit;text-align:left;box-shadow:0 7px 18px rgba(23,114,69,.2);cursor:pointer}
+.fd-save-primary:hover,.fd-save-primary:focus-visible{background:#125d38}
+.fd-save-primary-icon{display:grid;place-items:center;flex:0 0 38px;width:38px;height:38px;border-radius:50%;background:#fff;color:#177245;font-size:24px;font-weight:900}
+.fd-save-primary strong{display:block;font-size:18px;line-height:1.15}
+.fd-save-primary small{display:block;margin-top:4px;color:#dff5e8;font-size:12px;font-weight:600}
+.fd-save-primary-status{margin-top:8px;text-align:center;color:#52675b;font-size:13px;font-weight:700}
+.fd-save-primary-status.is-saving{color:#8a6500}.fd-save-primary-status.is-saved{color:#177245}.fd-save-primary-status.is-error{color:#a52d2d}
+@media(max-width:520px){.fd-save-primary{justify-content:flex-start}.fd-save-primary strong{font-size:17px}}
+
+
+/* RC9 debugged explicit pack save */
+.vt-explicit-save{margin:20px 0;padding:18px;border:2px solid #13804f;border-radius:16px;background:#f0fbf5;box-shadow:0 8px 22px rgba(20,80,55,.08)}
+.vt-explicit-save-head{display:flex;align-items:flex-start;gap:12px;margin-bottom:15px}.vt-explicit-save-icon{display:grid;place-items:center;flex:0 0 42px;height:42px;border-radius:50%;background:#13804f;color:#fff;font-size:24px;font-weight:900}.vt-explicit-save-head strong{display:block;color:#124c34;font-size:18px}.vt-explicit-save-head small{display:block;margin-top:4px;color:#557064;line-height:1.35}.vt-explicit-save-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}.vt-explicit-save label span{display:block;margin-bottom:6px;color:#334b41;font-size:12px;font-weight:800;text-transform:uppercase;letter-spacing:.04em}.vt-explicit-save input{width:100%;min-height:50px;padding:12px 13px;border:1px solid #9cc8b1;border-radius:10px;background:#fff;color:#142234;font:inherit;font-size:16px}.vt-explicit-save-button,.vt-explicit-back{display:block;width:100%;margin-top:14px;min-height:54px;padding:14px;border:0;border-radius:11px;background:#13804f;color:#fff;text-align:center;text-decoration:none;font:800 16px Arial;cursor:pointer}.vt-explicit-save-button:disabled{opacity:.72}.vt-explicit-back{background:#18334d}.vt-explicit-save-status{margin-top:12px;padding:11px 12px;border-radius:9px;background:#fff;color:#5a6874;font-weight:700}.vt-explicit-save-status[data-state="saving"]{background:#fff8df;color:#795600}.vt-explicit-save-status[data-state="saved"]{background:#dff5e8;color:#105c38}.vt-explicit-save-status[data-state="error"]{background:#fff0f0;color:#9c2828}@media(max-width:650px){.vt-explicit-save-grid{grid-template-columns:1fr}}
+
+/* RC12 DEV4 engineering verification */
+.fd-verification-panel{margin:14px 0;border:2px solid #9acdb2;border-radius:14px;overflow:hidden;background:#f1fbf5}.fd-verification-panel.partial{border-color:#e2b84c;background:#fff9e8}.fd-verification-panel.draft{border-color:#d98282;background:#fff1f1}.fd-verification-head{width:100%;border:0;background:transparent;padding:14px;display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:10px;text-align:left;color:#163047;cursor:pointer}.fd-verification-badge{font-weight:900}.fd-verification-head strong{font-size:.86rem}.fd-verification-head .chev{font-size:.78rem;color:#586879}.fd-verification-body{padding:0 14px 14px;border-top:1px solid rgba(20,40,60,.12)}.fd-verification-body h4{margin:14px 0 8px}.fd-verification-body ul{list-style:none;padding:0;margin:0;display:grid;gap:6px}.fd-verification-body li{display:flex;gap:8px}.fd-verification-body li.pass span{color:#167047}.fd-verification-body li.fail span{color:#b42323}.fd-verification-body dl{display:grid;grid-template-columns:1fr 1fr;gap:8px;margin:0}.fd-verification-body dl div{padding:9px;background:#fff;border-radius:8px}.fd-verification-body dt{font-size:.7rem;text-transform:uppercase;color:#607080;font-weight:800}.fd-verification-body dd{margin:3px 0 0;font-weight:700}.verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}@media(max-width:600px){.fd-verification-head{grid-template-columns:1fr auto}.fd-verification-head strong{grid-column:1/-1}.fd-verification-body dl{grid-template-columns:1fr}}
+
+/* RC12 DEV 5 hidden engineering mode */
+.fd-engineering-debug{margin-top:14px;padding:14px;border:1px dashed #6f7f8d;border-radius:12px;background:#f5f8fa}.fd-engineering-debug h4{margin:0 0 10px}.fd-engineering-debug dl{display:grid;gap:6px}.fd-engineering-debug dl div{display:grid;grid-template-columns:minmax(120px,.8fr) 1.2fr;gap:10px}.fd-engineering-debug dt{font-weight:800}.fd-engineering-debug dd{margin:0;word-break:break-word}.fd-engineering-debug li small{display:block;margin-top:3px;font-weight:500;color:#5b6670}.fd-engineering-all-pass{margin:8px 0 0;padding:10px;border-radius:9px;background:#e8f7ed;color:#17623e;font-weight:800}.vt-engineering-mode .footer-live-note::after{content:" • ENG";color:#ffcf4b;font-weight:900}

@@ -1,3 +1,12 @@
+# VentTools V1.0 Engineering Edition — Four Manufacturer Audit
+
+- BSB supported methods audited
+- Advanced Air supported methods audited
+- Swegon/Actionair OPE-backed and drawing-backed methods audited
+- Lindab FNC1, WH25, WH45, WK25, WK45 and WKS25 supported methods audited
+- Offline engineering library included with SHA-256 document manifest
+- Unsupported/drawing-specific methods remain locked rather than guessed
+
 # VentTools V5 development
 
 This is the first split-file build:
@@ -500,11 +509,112 @@ Important:
 - Updated policy dates to 16 July 2026.
 
 
-## VentTools V6.3.1 — Homepage and cache refresh
+## VentTools V6.3.2 — Homepage and cache refresh
 
 - Updated the homepage Latest updates panel to reflect the current release.
 - Added Lindab and Advanced Air to the visible Supported manufacturers panel.
 - Replaced the outdated More manufacturers planned card with a neutral under-review message.
-- Updated visible version labels to V6.3.1.
+- Updated visible version labels to V6.3.2.
 - Changed the service-worker cache key so existing visitors receive the refreshed homepage and assets.
 - Retained the existing install-app button and PWA behaviour.
+
+
+## VentTools V6.3.2 — BSB drywall lining clarification
+
+- Clarified that the two 12.5 mm D&F boards on each wall face form the tested drywall construction.
+- Clarified that the aperture itself is lined with one board thickness at each internal edge.
+- Structural cut remains finished aperture plus two lining-board thicknesses overall in width and height.
+- Updated result wording and input guidance to prevent users adding the wall-face layers twice.
+- Bumped the service-worker cache so existing users receive the corrected wording.
+
+
+## VentTools V6.4.2 — Manual-led quick setting out
+
+- Replaced the centred/custom-position controls with a manufacturer-led setting-out answer.
+- Added the plain-site instruction: “mark the bottom of the structural opening X mm below the bottom of the nominal duct.”
+- The answer is displayed only where the selected official method records enough information to split the opening above and below the duct.
+- Where that position has not been verified, VentTools now says not to guess and directs the user to the official drawing.
+- Added direct AFFL calculation from the known bottom-of-duct level.
+- Aperture-lining thickness is automatically included below the finished opening where the selected method requires lining.
+- Retained the prominent official manual link, traceability details and collapsible technical information.
+- Updated the service-worker cache and visible version labels.
+
+
+## VentTools V6.4.2 — Casing-mapped setting out
+
+- Corrects the setting-out model so manufacturer clearance is measured from the damper casing, not automatically from the nominal duct.
+- Maps BSB FSD-TD M5 as a complete dimension chain: nominal duct edge → 38 mm casing projection → 10 mm finished-aperture clearance → aperture-lining thickness.
+- With the default 12.5 mm lining, M5 now instructs the fitter to start the structural opening 60.5 mm below the bottom of the nominal duct.
+- Other methods remain locked to “Manual check required” until their casing projection and directional clearances are verified.
+- The expanded explanation shows the full dimension breakdown without cluttering the main site instruction.
+# VentTools V6.5 RC9
+
+This build consolidates the four original manufacturers into one codebase:
+
+- BSB
+- Actionair
+- Lindab
+- Advanced Air
+
+## Main change
+
+VentTools now treats a result as a chain of verified geometry rather than one hole-size formula:
+
+1. nominal duct;
+2. actual casing or installation-frame geometry;
+3. tested finished aperture;
+4. structural opening, including lining only where required;
+5. practical setting-out offsets;
+6. support, penetration-seal, access and breakaway requirements.
+
+## Safety behaviour
+
+- No free-choice centring rule is presented as a manufacturer requirement.
+- Asymmetric methods retain separate top, bottom, actuator-side and non-actuator-side values.
+- Guidance-only methods do not return a fabricated opening.
+- Audit conflicts remain visible.
+
+## Release status
+
+This is a regression-test beta, not an instruction to depart from the current manufacturer IOM or project fire strategy.
+
+
+## Beta 3 interface update
+The result page now places “Damper & Opening Details” and “Installation Requirements” immediately below the certified method, before Site Setting Out.
+
+
+## V6.5 RC9 — main-site refresh release
+
+- Removed the repeated post-result “Select Certified Installation Method” information panel.
+- Moved the verified manufacturer-method message directly beneath the site setting-out results.
+- Reworded the verified message to confirm that published casing build-up and installation/expansion gaps are included where applicable.
+- Updated all public version labels from V7 beta to V6.5 RC9.
+- Bumped the service-worker cache and retained skipWaiting/client claim so returning visitors receive the new files after refresh.
+
+
+## V6.5 RC9
+- Updated all visible version labels.
+- Added verified nominal-duct-edge setting-out support for BSB FD-C M9 and FSD-C M9.
+- Structural opening offset now includes the published 10 mm gap plus the selected aperture-lining board.
+- Bumped browser asset and service-worker cache versions.
+
+
+## V6.5 RC9 BSB engineering database
+Structured source: `data/bsb-engineering-database.json`. The live calculator retains an embedded runtime copy for offline reliability.
+
+## V6.5 RC12 DEV 8 — Official Resource Manager
+
+Replaced the manual-banner lookup with stable manufacturer/product resource IDs. Advanced Air 0160 and 2530 are resolved from both stored values and visible product codes, and a failed lookup now clears rather than retaining the previous banner.
+
+## RC12 DEV 10 — Actionair dimensional coordination
+
+Actionair CSS, supported SmokeShield DWFX-F methods and HEVAC/HVCA installation-frame methods now carry coordinated nominal-duct, casing/frame, opening and builder setting-out data from the current uploaded guides. Drawing-led and measured-only methods remain review controlled.
+
+
+## V1 Engineering Audit
+BSB audit complete for enabled calculators. Advanced Air audit complete for enabled calculators; drawing/table-led methods remain amber by design.
+
+
+## Public document policy
+
+This deployment package contains links to official manufacturer resources only. It does not bundle manufacturer manuals, spreadsheets, drawings or product photographs. Keep any audit source copies in a separate private archive.
