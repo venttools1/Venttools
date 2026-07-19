@@ -309,20 +309,73 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.0-rc12-dev4";
+const VT_ENGINEERING_DB_VERSION="1.0.0-rc12-dev5";
+const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
+function isVTEngineeringMode(){
+  try{
+    const params=new URLSearchParams(location.search);
+    if(params.get("engineering")==="1") return true;
+    return localStorage.getItem(VT_ENGINEERING_MODE_KEY)==="1";
+  }catch(_){return false}
+}
+function setVTEngineeringMode(enabled){
+  try{localStorage.setItem(VT_ENGINEERING_MODE_KEY,enabled?"1":"0")}catch(_){}
+  document.documentElement.classList.toggle("vt-engineering-mode",!!enabled);
+  const note=document.querySelector(".footer-live-note");
+  if(note) note.title=enabled?"Engineering mode enabled":"";
+  if(window.__lastFDResult) renderFDVerification(window.__lastFDResult);
+}
+function initVTEngineeringMode(){
+  document.documentElement.classList.toggle("vt-engineering-mode",isVTEngineeringMode());
+  const trigger=document.querySelector(".footer-live-note");
+  if(!trigger)return;
+  let taps=[];
+  trigger.addEventListener("click",()=>{
+    const now=Date.now(); taps=taps.filter(t=>now-t<4000); taps.push(now);
+    if(taps.length>=5){
+      taps=[];
+      const enabled=!isVTEngineeringMode();
+      setVTEngineeringMode(enabled);
+      const msg=enabled?"Engineering mode enabled":"Engineering mode hidden";
+      if(typeof fdMsg==="function")fdMsg("ok",msg);else alert(msg);
+    }
+  });
+}
+function applyFDVerificationTeaching(){
+  Object.entries(FD_MANUFACTURERS).forEach(([manufacturerKey,manufacturer])=>{
+    Object.entries(manufacturer.products||{}).forEach(([productKey,product])=>{
+      Object.entries(product.methods||{}).forEach(([methodKey,method])=>{
+        const unsupported=/link|manual/i.test(String(method.type||""));
+        const mappedSetting=!!(method.settingOut && ["casing-edge","nominal-duct","table-centred"].includes(method.settingOut.basis));
+        method.engineeringVerification={
+          manufacturerKey,productKey,methodKey,
+          manufacturerVerified:true,
+          productVerified:!!product.label,
+          installationMethodVerified:!!method.reference && !unsupported,
+          sourceDocumentVerified:!!product.manual,
+          sourceRevisionVerified:!!product.revision,
+          openingRuleVerified:!unsupported,
+          builderSettingOutVerified:mappedSetting,
+          taughtBy:"VentTools verified-method registry"
+        };
+      });
+    });
+  });
+}
 function getFDVerification(r){
-  const {man,p,m}=currentFD();
+  const {man,p,m,manKey,productKey,methodKey}=currentFD();
+  const taught=m?.engineeringVerification||{};
   const settingMapped=!!(m?.settingOut && ["casing-edge","nominal-duct","table-centred"].includes(m.settingOut.basis));
   const checks={
-    manufacturer:{pass:!!man?.label,label:"Manufacturer identified"},
-    product:{pass:!!p?.label,label:"Product record identified"},
-    installationMethod:{pass:!!m?.reference && !r?.isLinkOnly,label:"Installation method verified"},
-    sourceDocument:{pass:!!p?.manual,label:"Official source document linked"},
-    sourceRevision:{pass:!!p?.revision,label:"Source revision recorded"},
-    openingCalculation:{pass:!!r && !r.error && !r.invalidSize && !r.isLinkOnly && r.statusType!=="manual",label:"Opening calculation verified"},
-    builderSettingOut:{pass:settingMapped && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified"}
+    manufacturer:{pass:taught.manufacturerVerified===true && !!man?.label,label:"Manufacturer identified and verified",reason:taught.manufacturerVerified?"Manufacturer exists in the verified registry.":"Manufacturer verification flag is missing."},
+    product:{pass:taught.productVerified===true && !!p?.label,label:"Product record identified and verified",reason:taught.productVerified?"Product is mapped to the selected manufacturer.":"Product verification flag is missing."},
+    installationMethod:{pass:taught.installationMethodVerified===true && !!m?.reference && !r?.isLinkOnly,label:"Installation method verified",reason:taught.installationMethodVerified?"Method is tied to a recorded manufacturer reference.":"Method is drawing-led, link-only, or not yet verified."},
+    sourceDocument:{pass:taught.sourceDocumentVerified===true && !!p?.manual,label:"Official source document linked",reason:p?.manual||"No official URL recorded."},
+    sourceRevision:{pass:taught.sourceRevisionVerified===true && !!p?.revision,label:"Source revision recorded",reason:p?.revision||"No revision recorded."},
+    openingCalculation:{pass:taught.openingRuleVerified===true && !!r && !r.error && !r.invalidSize && !r.isLinkOnly && r.statusType!=="manual",label:"Opening calculation verified",reason:r?.sourceStatus||"No calculated result."},
+    builderSettingOut:{pass:taught.builderSettingOutVerified===true && settingMapped && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified",reason:m?.settingOut?.source||"Nominal duct → casing → clearance → lining chain is not fully mapped."}
   };
-  const failed=Object.entries(checks).filter(([,v])=>!v.pass).map(([key,v])=>({key,label:v.label}));
+  const failed=Object.entries(checks).filter(([,v])=>!v.pass).map(([key,v])=>({key,label:v.label,reason:v.reason}));
   let status="verified";
   if(r?.error || r?.invalidSize || r?.isLinkOnly || !checks.installationMethod.pass || !checks.openingCalculation.pass) status="draft";
   else if(failed.length) status="partial";
@@ -331,15 +384,17 @@ function getFDVerification(r){
     partial:{icon:"🟡",label:"Partially verified",issueLabel:"Engineering review required",canIssue:true},
     draft:{icon:"🔴",label:"Draft",issueLabel:"Do not issue",canIssue:false}
   }[status];
-  return {status,...meta,checks,failed,traceability:{manufacturer:man?.label||"—",product:p?.label||r?.product||"—",installationMethod:m?.label||r?.reference||"—",sourceDocument:p?.guide||p?.manualTitle||"—",sourceRevision:p?.revision||"—",sourceUrl:p?.manual||"",databaseVersion:VT_ENGINEERING_DB_VERSION,generatedAt:new Date().toISOString()}};
+  return {status,...meta,checks,failed,traceability:{manufacturer:man?.label||"—",product:p?.label||r?.product||"—",installationMethod:m?.label||r?.reference||"—",sourceDocument:p?.guide||p?.manualTitle||"—",sourceRevision:p?.revision||"—",sourceUrl:p?.manual||"",databaseVersion:VT_ENGINEERING_DB_VERSION,generatedAt:new Date().toISOString()},engineering:{manufacturerKey:manKey,productKey,methodKey,methodType:m?.type||"—",settingBasis:m?.settingOut?.basis||"unmapped",taughtBy:taught.taughtBy||"not registered"}};
 }
 function renderFDVerification(r){
+  window.__lastFDResult=r;
   const v=getFDVerification(r);r.verification=v;
   let panel=document.getElementById("fdVerificationPanel");
   if(!panel){panel=document.createElement("section");panel.id="fdVerificationPanel";panel.className="fd-verification-panel";document.getElementById("fdResultStatus")?.insertAdjacentElement("afterend",panel)}
   const checks=Object.values(v.checks).map(c=>`<li class="${c.pass?'pass':'fail'}"><span>${c.pass?'✓':'!'}</span>${c.label}</li>`).join('');
   panel.className=`fd-verification-panel ${v.status}`;
-  panel.innerHTML=`<button type="button" class="fd-verification-head" aria-expanded="false"><span class="fd-verification-badge">${v.icon} ${v.label}</span><strong>${v.issueLabel}</strong><span class="chev">Details ▾</span></button><div class="fd-verification-body" hidden><h4>Engineering verification</h4><ul>${checks}</ul><h4>Engineering traceability</h4><dl><div><dt>Manufacturer</dt><dd>${v.traceability.manufacturer}</dd></div><div><dt>Product</dt><dd>${v.traceability.product}</dd></div><div><dt>Method</dt><dd>${v.traceability.installationMethod}</dd></div><div><dt>Source</dt><dd>${v.traceability.sourceDocument}</dd></div><div><dt>Revision</dt><dd>${v.traceability.sourceRevision}</dd></div><div><dt>Database</dt><dd>${v.traceability.databaseVersion}</dd></div></dl></div>`;
+  const debug=isVTEngineeringMode()?`<section class="fd-engineering-debug"><h4>Engineering mode</h4><dl><div><dt>Manufacturer key</dt><dd>${v.engineering.manufacturerKey}</dd></div><div><dt>Product key</dt><dd>${v.engineering.productKey}</dd></div><div><dt>Method key</dt><dd>${v.engineering.methodKey}</dd></div><div><dt>Method type</dt><dd>${v.engineering.methodType}</dd></div><div><dt>Setting-out basis</dt><dd>${v.engineering.settingBasis}</dd></div><div><dt>Registry</dt><dd>${v.engineering.taughtBy}</dd></div></dl>${v.failed.length?`<h4>Why it is not green</h4><ul>${v.failed.map(f=>`<li class="fail"><span>!</span><strong>${f.label}</strong><small>${f.reason||""}</small></li>`).join("")}</ul>`:`<p class="fd-engineering-all-pass">All required engineering checks pass.</p>`}</section>`:"";
+  panel.innerHTML=`<button type="button" class="fd-verification-head" aria-expanded="false"><span class="fd-verification-badge">${v.icon} ${v.label}</span><strong>${v.issueLabel}</strong><span class="chev">Details ▾</span></button><div class="fd-verification-body" hidden><h4>Engineering verification</h4><ul>${checks}</ul><h4>Engineering traceability</h4><dl><div><dt>Manufacturer</dt><dd>${v.traceability.manufacturer}</dd></div><div><dt>Product</dt><dd>${v.traceability.product}</dd></div><div><dt>Method</dt><dd>${v.traceability.installationMethod}</dd></div><div><dt>Source</dt><dd>${v.traceability.sourceDocument}</dd></div><div><dt>Revision</dt><dd>${v.traceability.sourceRevision}</dd></div><div><dt>Database</dt><dd>${v.traceability.databaseVersion}</dd></div></dl>${debug}</div>`;
   const btn=panel.querySelector('button'),body=panel.querySelector('.fd-verification-body');btn.onclick=()=>{const open=body.hidden;body.hidden=!open;btn.setAttribute('aria-expanded',String(open));btn.querySelector('.chev').textContent=open?'Details ▴':'Details ▾'};
   return v;
 }
@@ -563,6 +618,8 @@ function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
     });
   }
 })();
+
+applyFDVerificationTeaching();
 
 function currentFD(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=p.methods[$("fdMethod").value];return{man,p,m,manKey:$("fdManufacturer").value,productKey:$("fdSeries").value,methodKey:$("fdMethod").value}}
 function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;s.appendChild(o)});fillFDMethods()}
@@ -1262,25 +1319,45 @@ function updateFDManualButtonLabel(){
   const titleEl=$("fdManualTitle");
   const manufacturerSelect=$("fdManufacturer");
   const productSelect=$("fdSeries");
-  if(!link || !manufacturerSelect || !productSelect || !productSelect.value) return;
+  if(!link || !titleEl || !manufacturerSelect || !productSelect) return;
 
-  const man=FD_MANUFACTURERS[manufacturerSelect.value];
-  const p=man?.products?.[productSelect.value];
-  if(!man || !p) return;
+  // Clear first so a failed lookup can never leave the previous product banner behind.
+  link.removeAttribute("href");
+  link.setAttribute("aria-disabled","true");
+  link.innerHTML='<span aria-hidden="true">📄</span> Official manual not mapped';
+  titleEl.textContent="Official documentation not yet mapped for this product.";
 
-  const productLabel=(p.label||productSelect.value).split(" — ")[0];
+  const manufacturerKey=String(manufacturerSelect.value||"").trim();
+  const rawProduct=String(productSelect.value||"").trim();
+  const canonicalProduct=rawProduct.replace(/^160$/,"0160").replace(/^2630$/,"2530");
+  const man=FD_MANUFACTURERS[manufacturerKey];
+  let p=man?.products?.[canonicalProduct]||man?.products?.[rawProduct];
+
+  // Hard official Advanced Air aliases guard against numeric-looking IDs and old 2630 typo data.
+  if(manufacturerKey==="ADVANCED_AIR"){
+    const aliases={
+      "0160":{url:ADVANCED_AIR_DOCUMENTS.IOM_0160.url,title:"0160 Installation Manual",revision:"Rev 1.0"},
+      "160":{url:ADVANCED_AIR_DOCUMENTS.IOM_0160.url,title:"0160 Installation Manual",revision:"Rev 1.0"},
+      "2530":{url:ADVANCED_AIR_DOCUMENTS.IOM_2530.url,title:"2530 Installation Manual",revision:"Rev 1.1"},
+      "2630":{url:ADVANCED_AIR_DOCUMENTS.IOM_2530.url,title:"2530 Installation Manual",revision:"Rev 1.1"}
+    };
+    const exact=aliases[rawProduct]||aliases[canonicalProduct];
+    if(exact){
+      p=p||{};
+      p={...p,manual:exact.url,manualTitle:exact.title,guide:`Advanced Air ${exact.title}`,revision:exact.revision};
+    }
+  }
+  if(!man || !p || !p.manual) return;
+
+  const productLabel=(p.label||canonicalProduct||rawProduct).split(" — ")[0];
   const documentTitle=p.manualTitle||p.guide||`${productLabel} Installation Manual`;
-  const destination=p.manual||"#";
-
-  link.href=destination;
+  link.href=p.manual;
   link.target="_blank";
   link.rel="noopener noreferrer";
+  link.removeAttribute("aria-disabled");
   link.innerHTML=`<span aria-hidden="true">📄</span> Open Official ${man.label} ${productLabel} IOM`;
   link.setAttribute("aria-label",`Open official ${man.label} ${productLabel} installation manual`);
-
-  if(titleEl){
-    titleEl.textContent=`${man.label} • ${documentTitle} • ${p.revision||"current revision"}`;
-  }
+  titleEl.textContent=`${man.label} • ${documentTitle} • ${p.revision||"current revision"}`;
 }
 
 
@@ -1433,3 +1510,6 @@ function initialiseVentToolsSite(){
   showPage(allowed.includes(requested)?requested:"home");
 }
 window.addEventListener("DOMContentLoaded",initialiseVentToolsSite);
+
+
+document.addEventListener("DOMContentLoaded",initVTEngineeringMode);
