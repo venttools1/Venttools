@@ -623,7 +623,7 @@ applyFDVerificationTeaching();
 
 function currentFD(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=p.methods[$("fdMethod").value];return{man,p,m,manKey:$("fdManufacturer").value,productKey:$("fdSeries").value,methodKey:$("fdMethod").value}}
 function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=String(k);o.textContent=v.label;o.dataset.manual=v.manual||"";o.dataset.manualTitle=v.manualTitle||v.guide||"";o.dataset.revision=v.revision||"";o.dataset.productLabel=(v.label||String(k)).split(" — ")[0];s.appendChild(o)});fillFDMethods()}
-function fillFDMethods(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=$("fdMethod");m.innerHTML="";Object.entries(p.methods).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});updateFDInputs();updateFDManualButtonLabel()}
+function fillFDMethods(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=$("fdMethod");m.innerHTML="";Object.entries(p.methods).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});updateFDInputs();refreshFDManualResource()}
 function setAllowanceOptions(min,max,step,def){const sel=$("fdAllowance");sel.innerHTML="";for(let n=min;n<=max;n+=step){const o=document.createElement("option");o.value=n;o.textContent=`${n} mm total (${n/2} mm nominal each side)`;if(n===def)o.selected=true;sel.appendChild(o)}}
 
 function setNumericOptions(id,min,max,def){const s=$(id);s.innerHTML="";for(let n=min;n<=max;n++){const o=document.createElement("option");o.value=n;o.textContent=n+" mm";if(n===def)o.selected=true;s.appendChild(o)}}
@@ -998,8 +998,7 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
  }
  renderFDInstallationRequirements([...(criticalRules||[]),...((m&&m.engineeringNotes)||[])]);
  renderFDVerification(r);
- $("fdManualLink").href=p.manual;
- updateFDManualButtonLabel();
+ refreshFDManualResource();
  updateFDSettingOut(r);
  drawFD(r);const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
 else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);
@@ -1257,7 +1256,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V6.5 RC12 DEV 6 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V6.5 RC12 DEV 7 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
@@ -1268,7 +1267,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V6.5 RC12 DEV 6</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V6.5 RC12 DEV 7</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
@@ -1308,73 +1307,93 @@ async function buildFDSiteSheet(){
 }
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nFinished opening: ${r.finishedStage||r.opening}\nStructural hole to cut: ${r.cutStage||r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
 function resetFD(){$("fdDatumLevel")&&( $("fdDatumLevel").value=2400);$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
-if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",()=>{fillFDMethods();updateFDManualButtonLabel()});
+if($("fdSeries")){$("fdManufacturer").addEventListener("change",fillFDProducts);$("fdSeries").addEventListener("change",()=>{fillFDMethods();refreshFDManualResource()});
+$("fdManufacturer").addEventListener("change",refreshFDManualResource,true);$("fdSeries").addEventListener("change",refreshFDManualResource,true);
 $("fdWk25Config")?.addEventListener("change",updateFDInputs);
 $("fdWk25Axis")?.addEventListener("change",calcFD);$("fdMethod").addEventListener("change",updateFDInputs);$("fdApertureShape").addEventListener("change",updateFDInputs);["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));$("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
 $("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);
 ["fdDatumLevel"].forEach(id=>$(id)?.addEventListener("input",()=>updateFDSettingOut(calcFD())));$("fdHevacVariant").addEventListener("change",calcFD);$("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));$("fdCopyBtn").addEventListener("click",copyFD);document.querySelectorAll("[data-save-pack]").forEach(btn=>btn.addEventListener("click",buildFDSiteSheet));$("fdResetBtn").addEventListener("click",resetFD);fillFDProducts()}
 
+const FD_OFFICIAL_RESOURCES={
+  "BSB::FSD-TD":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",title:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904"},
+  "BSB::FD-C":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_c_series_iom.pdf",title:"BSB FD-C Installation, Operation and Maintenance Instructions",revision:"V62904"},
+  "BSB::FSD-C":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_c_iom_11zon.pdf",title:"BSB FSD-C Installation, Operation and Maintenance Instructions",revision:"V62904"},
+  "BSB::MFD-IC":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2026/06/MFD-IC-IOM.pdf",title:"BSB MFD-IC Installation, Operation and Maintenance Instructions",revision:"V012606"},
+  "BSB::AT-FSD":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/at_fsd_iom_compressed.pdf",title:"BSB AT-FSD Installation, Operation and Maintenance Instructions",revision:"V12204"},
+  "ADVANCED_AIR::0160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.0"},
+  "ADVANCED_AIR::2530":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::26SCD":{url:"https://www.advancedair.co.uk/app/uploads/26SCD_IOM_Rev1.0.pdf",title:"26SCD Installation Manual",revision:"Rev 1.0"},
+  "ADVANCED_AIR::0400MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0400FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0500MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"}
+};
+
+function canonicalFDProductKey(manufacturerKey,select){
+  const raw=String(select?.value||"").trim();
+  const label=String(select?.options?.[select.selectedIndex]?.textContent||"").trim();
+  // Product display labels always begin with the stable model code. Using the
+  // label as a second source prevents numeric-looking IDs such as 0160 and 2530
+  // from ever retaining a previous product resource.
+  const labelCode=(label.split(/\s+[—-]\s+/)[0]||"").trim();
+  let key=raw || labelCode;
+  if(/^0?160$/i.test(raw)||/^0?160$/i.test(labelCode)) key="0160";
+  else if(/^(2530|2630)$/i.test(raw)||/^(2530|2630)$/i.test(labelCode)) key="2530";
+  else if(labelCode) key=labelCode;
+  return key;
+}
+
+function resolveFDOfficialResource(){
+  const manufacturerSelect=$("fdManufacturer");
+  const productSelect=$("fdSeries");
+  if(!manufacturerSelect||!productSelect)return null;
+  const manufacturerKey=String(manufacturerSelect.value||"").trim();
+  const productKey=canonicalFDProductKey(manufacturerKey,productSelect);
+  const man=FD_MANUFACTURERS[manufacturerKey];
+  const product=man?.products?.[productKey]||man?.products?.[String(productSelect.value||"").trim()];
+  const registry=FD_OFFICIAL_RESOURCES[`${manufacturerKey}::${productKey}`];
+  if(registry)return {manufacturerKey,productKey,man,product,...registry};
+  if(product?.manual)return {
+    manufacturerKey,productKey,man,product,
+    url:product.manual,
+    title:product.manualTitle||product.guide||`${productKey} Installation Manual`,
+    revision:product.revision||"Current revision"
+  };
+  return {manufacturerKey,productKey,man,product,url:"",title:"",revision:""};
+}
+
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");
   const titleEl=$("fdManualTitle");
-  const manufacturerSelect=$("fdManufacturer");
-  const productSelect=$("fdSeries");
-  if(!link || !titleEl || !manufacturerSelect || !productSelect) return;
+  if(!link||!titleEl)return;
 
+  // Clear first. A failed lookup can never leave the previous damper visible.
   link.removeAttribute("href");
+  link.removeAttribute("target");
   link.setAttribute("aria-disabled","true");
   link.innerHTML='<span aria-hidden="true">📄</span> Official manual not mapped';
   titleEl.textContent="Official documentation not yet mapped for this product.";
 
-  const manufacturerKey=String(manufacturerSelect.value||"").trim();
-  const rawProduct=String(productSelect.value||"").trim();
-  const canonicalProduct=rawProduct.replace(/^160$/,"0160").replace(/^2630$/,"2530");
-  const man=FD_MANUFACTURERS[manufacturerKey];
-  const selectedOption=productSelect.options[productSelect.selectedIndex];
-
-  // First use the document data attached directly to the selected option. This
-  // prevents any previous product banner surviving a failed object lookup.
-  let manual=String(selectedOption?.dataset?.manual||"").trim();
-  let documentTitle=String(selectedOption?.dataset?.manualTitle||"").trim();
-  let revision=String(selectedOption?.dataset?.revision||"").trim();
-  let productLabel=String(selectedOption?.dataset?.productLabel||canonicalProduct||rawProduct).trim();
-
-  const p=man?.products?.[canonicalProduct]||man?.products?.[rawProduct];
-  if(!manual && p){
-    manual=p.manual||"";
-    documentTitle=p.manualTitle||p.guide||"";
-    revision=p.revision||"";
-    productLabel=(p.label||productLabel).split(" — ")[0];
-  }
-
-  // Absolute official Advanced Air mapping for the two numeric-looking IDs.
-  if(manufacturerKey==="ADVANCED_AIR"){
-    const exactAdvancedAir={
-      "0160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.0"},
-      "160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.0"},
-      "2530":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"},
-      "2630":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"}
-    }[rawProduct]||({
-      "0160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.0"},
-      "2530":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"}
-    }[canonicalProduct]);
-    if(exactAdvancedAir){
-      manual=exactAdvancedAir.url;
-      documentTitle=exactAdvancedAir.title;
-      revision=exactAdvancedAir.revision;
-      productLabel=canonicalProduct;
-    }
-  }
-
-  if(!man || !manual) return;
-  link.href=manual;
+  const resource=resolveFDOfficialResource();
+  if(!resource?.man||!resource.url)return;
+  const productLabel=(resource.product?.label||resource.productKey).split(/\s+[—-]\s+/)[0];
+  link.href=resource.url;
   link.target="_blank";
   link.rel="noopener noreferrer";
   link.removeAttribute("aria-disabled");
-  link.innerHTML=`<span aria-hidden="true">📄</span> Open Official ${man.label} ${productLabel} IOM`;
-  link.setAttribute("aria-label",`Open official ${man.label} ${productLabel} installation manual`);
-  titleEl.textContent=`${man.label} • ${documentTitle||`${productLabel} Installation Manual`} • ${revision||"current revision"}`;
+  link.innerHTML=`<span aria-hidden="true">📄</span> Open Official ${resource.man.label} ${productLabel} IOM`;
+  link.setAttribute("aria-label",`Open official ${resource.man.label} ${productLabel} installation manual`);
+  titleEl.textContent=`${resource.man.label} • ${resource.title} • ${resource.revision}`;
+  link.dataset.resourceKey=`${resource.manufacturerKey}::${resource.productKey}`;
 }
+
+function refreshFDManualResource(){
+  updateFDManualButtonLabel();
+  // Repeat after the current select/calculation event has completed. This guards
+  // against any later result renderer writing an older product resource.
+  requestAnimationFrame(updateFDManualButtonLabel);
+  setTimeout(updateFDManualButtonLabel,0);
+}
+
 
 
 ['up','over','dia','minStraight','rmFactor','angleCustom'].forEach(id=>{
