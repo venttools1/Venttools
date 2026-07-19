@@ -593,6 +593,6 @@ The result page now places “Damper & Opening Details” and “Installation Re
 ## V6.5 RC9 BSB engineering database
 Structured source: `data/bsb-engineering-database.json`. The live calculator retains an embedded runtime copy for offline reliability.
 
-## V6.5 RC12 DEV 7 — Official Resource Manager
+## V6.5 RC12 DEV 8 — Official Resource Manager
 
 Replaced the manual-banner lookup with stable manufacturer/product resource IDs. Advanced Air 0160 and 2530 are resolved from both stored values and visible product codes, and a failed lookup now clears rather than retaining the previous banner.
