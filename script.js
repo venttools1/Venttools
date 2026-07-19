@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.1-four-manufacturer-verification-fix";
+const VT_ENGINEERING_DB_VERSION="1.0.3-unified-verification-engine";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -947,9 +947,34 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     r.sourceStatus="Verified from manufacturer method";r.statusType="verified";r.includesLining=false;
     r.criticalRules=[`Supporting construction: ${m.wall}.`,`Certified infill: ${m.seal}.`,`Minimum opening: nominal diameter +${m.add} mm; maximum 1800 × 1800 mm.`,"Use shuttering and the compound manufacturer's tested mixing/curing instructions.","Independently support connected ductwork within 1 metre.",m.note];
   }
-  else if(m.type==="css-dry"){const a=parseFloat($("fdAllowance").value)||30,b=parseFloat($("fdBoardThickness").value)||12.5,finished=dia+a,cut=finished+2*b;r.visualOpen=cut;r.apertureShape="square";r.opening=`${fmt0(cut)} × ${fmt0(cut)} mm cut size`;r.rule=`Finished square opening Ø casing +${fmt0(a)} mm; cut size +2 × ${fmt(b)} mm board`;r.reference=$("fdWallBuild").value;r.range=`Permitted finished-opening allowance: ${m.min}–${m.max} mm total.`}
-  else if(m.type==="css-masonry"){const a=parseFloat($("fdAllowance").value)||30,shape=$("fdApertureShape").value,open=dia+a;r.visualOpen=open;r.apertureShape=shape;r.opening=shape==="square"?`${fmt0(open)} × ${fmt0(open)} mm square`:`Ø ${fmt0(open)} mm circular`;r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=shape==="square"?`Permitted square allowance: ${m.squareMin}–${m.squareMax} mm total.`:`Permitted circular allowance: ${m.circleMin}–${m.circleMax} mm total.`}
-  else if(m.type==="css-slab"){const a=parseFloat($("fdAllowance").value)||30,open=dia+a;r.visualOpen=open;r.apertureShape="square";r.opening=`${fmt0(open)} × ${fmt0(open)} mm square`;r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=`Supported square-opening allowance: ${m.squareMin}–${m.squareMax} mm total. Circular slab opening is not enabled because the current guide text and drawing conflict.`}
+  else if(m.type==="css-dry"){
+    const a=parseFloat($("fdAllowance").value)||30,b=parseFloat($("fdBoardThickness").value)||12.5,finished=dia+a,cut=finished+2*b;
+    r.visualOpen=cut;r.openD=cut;r.apertureShape="square";r.opening=`${fmt0(cut)} × ${fmt0(cut)} mm structural cut`;
+    r.rule=`Finished square opening = casing Ø +${fmt0(a)} mm; structural cut adds 2 × ${fmt(b)} mm aperture lining`;
+    r.reference=$("fdWallBuild").value;r.range=`Permitted finished-opening allowance: ${m.min}–${m.max} mm total.`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm overall casing`;
+    r.finishedStage=`${fmt0(finished)} × ${fmt0(finished)} mm finished opening`;
+    r.cutStage=`${fmt0(finished)} + 2 × ${fmt(b)} mm lining = ${fmt0(cut)} mm each way`;
+    r.finishedW=finished;r.finishedH=finished;r.cutW=cut;r.cutH=cut;
+    r.includesLining=true;r.liningMapped=true;r.structuralLiningBottom=b;
+    r.sourceStatus="Verified from Actionair CSS installation guide and selected permitted opening allowance";r.statusType="verified";
+  }
+  else if(m.type==="css-masonry"){
+    const a=parseFloat($("fdAllowance").value)||30,shape=$("fdApertureShape").value,open=dia+a;
+    r.visualOpen=open;r.openD=open;r.apertureShape=shape;r.opening=shape==="square"?`${fmt0(open)} × ${fmt0(open)} mm square opening`:`Ø ${fmt0(open)} mm circular opening`;
+    r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=shape==="square"?`Permitted square allowance: ${m.squareMin}–${m.squareMax} mm total.`:`Permitted circular allowance: ${m.circleMin}–${m.circleMax} mm total.`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm overall casing`;r.finishedStage=r.opening;r.cutStage=r.opening;
+    r.finishedW=open;r.finishedH=open;r.cutW=open;r.cutH=open;r.includesLining=false;
+    r.sourceStatus="Verified from Actionair CSS installation guide and selected permitted opening allowance";r.statusType="verified";
+  }
+  else if(m.type==="css-slab"){
+    const a=parseFloat($("fdAllowance").value)||30,open=dia+a;
+    r.visualOpen=open;r.openD=open;r.apertureShape="square";r.opening=`${fmt0(open)} × ${fmt0(open)} mm square opening`;
+    r.rule=`Overall casing diameter +${fmt0(a)} mm total clearance`;r.range=`Supported square-opening allowance: ${m.squareMin}–${m.squareMax} mm total. Circular slab opening is not enabled because the current guide text and drawing conflict.`;
+    r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm overall casing`;r.finishedStage=r.opening;r.cutStage=r.opening;
+    r.finishedW=open;r.finishedH=open;r.cutW=open;r.cutH=open;r.includesLining=false;
+    r.sourceStatus="Verified from Actionair CSS installation guide and selected permitted opening allowance";r.statusType="verified";
+  }
   else if(m.type==="lindab-circle-fixed"){
     const open=dia+m.add;r.visualOpen=open;r.apertureShape=m.openingShape||"circle";r.openD=open;
     r.opening=r.apertureShape==="circle"?`Ø ${fmt0(open)} mm`:`${fmt0(open)} × ${fmt0(open)} mm square`;
@@ -983,12 +1008,12 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
  
  if(r && !r.error && ["css-dry","css-masonry","css-slab"].includes(m.type)){
    const nominalDia=Number(r.dia||parseFloat($("fdDiameter")?.value)||0);
-   const finishedHeight=Number(r.openH??r.openD??r.visualOpen);
+   const finishedHeight=Number(r.finishedH??r.openH??r.openD??r.visualOpen);
    const allowanceH=finishedHeight-nominalDia;
    if(Number.isFinite(allowanceH)){
      const cssBoard=m.type==="css-dry"?(parseFloat($("fdBoardThickness")?.value)||0):0;
      r.settingOut={basis:"nominal-duct",bottomFinished:allowanceH/2,topFinished:allowanceH/2,source:"Actionair CSS LNNN00356 v6.0: overall casing diameter plus the selected permitted finished-opening allowance, with the casing centred in the aperture."};
-     if(cssBoard){r.includesLining=true;r.structuralLiningBottom=cssBoard;}
+     if(cssBoard){r.includesLining=true;r.liningMapped=true;r.structuralLiningBottom=cssBoard;}
      r.sourceStatus="Verified from Actionair CSS installation guide";
      r.statusType="verified";
    }
