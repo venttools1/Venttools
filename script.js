@@ -949,7 +949,7 @@ function getFDSiteSheetDetails(){
         </label>
         <div class="fd-sheet-dialog-actions">
           <button type="button" class="fd-sheet-dialog-cancel">Cancel</button>
-          <button type="button" class="fd-sheet-dialog-create">Add to Pack</button>
+          <button type="button" class="fd-sheet-dialog-create">Save to Pack</button>
         </div>
       </div>`;
     const style=document.createElement("style");
@@ -993,14 +993,43 @@ function vtOpenPackDB(){
     req.onerror=()=>reject(req.error||new Error("Could not open project database"));
   });
 }
-async function vtSaveSheetDocument(id,html){
+async function vtSaveSheetDocument(entry,html){
   const db=await vtOpenPackDB();
-  return new Promise((resolve,reject)=>{
+  await new Promise((resolve,reject)=>{
     const tx=db.transaction(VT_PACK_STORE,"readwrite");
-    tx.objectStore(VT_PACK_STORE).put({id,html,updatedAt:new Date().toISOString()});
-    tx.oncomplete=()=>{db.close();resolve(true)};
-    tx.onerror=()=>{const e=tx.error;db.close();reject(e||new Error("Could not save report document"))};
+    tx.objectStore(VT_PACK_STORE).put({id:entry.id,entry,html,updatedAt:new Date().toISOString()});
+    tx.oncomplete=resolve;
+    tx.onerror=()=>reject(tx.error||new Error("Could not save project pack record"));
+    tx.onabort=()=>reject(tx.error||new Error("Project pack save was aborted"));
   });
+  const verified=await new Promise((resolve,reject)=>{
+    const tx=db.transaction(VT_PACK_STORE,"readonly");
+    const req=tx.objectStore(VT_PACK_STORE).get(entry.id);
+    req.onsuccess=()=>resolve(req.result);
+    req.onerror=()=>reject(req.error||new Error("Could not verify project pack record"));
+  });
+  db.close();
+  if(!verified?.entry?.id || verified.entry.id!==entry.id) throw new Error("Saved damper could not be verified");
+  return verified;
+}
+
+function showPackSaveSuccess(entry){
+  document.getElementById("vtPackSaveSuccess")?.remove();
+  const overlay=document.createElement("div");
+  overlay.id="vtPackSaveSuccess";
+  overlay.innerHTML=`<div class="vt-save-card" role="dialog" aria-modal="true" aria-labelledby="vtSaveTitle">
+    <div class="vt-save-tick" aria-hidden="true">✓</div>
+    <h2 id="vtSaveTitle">Saved to Project Pack</h2>
+    <p><strong>${String(entry.ref||"Damper")}</strong> has been saved and verified.</p>
+    <div class="vt-save-actions"><button type="button" class="vt-stay">Stay here</button><button type="button" class="vt-back">Back to Pack</button></div>
+  </div><style>
+  #vtPackSaveSuccess{position:fixed;inset:0;z-index:100000;display:grid;place-items:center;padding:18px;background:rgba(10,20,32,.64);backdrop-filter:blur(3px)}
+  .vt-save-card{width:min(100%,430px);padding:26px 22px;border-radius:22px;background:#fff;color:#142234;text-align:center;box-shadow:0 25px 70px rgba(0,0,0,.32)}
+  .vt-save-tick{display:grid;place-items:center;width:72px;height:72px;margin:0 auto 15px;border-radius:50%;background:#e8f8ef;color:#167047;font-size:42px;font-weight:900}.vt-save-card h2{margin:0 0 8px}.vt-save-card p{margin:0;color:#5a6978}.vt-save-actions{display:grid;grid-template-columns:1fr 1.25fr;gap:10px;margin-top:22px}.vt-save-actions button{min-height:50px;border-radius:12px;font:inherit;font-weight:800}.vt-stay{border:1px solid #bcc8d2;background:#fff;color:#263746}.vt-back{border:1px solid #075a93;background:#075a93;color:#fff}
+  </style>`;
+  document.body.appendChild(overlay);
+  overlay.querySelector(".vt-stay").onclick=()=>overlay.remove();
+  overlay.querySelector(".vt-back").onclick=()=>window.location.assign("pack-builder.html?added="+encodeURIComponent(entry.id));
 }
 
 async function buildFDSiteSheet(){
@@ -1075,18 +1104,15 @@ async function buildFDSiteSheet(){
       structuralOpening:r.cutStage||r.opening,openingBottom,openingTop,ductBottom,ductTop,bottomOffset,
       settingAnswer,settingWarning,source:`${p.guide} — ${p.revision}`
     };
-    await vtSaveSheetDocument(entry.id,html);
-    // Keep a lightweight pending copy during navigation. The dashboard imports it
-    // before rendering, so mobile browsers cannot lose the newly created record.
-    sessionStorage.setItem("venttoolsPendingPackEntry",JSON.stringify(entry));
-    existing.push(entry);
-    localStorage.setItem(key,JSON.stringify(existing));
-    // Verify that the write really persisted before leaving the calculator.
-    const confirmed=JSON.parse(localStorage.getItem(key)||"[]").some(x=>x.id===entry.id);
-    if(!confirmed) throw new Error("Project pack save could not be verified");
-    sessionStorage.setItem("venttoolsLastAddedPackId",entry.id);
-    sessionStorage.setItem("venttoolsSiteSheetReturn",window.location.href);
-    window.location.assign("pack-builder.html?added="+encodeURIComponent(entry.id));
+    await vtSaveSheetDocument(entry,html);
+    // Maintain a lightweight compatibility copy where storage is available,
+    // but IndexedDB is now the verified source of truth for the Project Pack.
+    try{
+      const withoutDuplicate=existing.filter(x=>x.id!==entry.id);
+      withoutDuplicate.push(entry);
+      localStorage.setItem(key,JSON.stringify(withoutDuplicate));
+    }catch(storageError){}
+    showPackSaveSuccess(entry);
   }catch(e){
     fdMsg("warn","The damper could not be added to the project pack on this device.");
   }
