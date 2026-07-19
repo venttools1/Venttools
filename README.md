@@ -1,3 +1,12 @@
+# VentTools V1.0 Engineering Edition — Four Manufacturer Audit
+
+- BSB supported methods audited
+- Advanced Air supported methods audited
+- Swegon/Actionair OPE-backed and drawing-backed methods audited
+- Lindab FNC1, WH25, WH45, WK25, WK45 and WKS25 supported methods audited
+- Offline engineering library included with SHA-256 document manifest
+- Unsupported/drawing-specific methods remain locked rather than guessed
+
 # VentTools V5 development
 
 This is the first split-file build:
@@ -597,6 +606,15 @@ Structured source: `data/bsb-engineering-database.json`. The live calculator ret
 
 Replaced the manual-banner lookup with stable manufacturer/product resource IDs. Advanced Air 0160 and 2530 are resolved from both stored values and visible product codes, and a failed lookup now clears rather than retaining the previous banner.
 
-## RC12 DEV 9 — Actionair dimensional coordination
+## RC12 DEV 10 — Actionair dimensional coordination
 
 Actionair CSS, supported SmokeShield DWFX-F methods and HEVAC/HVCA installation-frame methods now carry coordinated nominal-duct, casing/frame, opening and builder setting-out data from the current uploaded guides. Drawing-led and measured-only methods remain review controlled.
+
+
+## V1 Engineering Audit
+BSB audit complete for enabled calculators. Advanced Air audit complete for enabled calculators; drawing/table-led methods remain amber by design.
+
+
+## Public document policy
+
+This deployment package contains links to official manufacturer resources only. It does not bundle manufacturer manuals, spreadsheets, drawings or product photographs. Keep any audit source copies in a separate private archive.

@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.0-rc12-dev9";
+const VT_ENGINEERING_DB_VERSION="1.0.0-four-manufacturer-audit";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -374,6 +374,9 @@ function getFDVerification(r){
     sourceDocument:{pass:taught.sourceDocumentVerified===true && !!p?.manual,label:"Official source document linked",reason:p?.manual||"No official URL recorded."},
     sourceRevision:{pass:taught.sourceRevisionVerified===true && !!p?.revision,label:"Source revision recorded",reason:p?.revision||"No revision recorded."},
     openingCalculation:{pass:taught.openingRuleVerified===true && !!r && !r.error && !r.invalidSize && !r.isLinkOnly && r.statusType!=="manual",label:"Opening calculation verified",reason:r?.sourceStatus||"No calculated result."},
+    finishedOpening:{pass:!!r?.finishedStage && !r?.invalidSize && !r?.isLinkOnly,label:"Finished opening verified",reason:r?.finishedStage||"The formed/finished aperture is not separately recorded."},
+    apertureLining:{pass:!r?.includesLining || (Number(r?.structuralLiningBottom)>0 && r?.cutStage && r?.finishedStage && r.cutStage!==r.finishedStage),label:"Aperture lining build-up verified",reason:!r?.includesLining?"Selected method does not add a separate aperture lining.":(Number(r?.structuralLiningBottom)>0?`One ${r.structuralLiningBottom} mm lining layer is accounted for at each opposite edge.`:"Lining is required but its thickness/build-up is not mapped.")},
+    structuralCut:{pass:!!r?.cutStage && (!r?.includesLining || (r?.finishedStage && r.cutStage!==r.finishedStage)),label:"Structural cut verified separately",reason:r?.cutStage||"The structural builder cut is not separately recorded."},
     builderSettingOut:{pass:taught.builderSettingOutVerified===true && settingMapped && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified",reason:activeSetting?.source||"Nominal duct → casing → clearance → lining chain is not fully mapped."}
   };
   const failed=Object.entries(checks).filter(([,v])=>!v.pass).map(([key,v])=>({key,label:v.label,reason:v.reason}));
@@ -461,10 +464,14 @@ const FD_MANUFACTURERS={
     "0400FME":{label:"0400FME — Circular motorised fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
       FLEX_60:{label:"60 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400FME flexible wall • E60 S",wall:"Flexible wall, minimum 106 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square."},
       FLEX_120:{label:"120 minute flexible wall — square letterbox",type:"advanced-circle-fixed",add:55,openingShape:"square",reference:"0400FME flexible wall • E120 S",wall:"Flexible wall, minimum 131 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening to form: nominal diameter +55 mm, square."},
-      RIGID:{label:"Rigid wall — square/circular opening",type:"advanced-circle-fixed",add:35,openingShape:"square",reference:"0400FME rigid wall",wall:"Rigid wall matching the selected tested construction",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening: nominal diameter +35 mm."}
+      RIGID_60:{label:"60 minute rigid wall — square/circular opening",type:"advanced-circle-fixed",add:35,openingShape:"square",reference:"0400FME rigid wall • E60 S",wall:"Rigid wall, minimum 106 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening: nominal diameter +35 mm; published tolerance ±25 mm."},
+      RIGID_120:{label:"120 minute rigid wall — square/circular opening",type:"advanced-circle-fixed",add:35,openingShape:"square",reference:"0400FME rigid wall • E120 S",wall:"Rigid wall, minimum 131 mm",seal:"Two layers of 50 mm, 140 kg/m³ fire batt",note:"Manufacturer opening: nominal diameter +35 mm; published tolerance ±25 mm."}
     }},
     "0500MAN":{label:"0500MAN — Circular floor fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
       FLOOR:{label:"Rigid floor — compound infill E120",type:"advanced-circle-floor",add:10,reference:"0500MAN floor • E120",wall:"Aerated concrete floor, minimum 150 mm, density 575 kg/m³ ±50 kg/m³",seal:"Silverseal HS Compound, minimum 100 mm thick",note:"Minimum opening is nominal diameter +10 mm. Maximum permitted opening is 1800 × 1800 mm."}
+    }},
+    "0500FME":{label:"0500FME — Circular motorised floor fire damper",shape:"circle",documentId:"IOM_0400_0500",manual:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0400_0500.title,guide:"Advanced Air 0400/0500 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • December 2025",minSize:100,maxSize:315,methods:{
+      FLOOR:{label:"Rigid floor — compound infill E120 S",type:"advanced-circle-floor",add:10,reference:"0500FME floor • E120 S",wall:"Aerated concrete floor, minimum 150 mm, density 575 kg/m³ ±50 kg/m³",seal:"Silverseal HS Compound, minimum 100 mm thick",note:"Minimum opening is nominal diameter +10 mm. Maximum permitted opening is 1800 × 1800 mm."}
     }}
   }},
   ACTIONAIR:{label:"Swegon (Actionair products)",products:{
@@ -1351,6 +1358,7 @@ async function buildFDSiteSheet(){
 }
 async function copyFD(){const r=calcFD(),{man,p}=currentFD();const t=`Vent Tools — Fire Damper Opening\n\nManufacturer: ${man.label}\nProduct: ${r.product}\nMethod/reference: ${r.reference}\nDamper size: ${r.damper}\nFinished opening: ${r.finishedStage||r.opening}\nStructural hole to cut: ${r.cutStage||r.opening}\nRule: ${r.rule}\nGuide: ${p.guide} — ${p.revision}\n\nIndependent calculator. Verify against the current official manufacturer installation manual.`;try{await navigator.clipboard.writeText(t);fdMsg("ok","✅ Fire damper result copied.")}catch(e){fdMsg("warn","Could not copy automatically.")}}
 function resetFD(){$("fdDatumLevel")&&( $("fdDatumLevel").value=2400);$("fdManufacturer").value="BSB";$("fdWidth").value=500;$("fdHeight").value=300;$("fdDiameter").value=250;$("fdBoardThickness").value=12.5;$("fdDwfxBoard").value=12.5;$("fdDwfxVariant").value="SMOKE";$("fdApertureShape").value="square";fillFDProducts()}
+
 const FD_OFFICIAL_RESOURCES={
   "BSB::FSD-TD":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",title:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904"},
   "BSB::FD-C":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_c_series_iom.pdf",title:"BSB FD-C Installation, Operation and Maintenance Instructions",revision:"V62904"},
@@ -1361,6 +1369,9 @@ const FD_OFFICIAL_RESOURCES={
   "ADVANCED_AIR::2530":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::26SCD":{url:"https://www.advancedair.co.uk/app/uploads/26SCD_IOM_Rev1.0.pdf",title:"26SCD Installation Manual",revision:"Rev 1.0"},
   "ADVANCED_AIR::0400MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0400FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0500MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
+  "ADVANCED_AIR::0500FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::0400FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::0500MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::0500FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"}
@@ -1388,8 +1399,9 @@ function resolveFDOfficialResource(){
   const productKey=canonicalFDProductKey(manufacturerKey,productSelect);
   const man=FD_MANUFACTURERS[manufacturerKey];
   const product=man?.products?.[productKey]||man?.products?.[String(productSelect.value||"").trim()];
-  const registry=FD_OFFICIAL_RESOURCES[`${manufacturerKey}::${productKey}`];
-  if(registry)return {manufacturerKey,productKey,man,product,...registry};
+  const resourceKey=`${manufacturerKey}::${productKey}`;
+  const registry=FD_OFFICIAL_RESOURCES[resourceKey];
+  if(registry)return {manufacturerKey,productKey,man,product,...registry,onlineUrl:registry.url,url:registry.url,offline:false};
   if(product?.manual)return {
     manufacturerKey,productKey,man,product,
     url:product.manual,
@@ -1418,9 +1430,9 @@ function updateFDManualButtonLabel(){
   link.target="_blank";
   link.rel="noopener noreferrer";
   link.removeAttribute("aria-disabled");
-  link.innerHTML=`<span aria-hidden="true">📄</span> Open Official ${resource.man.label} ${productLabel} IOM`;
+  link.innerHTML=`<span aria-hidden="true">📄</span> Open ${resource.offline?"Offline ":"Official "}${resource.man.label} ${productLabel} IOM`;
   link.setAttribute("aria-label",`Open official ${resource.man.label} ${productLabel} installation manual`);
-  titleEl.textContent=`${resource.man.label} • ${resource.title} • ${resource.revision}`;
+  titleEl.textContent=`${resource.man.label} • ${resource.title} • ${resource.revision}${resource.offline?" • bundled offline copy":""}`;
   link.dataset.resourceKey=`${resource.manufacturerKey}::${resource.productKey}`;
 }
 
