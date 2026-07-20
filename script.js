@@ -363,7 +363,13 @@ function applyFDVerificationTeaching(){
   });
 }
 function getFDVerification(r){
-  const {man,p,m,manKey,productKey,methodKey}=currentFD();
+  const live=currentFD();
+  const manKey=r?.manufacturerKey||live.manKey;
+  const productKey=r?.productKey||live.productKey;
+  const methodKey=r?.methodKey||live.methodKey;
+  const man=FD_MANUFACTURERS[manKey];
+  const p=man?.products?.[productKey];
+  const m=p?.methods?.[methodKey];
   const taught=m?.engineeringVerification||{};
   const activeSetting=r?.settingOut||m?.settingOut;
   const settingMapped=!!(activeSetting && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(activeSetting.basis));
@@ -632,6 +638,22 @@ function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
 
 applyFDVerificationTeaching();
 
+function clearFDSelectionDependentUI(message="Selection changed — recalculating…"){
+  window.__lastFDResult=null;
+  const rangePanel=$("fdOpeningRange"); if(rangePanel)rangePanel.hidden=true;
+  const verification=document.getElementById("fdVerificationPanel"); if(verification)verification.remove();
+  const status=$("fdResultStatus"); if(status){status.textContent=message;status.className="fd-result-status warning";}
+  ["fdReqConstruction","fdReqDuct","fdReqSupports","fdReqAccess","fdReqPosition","fdReqCritical"].forEach(id=>{
+    const el=$(id); if(!el)return; el.hidden=true;
+    const content=el.querySelector(".fd-requirement-content"); if(content)content.innerHTML="";
+  });
+  ["fdSetOpeningBottom","fdSetOpeningTop","fdSetDuctTop","fdSetBottomOffset"].forEach(id=>{if($(id))$(id).textContent="—"});
+  if($("fdSettingAnswer"))$("fdSettingAnswer").textContent=message;
+  if($("fdSettingStatus")){ $("fdSettingStatus").textContent="Recalculating"; $("fdSettingStatus").className="fd-setting-badge warning"; }
+}
+function fdSelectionToken(selection=currentFD()){
+  return `${selection.manKey||""}::${selection.productKey||""}::${selection.methodKey||""}`;
+}
 function currentFD(){
   const manKey=String($("fdManufacturer")?.value||"").trim();
   const man=FD_MANUFACTURERS[manKey];
@@ -642,6 +664,7 @@ function currentFD(){
   return{man,p,m,manKey,productKey,methodKey};
 }
 function fillFDProducts(){
+  clearFDSelectionDependentUI();
   const manKey=String($("fdManufacturer")?.value||"").trim();
   const man=FD_MANUFACTURERS[manKey],s=$("fdSeries");
   if(!man||!s)return;
@@ -657,6 +680,7 @@ function fillFDProducts(){
   fillFDMethods();
 }
 function fillFDMethods(){
+  clearFDSelectionDependentUI();
   const manKey=String($("fdManufacturer")?.value||"").trim();
   const man=FD_MANUFACTURERS[manKey],productKey=canonicalFDProductKey(manKey,$("fdSeries"));
   const p=man?.products?.[productKey],sel=$("fdMethod");
@@ -818,7 +842,7 @@ function advanced2530Hevac(W,H){
   if(W>=200 && H>=200)return {w:W+170,h:H+170,maxW:W+200,maxH:H+200};
   return {w:370,h:370,maxW:400,maxH:400};
 }
-function calcFD(){if(!$("fdSeries")?.value)return null;const {man,p,m,productKey,methodKey}=currentFD();if(!man||!p||!m){window.__lastFDResult=null;refreshFDManualResource();return null;}let r;
+function calcFD(){if(!$("fdSeries")?.value)return null;const startSelection=currentFD(),startToken=fdSelectionToken(startSelection);const {man,p,m,manKey,productKey,methodKey}=startSelection;if(!man||!p||!m){clearFDSelectionDependentUI("Installation method did not initialise.");refreshFDManualResource();return null;}let r;
  if(productKey==="SPAN"){
    r=calculateActionairSpan();
    if(r.error){
@@ -1151,7 +1175,22 @@ function calcFD(){if(!$("fdSeries")?.value)return null;const {man,p,m,productKey
      $("fdRangeNote").textContent=r.rangeNote||"The minimum published opening is used as the main result.";
    }
  }
- renderFDInstallationRequirements([...(criticalRules||[]),...((m&&m.engineeringNotes)||[])]);
+ // Bind the rendered result to the exact selection that produced it. This
+ // prevents lifecycle/select refreshes from mixing another manufacturer
+ // method's notes or setting-out rule into the visible result.
+ r.manufacturerKey=manKey;
+ r.productKey=productKey;
+ r.methodKey=methodKey;
+ r.selectionToken=startToken;
+ const live=currentFD();
+ const sameSelection=fdSelectionToken(live)===startToken && live.m===m;
+ if(!sameSelection){
+   clearFDSelectionDependentUI("Selection changed during calculation — recalculating…");
+   queueMicrotask(calcFD);
+   return null;
+ }
+ const mappedNotes=Array.isArray(m.engineeringNotes) ? m.engineeringNotes : [];
+ renderFDInstallationRequirements([...(criticalRules||[]),...mappedNotes],startToken);
  renderFDVerification(r);
  refreshFDManualResource();
  updateFDSettingOut(r);
@@ -1159,7 +1198,9 @@ function calcFD(){if(!$("fdSeries")?.value)return null;const {man,p,m,productKey
 else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);
 else fdMsg("ok",`✅ Verified from the selected ${man.label} tested installation method.${hasStructuredRange?" Permitted minimum and maximum openings are shown below.":range} The stated opening includes the manufacturer-specified casing build-up and installation/expansion gaps where published. Verify the current official manual before construction.`);return r}
 
-function renderFDInstallationRequirements(rules){
+function renderFDInstallationRequirements(rules,selectionToken=""){
+  const liveToken=fdSelectionToken();
+  if(selectionToken && liveToken!==selectionToken)return;
   const groups={construction:[],duct:[],supports:[],access:[],position:[],critical:[]};
   const clean=(rules||[]).filter(Boolean);
   clean.forEach(rule=>{
@@ -1179,6 +1220,9 @@ function renderFDInstallationRequirements(rules){
     const el=$(id); if(!el)return;
     const content=el.querySelector(".fd-requirement-content");
     if(!content)return;
+    el.hidden=true;
+    el.dataset.selectionToken=selectionToken||liveToken;
+    content.innerHTML="";
     const items=groups[key];
     if(key==="duct" && !items.length){
       el.hidden=false;
@@ -1200,7 +1244,9 @@ function updateFDSettingOut(r){
     if(status){status.textContent="Check manual";status.className="fd-setting-badge warning";}
     return;
   }
-  const {m}=currentFD();
+  const live=currentFD();
+  const sameSelection=live.manKey===r.manufacturerKey && live.productKey===r.productKey && live.methodKey===r.methodKey;
+  const m=sameSelection?live.m:null;
   if(r.noBuilderOpening===true){
     clear();
     if(answer)answer.innerHTML="<strong>No separate damper opening is formed.</strong> Coordinate the fire-rated duct penetration and supports to the selected remote-from-wall method.";
@@ -1211,7 +1257,7 @@ function updateFDSettingOut(r){
   const ductH=Number(r.nomH ?? r.dia);
   const openingH=Number(r.openH ?? r.openD ?? r.visualOpen);
   const board=r.includesLining?(Number.isFinite(r.structuralLiningBottom)?Number(r.structuralLiningBottom):(parseFloat($("fdBoardThickness")?.value)||0)):0;
-  const rule=r.settingOut||m.settingOut;
+  const rule=r.settingOut||(sameSelection?m?.settingOut:null);
   const casingMapped=rule?.basis==="casing-edge" && Number.isFinite(rule.casingProjectionBottom) && Number.isFinite(rule.bottomClearance);
   const nominalMapped=rule?.basis==="nominal-duct" && Number.isFinite(rule.bottomFinished);
   const tableMapped=rule?.basis==="table-centred" && Number.isFinite(openingH) && Number.isFinite(ductH);
@@ -1418,7 +1464,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.0.10 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.0.12 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
@@ -1429,7 +1475,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.10</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.12</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
@@ -1554,28 +1600,47 @@ function refreshFDManualResource(){
 
 // Initialise the fire-damper UI only after the official resource registry is ready.
 if($("fdSeries")){
-  $("fdManufacturer").addEventListener("change",fillFDProducts);
-  $("fdSeries").addEventListener("change",()=>{fillFDMethods();refreshFDManualResource()});
+  $("fdManufacturer").addEventListener("change",()=>{clearFDSelectionDependentUI();fillFDProducts()});
+  $("fdSeries").addEventListener("change",()=>{clearFDSelectionDependentUI();fillFDMethods();refreshFDManualResource()});
   $("fdManufacturer").addEventListener("change",refreshFDManualResource,true);
   $("fdSeries").addEventListener("change",refreshFDManualResource,true);
   $("fdWk25Config")?.addEventListener("change",updateFDInputs);
   $("fdWk25Axis")?.addEventListener("change",calcFD);
-  $("fdMethod").addEventListener("change",updateFDInputs);
+  $("fdMethod").addEventListener("change",()=>{clearFDSelectionDependentUI();updateFDInputs()});
   $("fdApertureShape").addEventListener("change",updateFDInputs);
   ["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));
   $("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
   $("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);
-  ["fdDatumLevel"].forEach(id=>{const el=$(id);if(!el)return;const recalc=()=>{const r=calcFD();if(r)updateFDSettingOut(r)};el.addEventListener("input",recalc);el.addEventListener("change",recalc);el.addEventListener("keyup",recalc)});
+  ["fdDatumLevel"].forEach(id=>{const el=$(id);if(!el)return;
+    const liveSetting=()=>{
+      const r=window.__lastFDResult;
+      if(r && r.selectionToken===fdSelectionToken()) updateFDSettingOut(r);
+      else calcFD();
+    };
+    el.addEventListener("input",liveSetting);
+    el.addEventListener("keyup",liveSetting);
+    el.addEventListener("change",calcFD);
+    el.addEventListener("blur",calcFD);
+  });
   $("fdHevacVariant").addEventListener("change",calcFD);
   $("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});
   ["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));
   $("fdCopyBtn").addEventListener("click",copyFD);
   document.querySelectorAll("[data-save-pack]").forEach(btn=>btn.addEventListener("click",buildFDSiteSheet));
   $("fdResetBtn").addEventListener("click",resetFD);
-  const initialiseFD=()=>{fillFDProducts();refreshFDManualResource();const r=calcFD();if(r)updateFDSettingOut(r)};
+  const initialiseFD=()=>{fillFDProducts();refreshFDManualResource();calcFD()};
+  const resumeFD=()=>{
+    // Do not rebuild product/method selects here. On Android, opening/closing the
+    // numeric keyboard can trigger lifecycle events; rebuilding the selects at
+    // that point caused the displayed result, notes and datum input to drift.
+    const live=currentFD();
+    if(!live.man||!live.p||!live.m){initialiseFD();return;}
+    refreshFDManualResource();
+    calcFD();
+  };
   initialiseFD();
-  window.addEventListener("pageshow",initialiseFD);
-  document.addEventListener("visibilitychange",()=>{if(!document.hidden)initialiseFD()});
+  window.addEventListener("pageshow",event=>{event.persisted?resumeFD():refreshFDManualResource()});
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)resumeFD()});
 }
 
 
