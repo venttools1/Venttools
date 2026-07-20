@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.13-advanced-air-render-lock";
+const VT_ENGINEERING_DB_VERSION="1.0.14-advanced-air-product-key-fix";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -686,7 +686,9 @@ function fillFDProducts(){
 function fillFDMethods(){
   clearFDSelectionDependentUI();
   const manKey=String($("fdManufacturer")?.value||"").trim();
-  const man=FD_MANUFACTURERS[manKey],productKey=canonicalFDProductKey(manKey,$("fdSeries"));
+  const man=FD_MANUFACTURERS[manKey];
+  const rawProductKey=String($("fdSeries")?.value||"").trim();
+  const productKey=man?.products?.[rawProductKey] ? rawProductKey : canonicalFDProductKey(manKey,$("fdSeries"));
   const p=man?.products?.[productKey],sel=$("fdMethod");
   if(!sel)return;
   const previous=String(sel.value||"").trim();sel.innerHTML="";
@@ -1539,6 +1541,10 @@ const FD_OFFICIAL_RESOURCES={
 
 function canonicalFDProductKey(manufacturerKey,select){
   const raw=String(select?.value||"").trim();
+  const manufacturer=FD_MANUFACTURERS?.[manufacturerKey];
+  // The actual select value is always authoritative when it is a registered
+  // product key. This is essential for numeric-looking Advanced Air codes.
+  if(raw && manufacturer?.products?.[raw]) return raw;
   const label=String(select?.options?.[select.selectedIndex]?.textContent||"").trim();
   // Product display labels always begin with the stable model code. Using the
   // label as a second source prevents numeric-looking IDs such as 0160 and 2530

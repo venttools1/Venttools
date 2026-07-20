@@ -1,10 +1,10 @@
-# VentTools V1.0.13
+# VentTools V1.0.14
 
 **Internal release label:** Advanced Air Render-Lock Hotfix
 
-This package keeps the public interface clean: the website shows only `VentTools V1.0.13` in the footer. The descriptive release label is retained here for development and change tracking.
+This package keeps the public interface clean: the website shows only `VentTools V1.0.14` in the footer. The descriptive release label is retained here for development and change tracking.
 
-## V1.0.13 changes
+## V1.0.14 changes
 
 - Isolated and corrected the Advanced Air render/recalculation state fault.
 - Prevented stale diagrams, banners and installation notes from another manufacturer remaining on screen.
@@ -633,3 +633,11 @@ BSB audit complete for enabled calculators. Advanced Air audit complete for enab
 ## Public document policy
 
 This deployment package contains links to official manufacturer resources only. It does not bundle manufacturer manuals, spreadsheets, drawings or product photographs. Keep any audit source copies in a separate private archive.
+
+
+## V1.0.14 — Advanced Air Product-Key Fix
+
+- Uses the registered product select value as the single authoritative key.
+- Prevents Advanced Air numeric model codes from being re-derived from display labels.
+- Keeps product, method, diagram, verification and setting-out state aligned.
+- Public pages show only VentTools V1.0.14.
