@@ -1,3 +1,18 @@
+# VentTools V1.0.13
+
+**Internal release label:** Advanced Air Render-Lock Hotfix
+
+This package keeps the public interface clean: the website shows only `VentTools V1.0.13` in the footer. The descriptive release label is retained here for development and change tracking.
+
+## V1.0.13 changes
+
+- Isolated and corrected the Advanced Air render/recalculation state fault.
+- Prevented stale diagrams, banners and installation notes from another manufacturer remaining on screen.
+- Added controlled recalculation after selection and mobile-keyboard changes.
+- Kept the public version display to the footer only.
+
+---
+
 # VentTools V1.0 Engineering Edition — Four Manufacturer Audit
 
 - BSB supported methods audited

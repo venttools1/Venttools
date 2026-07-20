@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.8-pack-status-refresh";
+const VT_ENGINEERING_DB_VERSION="1.0.13-advanced-air-render-lock";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -648,6 +648,7 @@ function clearFDSelectionDependentUI(message="Selection changed — recalculatin
     const content=el.querySelector(".fd-requirement-content"); if(content)content.innerHTML="";
   });
   ["fdSetOpeningBottom","fdSetOpeningTop","fdSetDuctTop","fdSetBottomOffset"].forEach(id=>{if($(id))$(id).textContent="—"});
+  const diagram=$("fdDiagramLayer"); if(diagram)diagram.innerHTML="";
   if($("fdSettingAnswer"))$("fdSettingAnswer").textContent=message;
   if($("fdSettingStatus")){ $("fdSettingStatus").textContent="Recalculating"; $("fdSettingStatus").className="fd-setting-badge warning"; }
 }
@@ -657,7 +658,10 @@ function fdSelectionToken(selection=currentFD()){
 function currentFD(){
   const manKey=String($("fdManufacturer")?.value||"").trim();
   const man=FD_MANUFACTURERS[manKey];
-  const productKey=canonicalFDProductKey(manKey,$("fdSeries"));
+  const rawProductKey=String($("fdSeries")?.value||"").trim();
+  // The select value is the authoritative engineering key. Numeric-looking
+  // Advanced Air codes (0160 / 2530) must never be re-derived from display text.
+  const productKey=man?.products?.[rawProductKey] ? rawProductKey : canonicalFDProductKey(manKey,$("fdSeries"));
   const p=man?.products?.[productKey];
   const methodKey=String($("fdMethod")?.value||"").trim();
   const m=p?.methods?.[methodKey];
@@ -1182,11 +1186,13 @@ function calcFD(){if(!$("fdSeries")?.value)return null;const startSelection=curr
  r.productKey=productKey;
  r.methodKey=methodKey;
  r.selectionToken=startToken;
- const live=currentFD();
- const sameSelection=fdSelectionToken(live)===startToken && live.m===m;
- if(!sameSelection){
-   clearFDSelectionDependentUI("Selection changed during calculation — recalculating…");
-   queueMicrotask(calcFD);
+ const liveToken=fdSelectionToken(currentFD());
+ if(liveToken!==startToken){
+   clearFDSelectionDependentUI("Selection changed — waiting for the selected method…");
+   // Do not recursively recalculate in a microtask. On Android this could create
+   // a permanent Advanced Air recalculation loop while leaving an old diagram.
+   cancelAnimationFrame(window.__fdRetryFrame||0);
+   window.__fdRetryFrame=requestAnimationFrame(()=>{ window.__fdRetryFrame=0; calcFD(); });
    return null;
  }
  const mappedNotes=Array.isArray(m.engineeringNotes) ? m.engineeringNotes : [];
@@ -1464,7 +1470,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.0.12 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.0.13 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
@@ -1475,7 +1481,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.12</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.13</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
