@@ -1,8 +1,16 @@
-# VentTools V1.0.15
+# VentTools V1.0.16
+
+Release label: Advanced Air post-render clear fix
+
+- Prevents duplicate Android lifecycle/select refreshes from wiping a completed Advanced Air result.
+- Keeps the diagram, verification banner and setting-out values visible after recalculation.
+- True manufacturer, product and method changes still clear stale UI before recalculating.
+
+# VentTools V1.0.16
 
 **Internal release label:** Advanced Air Render-Lock Hotfix
 
-This package keeps the public interface clean: the website shows only `VentTools V1.0.15` in the footer. The descriptive release label is retained here for development and change tracking.
+This package keeps the public interface clean: the website shows only `VentTools V1.0.16` in the footer. The descriptive release label is retained here for development and change tracking.
 
 ## V1.0.14 changes
 
@@ -640,11 +648,11 @@ This deployment package contains links to official manufacturer resources only. 
 - Uses the registered product select value as the single authoritative key.
 - Prevents Advanced Air numeric model codes from being re-derived from display labels.
 - Keeps product, method, diagram, verification and setting-out state aligned.
-- Public pages show only VentTools V1.0.15.
+- Public pages show only VentTools V1.0.16.
 
 
-## V1.0.15 — Advanced Air synchronous render fix
+## V1.0.16 — Advanced Air synchronous render fix
 
 - Removed the false post-calculation selection-token retry that trapped Advanced Air on Android in “Selection changed — recalculating”.
 - Advanced Air 0160/2530 table-based methods now complete their centred setting-out calculation and respond to AFFL changes.
-- Public UI shows only VentTools V1.0.15.
+- Public UI shows only VentTools V1.0.16.
