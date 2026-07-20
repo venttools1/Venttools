@@ -632,9 +632,48 @@ function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
 
 applyFDVerificationTeaching();
 
-function currentFD(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=p.methods[$("fdMethod").value];return{man,p,m,manKey:$("fdManufacturer").value,productKey:$("fdSeries").value,methodKey:$("fdMethod").value}}
-function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=String(k);o.textContent=v.label;o.dataset.manual=v.manual||"";o.dataset.manualTitle=v.manualTitle||v.guide||"";o.dataset.revision=v.revision||"";o.dataset.productLabel=(v.label||String(k)).split(" — ")[0];s.appendChild(o)});fillFDMethods()}
-function fillFDMethods(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=$("fdMethod");m.innerHTML="";Object.entries(p.methods).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});updateFDInputs();refreshFDManualResource()}
+function currentFD(){
+  const manKey=String($("fdManufacturer")?.value||"").trim();
+  const man=FD_MANUFACTURERS[manKey];
+  const productKey=canonicalFDProductKey(manKey,$("fdSeries"));
+  const p=man?.products?.[productKey];
+  const methodKey=String($("fdMethod")?.value||"").trim();
+  const m=p?.methods?.[methodKey];
+  return{man,p,m,manKey,productKey,methodKey};
+}
+function fillFDProducts(){
+  const manKey=String($("fdManufacturer")?.value||"").trim();
+  const man=FD_MANUFACTURERS[manKey],s=$("fdSeries");
+  if(!man||!s)return;
+  const previous=canonicalFDProductKey(manKey,s);
+  s.innerHTML="";
+  Object.entries(man.products||{}).forEach(([k,v])=>{
+    const o=document.createElement("option");o.value=String(k);o.textContent=v.label;
+    o.dataset.manual=v.manual||"";o.dataset.manualTitle=v.manualTitle||v.guide||"";
+    o.dataset.revision=v.revision||"";o.dataset.productLabel=(v.label||String(k)).split(" — ")[0];s.appendChild(o)
+  });
+  if(previous&&man.products[previous])s.value=previous;
+  if(!s.value&&s.options.length)s.selectedIndex=0;
+  fillFDMethods();
+}
+function fillFDMethods(){
+  const manKey=String($("fdManufacturer")?.value||"").trim();
+  const man=FD_MANUFACTURERS[manKey],productKey=canonicalFDProductKey(manKey,$("fdSeries"));
+  const p=man?.products?.[productKey],sel=$("fdMethod");
+  if(!sel)return;
+  const previous=String(sel.value||"").trim();sel.innerHTML="";
+  Object.entries(p?.methods||{}).forEach(([k,v])=>{const o=document.createElement("option");o.value=String(k);o.textContent=v.label;sel.appendChild(o)});
+  if(previous&&p?.methods?.[previous])sel.value=previous;
+  if(!sel.value&&sel.options.length)sel.selectedIndex=0;
+  if(!p||!sel.options.length){
+    window.__lastFDResult=null;updateFDManualButtonLabel();
+    const answer=$("fdSettingAnswer"),status=$("fdSettingStatus");
+    if(answer)answer.innerHTML="<strong>Installation methods did not initialise.</strong> Reload this release once; VentTools will not reuse a previous product calculation.";
+    if(status){status.textContent="Data reload required";status.className="fd-setting-badge warning";}
+    return;
+  }
+  updateFDInputs();refreshFDManualResource();
+}
 function setAllowanceOptions(min,max,step,def){const sel=$("fdAllowance");sel.innerHTML="";for(let n=min;n<=max;n+=step){const o=document.createElement("option");o.value=n;o.textContent=`${n} mm total (${n/2} mm nominal each side)`;if(n===def)o.selected=true;sel.appendChild(o)}}
 
 function setNumericOptions(id,min,max,def){const s=$(id);s.innerHTML="";for(let n=min;n<=max;n++){const o=document.createElement("option");o.value=n;o.textContent=n+" mm";if(n===def)o.selected=true;s.appendChild(o)}}
@@ -779,7 +818,7 @@ function advanced2530Hevac(W,H){
   if(W>=200 && H>=200)return {w:W+170,h:H+170,maxW:W+200,maxH:H+200};
   return {w:370,h:370,maxW:400,maxH:400};
 }
-function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,methodKey}=currentFD();let r;
+function calcFD(){if(!$("fdSeries")?.value)return null;const {man,p,m,productKey,methodKey}=currentFD();if(!man||!p||!m){window.__lastFDResult=null;refreshFDManualResource();return null;}let r;
  if(productKey==="SPAN"){
    r=calculateActionairSpan();
    if(r.error){
@@ -1379,7 +1418,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.0.9 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.0.10 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
@@ -1390,7 +1429,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.9</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.10</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
@@ -1441,9 +1480,6 @@ const FD_OFFICIAL_RESOURCES={
   "ADVANCED_AIR::2530":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::26SCD":{url:"https://www.advancedair.co.uk/app/uploads/26SCD_IOM_Rev1.0.pdf",title:"26SCD Installation Manual",revision:"Rev 1.0"},
   "ADVANCED_AIR::0400MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
-  "ADVANCED_AIR::0400FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
-  "ADVANCED_AIR::0500MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
-  "ADVANCED_AIR::0500FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::0400FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::0500MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::0500FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"}
@@ -1529,14 +1565,17 @@ if($("fdSeries")){
   ["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));
   $("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
   $("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);
-  ["fdDatumLevel"].forEach(id=>$(id)?.addEventListener("input",()=>updateFDSettingOut(calcFD())));
+  ["fdDatumLevel"].forEach(id=>{const el=$(id);if(!el)return;const recalc=()=>{const r=calcFD();if(r)updateFDSettingOut(r)};el.addEventListener("input",recalc);el.addEventListener("change",recalc);el.addEventListener("keyup",recalc)});
   $("fdHevacVariant").addEventListener("change",calcFD);
   $("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});
   ["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));
   $("fdCopyBtn").addEventListener("click",copyFD);
   document.querySelectorAll("[data-save-pack]").forEach(btn=>btn.addEventListener("click",buildFDSiteSheet));
   $("fdResetBtn").addEventListener("click",resetFD);
-  fillFDProducts();
+  const initialiseFD=()=>{fillFDProducts();refreshFDManualResource();const r=calcFD();if(r)updateFDSettingOut(r)};
+  initialiseFD();
+  window.addEventListener("pageshow",initialiseFD);
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)initialiseFD()});
 }
 
 
