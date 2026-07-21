@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.17-advanced-air-stable-render";
+const VT_ENGINEERING_DB_VERSION="1.0.18-unified-render-path";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -639,13 +639,9 @@ function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
 
 applyFDVerificationTeaching();
 
-function clearFDSelectionDependentUI(message="Selection changed — recalculating…",force=false){
-  // Ignore duplicate Android lifecycle/select refreshes when the current visible
-  // selection is exactly the one that produced the last completed result.
-  // Advanced Air numeric model codes were triggering these harmless refreshes
-  // after calcFD had rendered, which then wiped the diagram and setting-out panel.
-  const previous=window.__lastFDResult;
-  if(!force && previous?.selectionToken && previous.selectionToken===fdSelectionToken()) return false;
+function clearFDSelectionDependentUI(message="Selection changed — recalculating…"){
+  // Selection changes are handled synchronously: clear once, then calculate once.
+  // No manufacturer-specific token or Android lifecycle guard is used here.
   window.__lastFDResult=null;
   const rangePanel=$("fdOpeningRange"); if(rangePanel)rangePanel.hidden=true;
   const verification=document.getElementById("fdVerificationPanel"); if(verification)verification.remove();
@@ -1193,6 +1189,8 @@ function calcFD(){if(!$("fdSeries")?.value)return null;const startSelection=curr
  r.productKey=productKey;
  r.methodKey=methodKey;
  r.selectionToken=startToken;
+ r.methodSnapshot=m;
+ r.settingOut=r.settingOut||m.settingOut||null;
  // calcFD is synchronous: the user cannot change the dropdown selection while
  // this calculation is running. The old post-calculation token guard produced
  // false Advanced Air mismatches on Android and trapped the setting-out panel in
@@ -1208,8 +1206,7 @@ else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-sp
 else fdMsg("ok",`✅ Verified from the selected ${man.label} tested installation method.${hasStructuredRange?" Permitted minimum and maximum openings are shown below.":range} The stated opening includes the manufacturer-specified casing build-up and installation/expansion gaps where published. Verify the current official manual before construction.`);return r}
 
 function renderFDInstallationRequirements(rules,selectionToken=""){
-  const liveToken=fdSelectionToken();
-  if(selectionToken && liveToken!==selectionToken)return;
+  const liveToken=selectionToken||fdSelectionToken();
   const groups={construction:[],duct:[],supports:[],access:[],position:[],critical:[]};
   const clean=(rules||[]).filter(Boolean);
   clean.forEach(rule=>{
@@ -1253,9 +1250,9 @@ function updateFDSettingOut(r){
     if(status){status.textContent="Check manual";status.className="fd-setting-badge warning";}
     return;
   }
-  const live=currentFD();
-  const sameSelection=live.manKey===r.manufacturerKey && live.productKey===r.productKey && live.methodKey===r.methodKey;
-  const m=sameSelection?live.m:null;
+  // Use the method captured by the completed calculation, exactly as the other
+  // manufacturer render paths do. Do not re-read the dropdowns during rendering.
+  const m=r.methodSnapshot||null;
   if(r.noBuilderOpening===true){
     clear();
     if(answer)answer.innerHTML="<strong>No separate damper opening is formed.</strong> Coordinate the fire-rated duct penetration and supports to the selected remote-from-wall method.";
@@ -1266,7 +1263,7 @@ function updateFDSettingOut(r){
   const ductH=Number(r.nomH ?? r.dia);
   const openingH=Number(r.openH ?? r.openD ?? r.visualOpen);
   const board=r.includesLining?(Number.isFinite(r.structuralLiningBottom)?Number(r.structuralLiningBottom):(parseFloat($("fdBoardThickness")?.value)||0)):0;
-  const rule=r.settingOut||(sameSelection?m?.settingOut:null);
+  const rule=r.settingOut||m?.settingOut||null;
   const casingMapped=rule?.basis==="casing-edge" && Number.isFinite(rule.casingProjectionBottom) && Number.isFinite(rule.bottomClearance);
   const nominalMapped=rule?.basis==="nominal-duct" && Number.isFinite(rule.bottomFinished);
   const tableMapped=rule?.basis==="table-centred" && Number.isFinite(openingH) && Number.isFinite(ductH);
@@ -1484,7 +1481,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.16</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.18</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
@@ -1669,9 +1666,7 @@ if($("fdSeries")){
     const live=currentFD();
     if(!live.man||!live.p||!live.m){initialiseFD();return;}
     refreshFDManualResource();
-    const last=window.__lastFDResult;
-    if(!last || last.selectionToken!==fdSelectionToken())calcFD();
-    else updateFDSettingOut(last);
+    calcFD();
     rememberFDSelects();
   };
   initialiseFD();
