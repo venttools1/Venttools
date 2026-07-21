@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.16-advanced-air-post-render-clear-fix";
+const VT_ENGINEERING_DB_VERSION="1.0.17-advanced-air-stable-render";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -346,7 +346,8 @@ function applyFDVerificationTeaching(){
     Object.entries(manufacturer.products||{}).forEach(([productKey,product])=>{
       Object.entries(product.methods||{}).forEach(([methodKey,method])=>{
         const unsupported=/link|manual/i.test(String(method.type||""));
-        const mappedSetting=!!((method.settingOut && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(method.settingOut.basis)) || method.dynamicSettingOut===true);
+        const dynamicMappedTypes=new Set(["advanced-afs-0160","advanced-afs-2530","advanced-hevac-2530","advanced-circle-fixed","advanced-circle-floor","advanced-rect-fixed","advanced-26scd-afs"]);
+        const mappedSetting=!!((method.settingOut && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(method.settingOut.basis)) || method.dynamicSettingOut===true || dynamicMappedTypes.has(method.type));
         method.engineeringVerification={
           manufacturerKey,productKey,methodKey,
           manufacturerVerified:true,
@@ -674,7 +675,6 @@ function currentFD(){
   return{man,p,m,manKey,productKey,methodKey};
 }
 function fillFDProducts(){
-  clearFDSelectionDependentUI();
   const manKey=String($("fdManufacturer")?.value||"").trim();
   const man=FD_MANUFACTURERS[manKey],s=$("fdSeries");
   if(!man||!s)return;
@@ -690,7 +690,6 @@ function fillFDProducts(){
   fillFDMethods();
 }
 function fillFDMethods(){
-  clearFDSelectionDependentUI();
   const manKey=String($("fdManufacturer")?.value||"").trim();
   const man=FD_MANUFACTURERS[manKey];
   const rawProductKey=String($("fdSeries")?.value||"").trim();
@@ -1614,13 +1613,37 @@ function refreshFDManualResource(){
 
 // Initialise the fire-damper UI only after the official resource registry is ready.
 if($("fdSeries")){
-  $("fdManufacturer").addEventListener("change",()=>{clearFDSelectionDependentUI("Selection changed — recalculating…",true);fillFDProducts()});
-  $("fdSeries").addEventListener("change",()=>{clearFDSelectionDependentUI("Selection changed — recalculating…",true);fillFDMethods();refreshFDManualResource()});
+  const fdSelectSnapshot={manufacturer:"",product:"",method:""};
+  const rememberFDSelects=()=>{
+    fdSelectSnapshot.manufacturer=String($("fdManufacturer")?.value||"");
+    fdSelectSnapshot.product=String($("fdSeries")?.value||"");
+    fdSelectSnapshot.method=String($("fdMethod")?.value||"");
+  };
+  const genuineChange=(key,value)=>{
+    value=String(value||"");
+    if(fdSelectSnapshot[key]===value)return false;
+    fdSelectSnapshot[key]=value;
+    return true;
+  };
+  $("fdManufacturer").addEventListener("change",()=>{
+    if(!genuineChange("manufacturer",$("fdManufacturer").value))return;
+    clearFDSelectionDependentUI("Selection changed — recalculating…",true);
+    fillFDProducts();rememberFDSelects();refreshFDManualResource();
+  });
+  $("fdSeries").addEventListener("change",()=>{
+    if(!genuineChange("product",$("fdSeries").value))return;
+    clearFDSelectionDependentUI("Selection changed — recalculating…",true);
+    fillFDMethods();rememberFDSelects();refreshFDManualResource();
+  });
   $("fdManufacturer").addEventListener("change",refreshFDManualResource,true);
   $("fdSeries").addEventListener("change",refreshFDManualResource,true);
   $("fdWk25Config")?.addEventListener("change",updateFDInputs);
   $("fdWk25Axis")?.addEventListener("change",calcFD);
-  $("fdMethod").addEventListener("change",()=>{clearFDSelectionDependentUI("Selection changed — recalculating…",true);updateFDInputs()});
+  $("fdMethod").addEventListener("change",()=>{
+    if(!genuineChange("method",$("fdMethod").value))return;
+    clearFDSelectionDependentUI("Selection changed — recalculating…",true);
+    updateFDInputs();rememberFDSelects();
+  });
   $("fdApertureShape").addEventListener("change",updateFDInputs);
   ["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));
   $("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
@@ -1632,9 +1655,8 @@ if($("fdSeries")){
       else calcFD();
     };
     el.addEventListener("input",liveSetting);
-    el.addEventListener("keyup",liveSetting);
-    el.addEventListener("change",calcFD);
-    el.addEventListener("blur",calcFD);
+    el.addEventListener("change",liveSetting);
+    el.addEventListener("blur",liveSetting);
   });
   $("fdHevacVariant").addEventListener("change",calcFD);
   $("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});
@@ -1642,15 +1664,15 @@ if($("fdSeries")){
   $("fdCopyBtn").addEventListener("click",copyFD);
   document.querySelectorAll("[data-save-pack]").forEach(btn=>btn.addEventListener("click",buildFDSiteSheet));
   $("fdResetBtn").addEventListener("click",resetFD);
-  const initialiseFD=()=>{fillFDProducts();refreshFDManualResource();calcFD()};
+  const initialiseFD=()=>{fillFDProducts();rememberFDSelects();refreshFDManualResource();calcFD();rememberFDSelects()};
   const resumeFD=()=>{
-    // Do not rebuild product/method selects here. On Android, opening/closing the
-    // numeric keyboard can trigger lifecycle events; rebuilding the selects at
-    // that point caused the displayed result, notes and datum input to drift.
     const live=currentFD();
     if(!live.man||!live.p||!live.m){initialiseFD();return;}
     refreshFDManualResource();
-    calcFD();
+    const last=window.__lastFDResult;
+    if(!last || last.selectionToken!==fdSelectionToken())calcFD();
+    else updateFDSettingOut(last);
+    rememberFDSelects();
   };
   initialiseFD();
   window.addEventListener("pageshow",event=>{event.persisted?resumeFD():refreshFDManualResource()});
