@@ -1,10 +1,14 @@
-# VentTools V1.0.18
+# VentTools V1.0.19
+
+Internal release label: **Asset cache-bust fix**
+
+This release changes the public JavaScript and stylesheet asset URLs to `script.js?v=1.0.19` and `style.css?v=1.0.19`. Earlier releases continued to request `?v=1.0.1`, allowing mobile browsers and hosting caches to keep serving the old calculator code even while the HTML footer showed a newer version. No new engineering formula has been added in this release; it ensures the already-built V1.0.18 logic is actually loaded.
 
 Internal release label: Unified manufacturer render path
 
 Advanced Air 0160 and 2530 now use the same synchronous render lifecycle as BSB, Swegon/Actionair and Lindab. The completed calculation carries its own method and setting-out data; render functions no longer re-read or compare dropdown state.
 
-# VentTools V1.0.18
+# VentTools V1.0.19
 
 Release label: Advanced Air post-render clear fix
 
@@ -12,11 +16,11 @@ Release label: Advanced Air post-render clear fix
 - Keeps the diagram, verification banner and setting-out values visible after recalculation.
 - True manufacturer, product and method changes still clear stale UI before recalculating.
 
-# VentTools V1.0.18
+# VentTools V1.0.19
 
 **Internal release label:** Advanced Air Render-Lock Hotfix
 
-This package keeps the public interface clean: the website shows only `VentTools V1.0.18` in the footer. The descriptive release label is retained here for development and change tracking.
+This package keeps the public interface clean: the website shows only `VentTools V1.0.19` in the footer. The descriptive release label is retained here for development and change tracking.
 
 ## V1.0.14 changes
 
@@ -654,11 +658,11 @@ This deployment package contains links to official manufacturer resources only. 
 - Uses the registered product select value as the single authoritative key.
 - Prevents Advanced Air numeric model codes from being re-derived from display labels.
 - Keeps product, method, diagram, verification and setting-out state aligned.
-- Public pages show only VentTools V1.0.18.
+- Public pages show only VentTools V1.0.19.
 
 
 ## V1.0.17 — Advanced Air synchronous render fix
 
 - Removed the false post-calculation selection-token retry that trapped Advanced Air on Android in “Selection changed — recalculating”.
 - Advanced Air 0160/2530 table-based methods now complete their centred setting-out calculation and respond to AFFL changes.
-- Public UI shows only VentTools V1.0.18.
+- Public UI shows only VentTools V1.0.19.
