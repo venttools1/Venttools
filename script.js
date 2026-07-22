@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.18-unified-render-path";
+const VT_ENGINEERING_DB_VERSION="1.1.1-advanced-air-direct-path";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -868,7 +868,61 @@ function resolveAdvancedAirRectTable(ruleKey,w,h){
   const hb=table.heightBands.find(b=>h<=b.max)||table.heightBands[table.heightBands.length-1];
   return {minW:w+table.width.min,maxW:w+table.width.max,minH:h+hb.min,maxH:h+hb.maxAdd,source:table.source};
 }
-function calcFD(){if(!$("fdSeries")?.value)return null;const startSelection=currentFD(),startToken=fdSelectionToken(startSelection);const {man,p,m,manKey,productKey,methodKey}=startSelection;if(!man||!p||!m){clearFDSelectionDependentUI("Installation method did not initialise.");refreshFDManualResource();return null;}let r;
+
+function advancedAirDirectProductKey(){
+  const man=String($("fdManufacturer")?.value||"").trim();
+  if(man!=="ADVANCED_AIR")return "";
+  const sel=$("fdSeries");
+  const raw=String(sel?.value||"").trim();
+  const label=String(sel?.options?.[sel.selectedIndex]?.textContent||"").trim();
+  if(raw==="0160"||/^0160\b/.test(label))return "0160";
+  if(raw==="2530"||/^2530\b/.test(label))return "2530";
+  return "";
+}
+function calculateAdvancedAirDirect(){
+  const productKey=advancedAirDirectProductKey();
+  if(!productKey)return null;
+  const methodKey=String($("fdMethod")?.value||"").trim();
+  const W=parseFloat($("fdWidth")?.value)||0,H=parseFloat($("fdHeight")?.value)||0;
+  const product=FD_MANUFACTURERS.ADVANCED_AIR.products[productKey];
+  const method=product?.methods?.[methodKey];
+  if(!method||W<=0||H<=0)return null;
+  let d=null;
+  if(method.type==="advanced-rect-table")d=resolveAdvancedAirRectTable(method.tableRule,W,H);
+  else if(method.type==="advanced-rect-fixed")d={minW:W+method.addW,maxW:W+method.addW,minH:H+method.addH,maxH:H+method.addH,source:method.reference};
+  if(!d)return null;
+  const opening=`${fmt0(d.minW)} × ${fmt0(d.minH)} mm minimum opening to form`;
+  const range=`Published range: ${fmt0(d.minW)}–${fmt0(d.maxW)} mm wide × ${fmt0(d.minH)}–${fmt0(d.maxH)} mm high.`;
+  const r={
+    shape:"rect",manufacturer:"Advanced Air",manufacturerKey:"ADVANCED_AIR",product:productKey,productKey,method:methodKey,methodKey,
+    nomW:W,nomH:H,openW:d.minW,openH:d.minH,opening,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,
+    rule:method.type==="advanced-rect-fixed"?`Nominal width +${method.addW} mm; nominal height +${method.addH} mm`:`Published ${method.tableRule==="AA2530_HEVAC"?"HEVAC":"AFS"} opening table selected from the nominal-size band`,
+    reference:method.reference,range,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,
+    casingStage:method.tableRule==="AA2530_HEVAC"?"HEVAC frame allowance included in the manufacturer table":"AFS frame, rails/brackets and fire-batt zone included in the manufacturer table",
+    finishedStage:`${fmt0(d.minW)} × ${fmt0(d.minH)} mm minimum formed opening`,cutStage:`${fmt0(d.minW)} × ${fmt0(d.minH)} mm minimum structural opening`,
+    sourceStatus:"Verified from manufacturer opening table",statusType:"verified",includesLining:false,
+    settingOut:{basis:"table-centred",source:`${d.source}: minimum opening shown with the nominal damper centred for builder setting-out.`},
+    minOpenW:d.minW,minOpenH:d.minH,maxOpenW:d.maxW,maxOpenH:d.maxH,
+    rangeNote:"The minimum published opening is shown as the main result.",methodSnapshot:method,
+    criticalRules:[`Supporting construction: ${method.wall}.`,`Certified penetration seal: ${method.seal}.`,`Leave the manufacturer-required 10 mm duct expansion clearance and independently support connected ductwork within one metre.`,method.note].filter(Boolean)
+  };
+  r.selectionToken=`ADVANCED_AIR::${productKey}::${methodKey}`;
+  window.__lastFDResult=r;
+  const set=(id,value)=>{const el=$(id);if(el)el.textContent=value};
+  set("fdOpeningLabel","Opening Required by Selected Method");set("fdOpeningBig",opening);set("fdMethodBig",`${productKey} • ${method.reference}`);
+  set("fdDamperSummary",r.damper);set("fdRuleSummary",r.rule);set("fdReferenceSummary",r.reference);set("fdGuideSummary",`${product.manualTitle||product.guide} — ${product.revision}`);
+  set("fdNominalStage",r.nominalStage);set("fdCasingStage",r.casingStage);set("fdFinishedStage",r.finishedStage);set("fdCutStage",r.cutStage);
+  const st=$("fdResultStatus");if(st){st.textContent=r.sourceStatus;st.className="fd-result-status verified"}
+  const rp=$("fdOpeningRange");if(rp){rp.hidden=false;set("fdRangeMinW",`${fmt0(d.minW)} mm`);set("fdRangeMinH",`${fmt0(d.minH)} mm`);set("fdRangeSelectedW",`${fmt0(d.minW)} mm`);set("fdRangeSelectedH",`${fmt0(d.minH)} mm`);set("fdRangeMaxW",`${fmt0(d.maxW)} mm`);set("fdRangeMaxH",`${fmt0(d.maxH)} mm`);set("fdRangeNote",r.rangeNote)}
+  try{updateFDSettingOut(r)}catch(e){console.error("Advanced Air direct setting-out",e);set("fdSettingAnswer",opening)}
+  try{drawFD(r)}catch(e){console.error("Advanced Air direct diagram",e)}
+  try{renderFDInstallationRequirements(r.criticalRules,r.selectionToken)}catch(e){console.error(e)}
+  try{renderFDVerification(r)}catch(e){console.error(e)}
+  try{refreshFDManualResource()}catch(e){console.error(e)}
+  fdMsg("ok",`✅ Advanced Air ${productKey} calculated directly from the selected manufacturer table.`);
+  return r;
+}
+function calcFD(){const aaDirect=calculateAdvancedAirDirect();if(aaDirect)return aaDirect;if(!$("fdSeries")?.value)return null;const startSelection=currentFD(),startToken=fdSelectionToken(startSelection);const {man,p,m,manKey,productKey,methodKey}=startSelection;if(!man||!p||!m){clearFDSelectionDependentUI("Installation method did not initialise.");refreshFDManualResource();return null;}let r;
  if(productKey==="SPAN"){
    r=calculateActionairSpan();
    if(r.error){
