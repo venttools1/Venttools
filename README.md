@@ -1,35 +1,14 @@
-# VentTools V1.0.19
+# VentTools V1.1.0
 
-Internal release label: **Asset cache-bust fix**
+**Release label:** Advanced Air 0160/2530 clean data-table rebuild
 
-This release changes the public JavaScript and stylesheet asset URLs to `script.js?v=1.0.19` and `style.css?v=1.0.19`. Earlier releases continued to request `?v=1.0.1`, allowing mobile browsers and hosting caches to keep serving the old calculator code even while the HTML footer showed a newer version. No new engineering formula has been added in this release; it ensures the already-built V1.0.18 logic is actually loaded.
+## Release summary
 
-Internal release label: Unified manufacturer render path
-
-Advanced Air 0160 and 2530 now use the same synchronous render lifecycle as BSB, Swegon/Actionair and Lindab. The completed calculation carries its own method and setting-out data; render functions no longer re-read or compare dropdown state.
-
-# VentTools V1.0.19
-
-Release label: Advanced Air post-render clear fix
-
-- Prevents duplicate Android lifecycle/select refreshes from wiping a completed Advanced Air result.
-- Keeps the diagram, verification banner and setting-out values visible after recalculation.
-- True manufacturer, product and method changes still clear stale UI before recalculating.
-
-# VentTools V1.0.19
-
-**Internal release label:** Advanced Air Render-Lock Hotfix
-
-This package keeps the public interface clean: the website shows only `VentTools V1.0.19` in the footer. The descriptive release label is retained here for development and change tracking.
-
-## V1.0.14 changes
-
-- Isolated and corrected the Advanced Air render/recalculation state fault.
-- Prevented stale diagrams, banners and installation notes from another manufacturer remaining on screen.
-- Added controlled recalculation after selection and mobile-keyboard changes.
-- Kept the public version display to the footer only.
-
----
+- Replaced the old product-specific 0160 and 2530 calculator branches with one shared data-table resolver.
+- Rebuilt 0160 AFS, 2530 AFS and 2530 HEVAC from the official opening tables.
+- Core diagram and builder setting-out render before optional panels, so a verification/manual-panel error cannot blank a valid result.
+- Public pages display only `VentTools V1.1.0`.
+- Existing BSB, Swegon/Actionair, Lindab, Project Pack and Site Sheet features are retained.
 
 # VentTools V1.0 Engineering Edition — Four Manufacturer Audit
 
@@ -658,11 +637,11 @@ This deployment package contains links to official manufacturer resources only. 
 - Uses the registered product select value as the single authoritative key.
 - Prevents Advanced Air numeric model codes from being re-derived from display labels.
 - Keeps product, method, diagram, verification and setting-out state aligned.
-- Public pages show only VentTools V1.0.19.
+- Public pages show only VentTools V1.1.0.
 
 
 ## V1.0.17 — Advanced Air synchronous render fix
 
 - Removed the false post-calculation selection-token retry that trapped Advanced Air on Android in “Selection changed — recalculating”.
 - Advanced Air 0160/2530 table-based methods now complete their centred setting-out calculation and respond to AFFL changes.
-- Public UI shows only VentTools V1.0.19.
+- Public UI shows only VentTools V1.1.0.
