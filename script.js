@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.1.1-advanced-air-direct-path";
+const VT_ENGINEERING_DB_VERSION="1.1.2-production-release";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -919,7 +919,7 @@ function calculateAdvancedAirDirect(){
   try{renderFDInstallationRequirements(r.criticalRules,r.selectionToken)}catch(e){console.error(e)}
   try{renderFDVerification(r)}catch(e){console.error(e)}
   try{refreshFDManualResource()}catch(e){console.error(e)}
-  fdMsg("ok",`✅ Advanced Air ${productKey} calculated directly from the selected manufacturer table.`);
+  fdMsg("ok",`✅ Advanced Air ${productKey} calculation complete.`);
   return r;
 }
 function calcFD(){const aaDirect=calculateAdvancedAirDirect();if(aaDirect)return aaDirect;if(!$("fdSeries")?.value)return null;const startSelection=currentFD(),startToken=fdSelectionToken(startSelection);const {man,p,m,manKey,productKey,methodKey}=startSelection;if(!man||!p||!m){clearFDSelectionDependentUI("Installation method did not initialise.");refreshFDManualResource();return null;}let r;
