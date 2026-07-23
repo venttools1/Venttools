@@ -1,3 +1,23 @@
+# VentTools V1.1.2
+
+## V1.1.2 production release
+
+- Built from the user-confirmed working Advanced Air V1.1.1 path.
+- Public pages and cache identifiers updated to V1.1.2.
+- Advanced Air 0160/2530 direct calculation route retained because it is the verified reliable implementation.
+- Successful calculations now use normal production wording.
+
+
+**Release label:** Advanced Air 0160/2530 clean data-table rebuild
+
+## Release summary
+
+- Replaced the old product-specific 0160 and 2530 calculator branches with one shared data-table resolver.
+- Rebuilt 0160 AFS, 2530 AFS and 2530 HEVAC from the official opening tables.
+- Core diagram and builder setting-out render before optional panels, so a verification/manual-panel error cannot blank a valid result.
+- Public pages display only `VentTools V1.1.2`.
+- Existing BSB, Swegon/Actionair, Lindab, Project Pack and Site Sheet features are retained.
+
 # VentTools V1.0 Engineering Edition — Four Manufacturer Audit
 
 - BSB supported methods audited
@@ -618,3 +638,18 @@ BSB audit complete for enabled calculators. Advanced Air audit complete for enab
 ## Public document policy
 
 This deployment package contains links to official manufacturer resources only. It does not bundle manufacturer manuals, spreadsheets, drawings or product photographs. Keep any audit source copies in a separate private archive.
+
+
+## V1.0.14 — Advanced Air Product-Key Fix
+
+- Uses the registered product select value as the single authoritative key.
+- Prevents Advanced Air numeric model codes from being re-derived from display labels.
+- Keeps product, method, diagram, verification and setting-out state aligned.
+- Public pages show only VentTools V1.1.2.
+
+
+## V1.0.17 — Advanced Air synchronous render fix
+
+- Removed the false post-calculation selection-token retry that trapped Advanced Air on Android in “Selection changed — recalculating”.
+- Advanced Air 0160/2530 table-based methods now complete their centred setting-out calculation and respond to AFFL changes.
+- Public UI shows only VentTools V1.1.2.

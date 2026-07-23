@@ -309,7 +309,7 @@ function calculateDuct(){const w=parseFloat($('rectW').value)||0,h=parseFloat($(
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.0.8-pack-status-refresh";
+const VT_ENGINEERING_DB_VERSION="1.1.2-production-release";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -346,7 +346,8 @@ function applyFDVerificationTeaching(){
     Object.entries(manufacturer.products||{}).forEach(([productKey,product])=>{
       Object.entries(product.methods||{}).forEach(([methodKey,method])=>{
         const unsupported=/link|manual/i.test(String(method.type||""));
-        const mappedSetting=!!((method.settingOut && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(method.settingOut.basis)) || method.dynamicSettingOut===true);
+        const dynamicMappedTypes=new Set(["advanced-rect-table","advanced-circle-fixed","advanced-circle-floor","advanced-rect-fixed","advanced-26scd-afs"]);
+        const mappedSetting=!!((method.settingOut && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(method.settingOut.basis)) || method.dynamicSettingOut===true || dynamicMappedTypes.has(method.type));
         method.engineeringVerification={
           manufacturerKey,productKey,methodKey,
           manufacturerVerified:true,
@@ -363,7 +364,13 @@ function applyFDVerificationTeaching(){
   });
 }
 function getFDVerification(r){
-  const {man,p,m,manKey,productKey,methodKey}=currentFD();
+  const live=currentFD();
+  const manKey=r?.manufacturerKey||live.manKey;
+  const productKey=r?.productKey||live.productKey;
+  const methodKey=r?.methodKey||live.methodKey;
+  const man=FD_MANUFACTURERS[manKey];
+  const p=man?.products?.[productKey];
+  const m=p?.methods?.[methodKey];
   const taught=m?.engineeringVerification||{};
   const activeSetting=r?.settingOut||m?.settingOut;
   const settingMapped=!!(activeSetting && ["casing-edge","nominal-duct","table-centred","not-applicable"].includes(activeSetting.basis));
@@ -444,13 +451,13 @@ const FD_MANUFACTURERS={
   }},
   ADVANCED_AIR:{label:"Advanced Air",products:{
     "0160":{label:"0160 — Curtain fire damper",shape:"rect",documentId:"IOM_0160",manual:ADVANCED_AIR_DOCUMENTS.IOM_0160.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_0160.title,guide:"Advanced Air 0160 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • April 2026",methods:{
-      AFS_60:{label:"AFS — 60 minute flexible/rigid wall",type:"advanced-afs-0160",reference:"0160 AFS • E60",wall:"Flexible or rigid supporting construction, minimum 94 mm",seal:"Two layers of 50 mm, 140 kg/m³ coated fire batt with tested intumescent sealant",classification:"E60",note:"Opening shown is the manufacturer table minimum. Letterbox lining is part of the wall construction and is not added again by VentTools."},
-      AFS_120:{label:"AFS — 120 minute flexible/rigid wall",type:"advanced-afs-0160",reference:"0160 AFS • E120",wall:"Flexible or rigid supporting construction, minimum 131 mm",seal:"Two layers of 50 mm, 140 kg/m³ coated fire batt with tested intumescent sealant",classification:"E120",note:"Opening shown is the manufacturer table minimum. Letterbox lining is part of the wall construction and is not added again by VentTools."},
+      AFS_60:{label:"AFS — 60 minute flexible/rigid wall",type:"advanced-rect-table",tableRule:"AA0160_AFS",reference:"0160 AFS • E60",wall:"Flexible or rigid supporting construction, minimum 94 mm",seal:"Two layers of 50 mm, 140 kg/m³ coated fire batt with tested intumescent sealant",classification:"E60",note:"Opening shown is the manufacturer table minimum. Letterbox lining is part of the wall construction and is not added again by VentTools."},
+      AFS_120:{label:"AFS — 120 minute flexible/rigid wall",type:"advanced-rect-table",tableRule:"AA0160_AFS",reference:"0160 AFS • E120",wall:"Flexible or rigid supporting construction, minimum 131 mm",seal:"Two layers of 50 mm, 140 kg/m³ coated fire batt with tested intumescent sealant",classification:"E120",note:"Opening shown is the manufacturer table minimum. Letterbox lining is part of the wall construction and is not added again by VentTools."},
       TRIMOTERM:{label:"Trimoterm wall — E120",type:"advanced-rect-fixed",addW:55,addH:55,tolerance:10,reference:"0160 Trimoterm • E120",wall:"Trimoterm sandwich panel, minimum 120 mm",seal:"Tested capping, Astroflame Astro INTU Mastic or equivalent, and retaining flanges",classification:"E120",note:"Opening is nominal width and height +55 mm, tolerance ±10 mm."}
     }},
     "2530":{label:"2530 — Motorised fire damper",shape:"rect",documentId:"IOM_2530",manual:ADVANCED_AIR_DOCUMENTS.IOM_2530.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_2530.title,guide:"Advanced Air 2530 Installation, Operation and Maintenance Manual",revision:"Rev 1.1 • April 2026",methods:{
-      AFS:{label:"AFS — flexible/rigid wall",type:"advanced-afs-2530",reference:"2530 AFS",wall:"Flexible or rigid wall matching the selected 60/120 minute tested construction",seal:"Two layers of 50 mm, 140 kg/m³ coated fire batt with tested intumescent sealant",classification:"E60/E120 S",note:"The opening shown is the published minimum for the entered nominal size. The AFS frame and fire-batt zone are already included."},
-      HEVAC:{label:"HEVAC frame — rigid wall E120",type:"advanced-hevac-2530",reference:"2530 HEVAC • E120",wall:"Rigid wall, minimum 150 mm",seal:"HEVAC frame with turnback tabs and 4:1 mortar mix",classification:"E120 S",note:"The damper must remain able to move within the HEVAC frame. Do not fill mortar onto the damper spigots."}
+      AFS:{label:"AFS — flexible/rigid wall",type:"advanced-rect-table",tableRule:"AA2530_AFS",reference:"2530 AFS",wall:"Flexible or rigid wall matching the selected 60/120 minute tested construction",seal:"Two layers of 50 mm, 140 kg/m³ coated fire batt with tested intumescent sealant",classification:"E60/E120 S",note:"The opening shown is the published minimum for the entered nominal size. The AFS frame and fire-batt zone are already included."},
+      HEVAC:{label:"HEVAC frame — rigid wall E120",type:"advanced-rect-table",tableRule:"AA2530_HEVAC",reference:"2530 HEVAC • E120",wall:"Rigid wall, minimum 150 mm",seal:"HEVAC frame with turnback tabs and 4:1 mortar mix",classification:"E120 S",note:"The damper must remain able to move within the HEVAC frame. Do not fill mortar onto the damper spigots."}
     }},
     "26SCD":{label:"26SCD — Smoke control damper",shape:"rect",documentId:"IOM_26SCD",manual:ADVANCED_AIR_DOCUMENTS.IOM_26SCD.url,manualTitle:ADVANCED_AIR_DOCUMENTS.IOM_26SCD.title,guide:"Advanced Air 26SCD Installation, Operation and Maintenance Manual",revision:"Rev 1.0 • April 2026",methods:{
       AFS_FLEX:{label:"AFS — two-hour flexible wall",type:"advanced-26scd-afs",reference:"26SCD IOM page 5 • E120 S500",wall:"Flexible supporting construction, minimum 122 mm; minimum 150 mm for multi-section dampers",seal:"Two layers of 50 mm, 140 kg/m³ fire batt with fire-batt sealant and intumescent mastic",classification:"E120 S500",dynamicSettingOut:true,note:"Published minimum and maximum openings are based on the damper being centralised in the opening."},
@@ -632,9 +639,72 @@ function fdMsg(t,s){const e=$("fdMessage");e.className="msg "+t;e.textContent=s}
 
 applyFDVerificationTeaching();
 
-function currentFD(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=p.methods[$("fdMethod").value];return{man,p,m,manKey:$("fdManufacturer").value,productKey:$("fdSeries").value,methodKey:$("fdMethod").value}}
-function fillFDProducts(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],s=$("fdSeries");s.innerHTML="";Object.entries(man.products).forEach(([k,v])=>{const o=document.createElement("option");o.value=String(k);o.textContent=v.label;o.dataset.manual=v.manual||"";o.dataset.manualTitle=v.manualTitle||v.guide||"";o.dataset.revision=v.revision||"";o.dataset.productLabel=(v.label||String(k)).split(" — ")[0];s.appendChild(o)});fillFDMethods()}
-function fillFDMethods(){const man=FD_MANUFACTURERS[$("fdManufacturer").value],p=man.products[$("fdSeries").value],m=$("fdMethod");m.innerHTML="";Object.entries(p.methods).forEach(([k,v])=>{const o=document.createElement("option");o.value=k;o.textContent=v.label;m.appendChild(o)});updateFDInputs();refreshFDManualResource()}
+function clearFDSelectionDependentUI(message="Selection changed — recalculating…"){
+  // Selection changes are handled synchronously: clear once, then calculate once.
+  // No manufacturer-specific token or Android lifecycle guard is used here.
+  window.__lastFDResult=null;
+  const rangePanel=$("fdOpeningRange"); if(rangePanel)rangePanel.hidden=true;
+  const verification=document.getElementById("fdVerificationPanel"); if(verification)verification.remove();
+  const status=$("fdResultStatus"); if(status){status.textContent=message;status.className="fd-result-status warning";}
+  ["fdReqConstruction","fdReqDuct","fdReqSupports","fdReqAccess","fdReqPosition","fdReqCritical"].forEach(id=>{
+    const el=$(id); if(!el)return; el.hidden=true;
+    const content=el.querySelector(".fd-requirement-content"); if(content)content.innerHTML="";
+  });
+  ["fdSetOpeningBottom","fdSetOpeningTop","fdSetDuctTop","fdSetBottomOffset"].forEach(id=>{if($(id))$(id).textContent="—"});
+  const diagram=$("fdDiagramLayer"); if(diagram)diagram.innerHTML="";
+  if($("fdSettingAnswer"))$("fdSettingAnswer").textContent=message;
+  if($("fdSettingStatus")){ $("fdSettingStatus").textContent="Recalculating"; $("fdSettingStatus").className="fd-setting-badge warning"; }
+}
+function fdSelectionToken(selection=currentFD()){
+  return `${selection.manKey||""}::${selection.productKey||""}::${selection.methodKey||""}`;
+}
+function currentFD(){
+  const manKey=String($("fdManufacturer")?.value||"").trim();
+  const man=FD_MANUFACTURERS[manKey];
+  const rawProductKey=String($("fdSeries")?.value||"").trim();
+  // The select value is the authoritative engineering key. Numeric-looking
+  // Advanced Air codes (0160 / 2530) must never be re-derived from display text.
+  const productKey=man?.products?.[rawProductKey] ? rawProductKey : canonicalFDProductKey(manKey,$("fdSeries"));
+  const p=man?.products?.[productKey];
+  const methodKey=String($("fdMethod")?.value||"").trim();
+  const m=p?.methods?.[methodKey];
+  return{man,p,m,manKey,productKey,methodKey};
+}
+function fillFDProducts(){
+  const manKey=String($("fdManufacturer")?.value||"").trim();
+  const man=FD_MANUFACTURERS[manKey],s=$("fdSeries");
+  if(!man||!s)return;
+  const previous=canonicalFDProductKey(manKey,s);
+  s.innerHTML="";
+  Object.entries(man.products||{}).forEach(([k,v])=>{
+    const o=document.createElement("option");o.value=String(k);o.textContent=v.label;
+    o.dataset.manual=v.manual||"";o.dataset.manualTitle=v.manualTitle||v.guide||"";
+    o.dataset.revision=v.revision||"";o.dataset.productLabel=(v.label||String(k)).split(" — ")[0];s.appendChild(o)
+  });
+  if(previous&&man.products[previous])s.value=previous;
+  if(!s.value&&s.options.length)s.selectedIndex=0;
+  fillFDMethods();
+}
+function fillFDMethods(){
+  const manKey=String($("fdManufacturer")?.value||"").trim();
+  const man=FD_MANUFACTURERS[manKey];
+  const rawProductKey=String($("fdSeries")?.value||"").trim();
+  const productKey=man?.products?.[rawProductKey] ? rawProductKey : canonicalFDProductKey(manKey,$("fdSeries"));
+  const p=man?.products?.[productKey],sel=$("fdMethod");
+  if(!sel)return;
+  const previous=String(sel.value||"").trim();sel.innerHTML="";
+  Object.entries(p?.methods||{}).forEach(([k,v])=>{const o=document.createElement("option");o.value=String(k);o.textContent=v.label;sel.appendChild(o)});
+  if(previous&&p?.methods?.[previous])sel.value=previous;
+  if(!sel.value&&sel.options.length)sel.selectedIndex=0;
+  if(!p||!sel.options.length){
+    window.__lastFDResult=null;updateFDManualButtonLabel();
+    const answer=$("fdSettingAnswer"),status=$("fdSettingStatus");
+    if(answer)answer.innerHTML="<strong>Installation methods did not initialise.</strong> Reload this release once; VentTools will not reuse a previous product calculation.";
+    if(status){status.textContent="Data reload required";status.className="fd-setting-badge warning";}
+    return;
+  }
+  updateFDInputs();refreshFDManualResource();
+}
 function setAllowanceOptions(min,max,step,def){const sel=$("fdAllowance");sel.innerHTML="";for(let n=min;n<=max;n+=step){const o=document.createElement("option");o.value=n;o.textContent=`${n} mm total (${n/2} mm nominal each side)`;if(n===def)o.selected=true;sel.appendChild(o)}}
 
 function setNumericOptions(id,min,max,def){const s=$(id);s.innerHTML="";for(let n=min;n<=max;n++){const o=document.createElement("option");o.value=n;o.textContent=n+" mm";if(n===def)o.selected=true;s.appendChild(o)}}
@@ -762,24 +832,97 @@ function calculateActionairSpan(){
     range:`Permitted range: ${fmt0(minW)} × ${fmt0(minH)} mm minimum to ${fmt0(maxW)} × ${fmt0(maxH)} mm maximum. Recommended opening allows 100 mm infill on all four sides.`
   };
 }
-function advancedHeightAllowance(h){
-  if(h<=100)return 100;
-  if(h<=300)return 125;
-  if(h<=525)return 150;
-  if(h<=700)return 175;
-  if(h<=925)return 200;
-  return 225;
+const ADVANCED_AIR_RECT_TABLES={
+  AA0160_AFS:{
+    source:"Advanced Air 0160 IOM Rev 1.1 opening tables",
+    width:{mode:"add",min:194,max:350},
+    heightBands:[
+      {max:100,min:100,maxAdd:350},{max:300,min:125,maxAdd:375},
+      {max:525,min:150,maxAdd:400},{max:700,min:175,maxAdd:425},
+      {max:925,min:200,maxAdd:450},{max:1000,min:225,maxAdd:475}
+    ]
+  },
+  AA2530_AFS:{
+    source:"Advanced Air 2530 IOM Rev 1.1 AFS opening table",
+    sizeBands:[
+      {test:(w,h)=>w>=200&&h>=200,minW:(w)=>w+194,maxW:(w)=>w+310,minH:(h)=>h+100,maxH:(h)=>h+310},
+      {test:(w,h)=>w>=175&&h>=175,minW:(w)=>w+219,maxW:(w)=>w+335,minH:(h)=>h+125,maxH:(h)=>h+335},
+      {test:()=>true,minW:()=>394,maxW:()=>510,minH:()=>300,maxH:()=>510}
+    ]
+  },
+  AA2530_HEVAC:{
+    source:"Advanced Air 2530 IOM Rev 1.1 HEVAC opening table",
+    sizeBands:[
+      {test:(w,h)=>w>=200&&h>=200,minW:(w)=>w+170,maxW:(w)=>w+200,minH:(h)=>h+170,maxH:(h)=>h+200},
+      {test:()=>true,minW:()=>370,maxW:()=>400,minH:()=>370,maxH:()=>400}
+    ]
+  }
+};
+function resolveAdvancedAirRectTable(ruleKey,w,h){
+  const table=ADVANCED_AIR_RECT_TABLES[ruleKey];
+  if(!table)return null;
+  if(table.sizeBands){
+    const band=table.sizeBands.find(b=>b.test(w,h));
+    return {minW:band.minW(w),maxW:band.maxW(w),minH:band.minH(h),maxH:band.maxH(h),source:table.source};
+  }
+  const hb=table.heightBands.find(b=>h<=b.max)||table.heightBands[table.heightBands.length-1];
+  return {minW:w+table.width.min,maxW:w+table.width.max,minH:h+hb.min,maxH:h+hb.maxAdd,source:table.source};
 }
-function advanced2530Min(W,H){
-  if(W>=200 && H>=200)return {w:W+194,h:H+100,maxW:W+310,maxH:H+310};
-  if(W>=175 && H>=175)return {w:W+219,h:H+125,maxW:W+335,maxH:H+335};
-  return {w:394,h:300,maxW:510,maxH:510};
+
+function advancedAirDirectProductKey(){
+  const man=String($("fdManufacturer")?.value||"").trim();
+  if(man!=="ADVANCED_AIR")return "";
+  const sel=$("fdSeries");
+  const raw=String(sel?.value||"").trim();
+  const label=String(sel?.options?.[sel.selectedIndex]?.textContent||"").trim();
+  if(raw==="0160"||/^0160\b/.test(label))return "0160";
+  if(raw==="2530"||/^2530\b/.test(label))return "2530";
+  return "";
 }
-function advanced2530Hevac(W,H){
-  if(W>=200 && H>=200)return {w:W+170,h:H+170,maxW:W+200,maxH:H+200};
-  return {w:370,h:370,maxW:400,maxH:400};
+function calculateAdvancedAirDirect(){
+  const productKey=advancedAirDirectProductKey();
+  if(!productKey)return null;
+  const methodKey=String($("fdMethod")?.value||"").trim();
+  const W=parseFloat($("fdWidth")?.value)||0,H=parseFloat($("fdHeight")?.value)||0;
+  const product=FD_MANUFACTURERS.ADVANCED_AIR.products[productKey];
+  const method=product?.methods?.[methodKey];
+  if(!method||W<=0||H<=0)return null;
+  let d=null;
+  if(method.type==="advanced-rect-table")d=resolveAdvancedAirRectTable(method.tableRule,W,H);
+  else if(method.type==="advanced-rect-fixed")d={minW:W+method.addW,maxW:W+method.addW,minH:H+method.addH,maxH:H+method.addH,source:method.reference};
+  if(!d)return null;
+  const opening=`${fmt0(d.minW)} × ${fmt0(d.minH)} mm minimum opening to form`;
+  const range=`Published range: ${fmt0(d.minW)}–${fmt0(d.maxW)} mm wide × ${fmt0(d.minH)}–${fmt0(d.maxH)} mm high.`;
+  const r={
+    shape:"rect",manufacturer:"Advanced Air",manufacturerKey:"ADVANCED_AIR",product:productKey,productKey,method:methodKey,methodKey,
+    nomW:W,nomH:H,openW:d.minW,openH:d.minH,opening,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,
+    rule:method.type==="advanced-rect-fixed"?`Nominal width +${method.addW} mm; nominal height +${method.addH} mm`:`Published ${method.tableRule==="AA2530_HEVAC"?"HEVAC":"AFS"} opening table selected from the nominal-size band`,
+    reference:method.reference,range,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,
+    casingStage:method.tableRule==="AA2530_HEVAC"?"HEVAC frame allowance included in the manufacturer table":"AFS frame, rails/brackets and fire-batt zone included in the manufacturer table",
+    finishedStage:`${fmt0(d.minW)} × ${fmt0(d.minH)} mm minimum formed opening`,cutStage:`${fmt0(d.minW)} × ${fmt0(d.minH)} mm minimum structural opening`,
+    sourceStatus:"Verified from manufacturer opening table",statusType:"verified",includesLining:false,
+    settingOut:{basis:"table-centred",source:`${d.source}: minimum opening shown with the nominal damper centred for builder setting-out.`},
+    minOpenW:d.minW,minOpenH:d.minH,maxOpenW:d.maxW,maxOpenH:d.maxH,
+    rangeNote:"The minimum published opening is shown as the main result.",methodSnapshot:method,
+    criticalRules:[`Supporting construction: ${method.wall}.`,`Certified penetration seal: ${method.seal}.`,`Leave the manufacturer-required 10 mm duct expansion clearance and independently support connected ductwork within one metre.`,method.note].filter(Boolean)
+  };
+  r.selectionToken=`ADVANCED_AIR::${productKey}::${methodKey}`;
+  window.__lastFDResult=r;
+  const set=(id,value)=>{const el=$(id);if(el)el.textContent=value};
+  set("fdOpeningLabel","Opening Required by Selected Method");set("fdOpeningBig",opening);set("fdMethodBig",`${productKey} • ${method.reference}`);
+  set("fdDamperSummary",r.damper);set("fdRuleSummary",r.rule);set("fdReferenceSummary",r.reference);set("fdGuideSummary",`${product.manualTitle||product.guide} — ${product.revision}`);
+  set("fdNominalStage",r.nominalStage);set("fdCasingStage",r.casingStage);set("fdFinishedStage",r.finishedStage);set("fdCutStage",r.cutStage);
+  const st=$("fdResultStatus");if(st){st.textContent=r.sourceStatus;st.className="fd-result-status verified"}
+  const rp=$("fdOpeningRange");if(rp){rp.hidden=false;set("fdRangeMinW",`${fmt0(d.minW)} mm`);set("fdRangeMinH",`${fmt0(d.minH)} mm`);set("fdRangeSelectedW",`${fmt0(d.minW)} mm`);set("fdRangeSelectedH",`${fmt0(d.minH)} mm`);set("fdRangeMaxW",`${fmt0(d.maxW)} mm`);set("fdRangeMaxH",`${fmt0(d.maxH)} mm`);set("fdRangeNote",r.rangeNote)}
+  try{updateFDSettingOut(r)}catch(e){console.error("Advanced Air direct setting-out",e);set("fdSettingAnswer",opening)}
+  try{drawFD(r)}catch(e){console.error("Advanced Air direct diagram",e)}
+  try{renderFDInstallationRequirements(r.criticalRules,r.selectionToken)}catch(e){console.error(e)}
+  try{renderFDVerification(r)}catch(e){console.error(e)}
+  try{refreshFDManualResource()}catch(e){console.error(e)}
+  fdMsg("ok",`✅ Advanced Air ${productKey} calculation complete.`);
+  return r;
 }
-function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,methodKey}=currentFD();let r;
+function calcFD(){const aaDirect=calculateAdvancedAirDirect();if(aaDirect)return aaDirect;if(!$("fdSeries")?.value)return null;const startSelection=currentFD(),startToken=fdSelectionToken(startSelection);const {man,p,m,manKey,productKey,methodKey}=startSelection;if(!man||!p||!m){clearFDSelectionDependentUI("Installation method did not initialise.");refreshFDManualResource();return null;}let r;
  if(productKey==="SPAN"){
    r=calculateActionairSpan();
    if(r.error){
@@ -883,15 +1026,27 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
     const openW=W+m.recommendedW,openH=H+m.recommendedH;
     const critical=[`Supporting construction: ${m.wall||m.note||"See official Lindab method"}.`,`Certified sealing arrangement: ${m.seal||"See official Lindab method"}.`,`Permitted opening allowance: width +${m.minW} to +${m.maxW} mm; height +${m.minH} to +${m.maxH} mm.`,m.spacing!==undefined?`Minimum separation between independent dampers: ${m.spacing} mm.`:"Check the official separation detail.",m.edge!==undefined?`Minimum distance to adjacent wall/floor/ceiling: ${m.edge} mm.`:"Check the official edge-distance detail.",m.pairAllowed===false?"Paired installation is not enabled for this method.":m.pairAllowed===true?"A paired assembly is permitted only with the official Lindab kit and tested arrangement.":"Verify whether pairing is permitted.",m.note||"Install exactly to the selected certified detail."];
     r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm selected`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal`,rule:`Selected opening: width +${m.recommendedW} mm; height +${m.recommendedH} mm`,reference:m.reference,range:`Permitted range: width +${m.minW} to +${m.maxW} mm; height +${m.minH} to +${m.maxH} mm. ${m.note||""}`,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:`${fmt0(W)} × ${fmt0(H)} mm nominal damper`,finishedStage:`${fmt0(openW)} × ${fmt0(openH)} mm selected`,cutStage:`${fmt0(openW)} × ${fmt0(openH)} mm`,sourceStatus:"Verified from manufacturer method",statusType:"verified",criticalRules:critical};
-  }else if(m.type==="advanced-afs-0160"){
-    const addH=advancedHeightAllowance(H),openW=W+194,openH=H+addH,maxW=W+350,maxH=H+addH+250;
-    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm minimum opening to form`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`Published AFS minimum: width = nominal +194 mm; height = nominal +${fmt0(addH)} mm for this height band`,reference:m.reference,range:`Published range: width ${fmt0(openW)}–${fmt0(maxW)} mm; height ${fmt0(openH)}–${fmt0(maxH)} mm.`,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:"AFS outer frame and bracket envelope included in manufacturer table",finishedStage:`${fmt0(openW)} × ${fmt0(openH)} mm minimum formed opening`,cutStage:`${fmt0(openW)} × ${fmt0(openH)} mm minimum opening to form`,sourceStatus:"Verified from manufacturer opening table",statusType:"verified",includesLining:false,minOpenW:openW,minOpenH:openH,maxOpenW:maxW,maxOpenH:maxH,rangeNote:"The minimum published opening is shown as the main result. Any opening within this published range must still follow the selected tested method.",criticalRules:[`Supporting construction: ${m.wall}.`,`Certified penetration seal: ${m.seal}.`,`The opening is a letterbox construction where the selected wall method requires it; do not add the wall-board thickness again to the published opening table.`,`AFS brackets and rails project nearly 50 mm from the damper case and are included in the opening method.`,`Maximum distance from damper case to opening edge is 130 mm; Advanced Air recommends at least 25 mm room for fire batt.`,`Ductwork must leave a 10 mm expansion gap at the damper case and be independently supported within 1 metre.`,m.note]};
-  }else if(m.type==="advanced-afs-2530"){
-    const d=advanced2530Min(W,H);
-    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:d.w,openH:d.h,opening:`${fmt0(d.w)} × ${fmt0(d.h)} mm minimum opening to form`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`Published 2530 AFS minimum opening selected from the nominal-size band`,reference:m.reference,range:`Published range: width ${fmt0(d.w)}–${fmt0(d.maxW)} mm; height ${fmt0(d.h)}–${fmt0(d.maxH)} mm.`,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:"AFS frame, rail and fire-batt zone included in manufacturer table",finishedStage:`${fmt0(d.w)} × ${fmt0(d.h)} mm minimum formed opening`,cutStage:`${fmt0(d.w)} × ${fmt0(d.h)} mm minimum opening to form`,sourceStatus:"Verified from manufacturer opening table",statusType:"verified",includesLining:false,minOpenW:d.w,minOpenH:d.h,maxOpenW:d.maxW,maxOpenH:d.maxH,rangeNote:"The minimum published opening is shown as the main result. Openings up to the published maximum remain subject to every requirement of the selected AFS method.",criticalRules:[`Supporting construction: ${m.wall}.`,`Certified penetration seal: ${m.seal}.`,`Letterbox board construction is part of the tested wall method; do not add board thickness again to this published opening.`,`Maximum case-to-opening-edge distance is 130 mm; Advanced Air recommends a minimum 25 mm fire-batt zone.`,`Use tested M10 drop-rod support and AFS rails.`,`Leave 10 mm between damper case and ductwork for expansion; support ductwork within 1 metre.`,m.note]};
-  }else if(m.type==="advanced-hevac-2530"){
-    const d=advanced2530Hevac(W,H);
-    r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:d.w,openH:d.h,opening:`${fmt0(d.w)} × ${fmt0(d.h)} mm minimum opening`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`Published HEVAC opening range selected from nominal-size band`,reference:m.reference,range:`Published range: ${fmt0(d.w)} × ${fmt0(d.h)} mm minimum to ${fmt0(d.maxW)} × ${fmt0(d.maxH)} mm maximum.`,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:"HEVAC frame allowance included in manufacturer table",finishedStage:`${fmt0(d.w)} × ${fmt0(d.h)} mm minimum opening`,cutStage:`${fmt0(d.w)} × ${fmt0(d.h)} mm minimum opening`,sourceStatus:"Verified from manufacturer opening table",statusType:"verified",includesLining:false,minOpenW:d.w,minOpenH:d.h,maxOpenW:d.maxW,maxOpenH:d.maxH,rangeNote:"The minimum published opening is shown as the main result. Do not exceed the published maximum for the selected HEVAC size band.",criticalRules:[`Supporting construction: ${m.wall}.`,`Certified sealing arrangement: ${m.seal}.`,`Create the tested pockets for turnback tabs and centre the damper evenly in the opening.`,`Mortar must stop at the HEVAC frame so the damper can expand within the frame.`,`Leave 10 mm between damper case and ductwork for expansion; support ductwork within 1 metre.`,m.note]};
+  }else if(m.type==="advanced-rect-table"){
+    const d=resolveAdvancedAirRectTable(m.tableRule,W,H);
+    if(!d){
+      r={error:"Advanced Air opening table did not initialise."};
+    }else{
+      const isHevac=m.tableRule==="AA2530_HEVAC";
+      const frameText=isHevac?"HEVAC frame allowance included in the manufacturer table":"AFS frame, rails/brackets and fire-batt zone included in the manufacturer table";
+      r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:d.minW,openH:d.minH,
+        opening:`${fmt0(d.minW)} × ${fmt0(d.minH)} mm minimum opening to form`,
+        damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,
+        rule:`Published ${isHevac?"HEVAC":"AFS"} opening table selected from the nominal-size band`,reference:m.reference,
+        range:`Published range: width ${fmt0(d.minW)}–${fmt0(d.maxW)} mm; height ${fmt0(d.minH)}–${fmt0(d.maxH)} mm.`,
+        nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:frameText,
+        finishedStage:`${fmt0(d.minW)} × ${fmt0(d.minH)} mm minimum formed opening`,cutStage:`${fmt0(d.minW)} × ${fmt0(d.minH)} mm minimum structural opening`,
+        sourceStatus:"Verified from manufacturer opening table",statusType:"verified",includesLining:false,
+        settingOut:{basis:"table-centred",source:`${d.source}: minimum opening shown with the nominal damper centred for builder setting-out.`},
+        minOpenW:d.minW,minOpenH:d.minH,maxOpenW:d.maxW,maxOpenH:d.maxH,
+        rangeNote:"The minimum published opening is shown as the main result. Any opening within the published range must follow the complete selected tested method.",
+        criticalRules:[`Supporting construction: ${m.wall}.`,`Certified penetration seal: ${m.seal}.`,isHevac?"Centre the HEVAC frame evenly in the opening and keep mortar off the damper spigots.":"The wall-board/letterbox construction and AFS frame are already included in the published opening table; do not add board thickness again.","Leave the manufacturer-required 10 mm duct expansion clearance and independently support connected ductwork within one metre.",m.note]
+      };
+    }
   }else if(m.type==="advanced-rect-fixed"){
     const openW=W+m.addW,openH=H+m.addH;
     r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW,openH,opening:`${fmt0(openW)} × ${fmt0(openH)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm nominal duct`,rule:`Nominal width +${m.addW} mm; nominal height +${m.addH} mm`,reference:m.reference,range:`Tolerance ±${m.tolerance} mm.`,nominalStage:`${fmt0(W)} × ${fmt0(H)} mm`,casingStage:"Manufacturer fixed opening allowance",finishedStage:`${fmt0(openW)} × ${fmt0(openH)} mm`,cutStage:`${fmt0(openW)} × ${fmt0(openH)} mm`,sourceStatus:"Verified from manufacturer method",statusType:"verified",includesLining:false,criticalRules:[`Supporting construction: ${m.wall}.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Opening tolerance: ±${m.tolerance} mm.`,`Use all specified retaining-flange fixings at the stated centres.`,m.note]};
@@ -1112,15 +1267,34 @@ function calcFD(){if(!$("fdSeries").value)return;const {man,p,m,productKey,metho
      $("fdRangeNote").textContent=r.rangeNote||"The minimum published opening is used as the main result.";
    }
  }
- renderFDInstallationRequirements([...(criticalRules||[]),...((m&&m.engineeringNotes)||[])]);
- renderFDVerification(r);
- refreshFDManualResource();
+ // Bind the rendered result to the exact selection that produced it. This
+ // prevents lifecycle/select refreshes from mixing another manufacturer
+ // method's notes or setting-out rule into the visible result.
+ r.manufacturerKey=manKey;
+ r.productKey=productKey;
+ r.methodKey=methodKey;
+ r.selectionToken=startToken;
+ r.methodSnapshot=m;
+ r.settingOut=r.settingOut||m.settingOut||null;
+ // calcFD is synchronous: the user cannot change the dropdown selection while
+ // this calculation is running. The old post-calculation token guard produced
+ // false Advanced Air mismatches on Android and trapped the setting-out panel in
+ // a permanent “recalculating” state. Selection-change handlers already clear
+ // stale UI before starting the next calculation, so render this captured result.
+ const mappedNotes=Array.isArray(m.engineeringNotes) ? m.engineeringNotes : [];
+ // Core output renders first. Auxiliary panels must never be able to suppress
+ // the diagram or builder setting-out for an otherwise valid calculation.
  updateFDSettingOut(r);
- drawFD(r);const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
+ drawFD(r);
+ try{renderFDInstallationRequirements([...(criticalRules||[]),...mappedNotes],startToken);}catch(err){console.error("VentTools requirements panel",err);}
+ try{renderFDVerification(r);}catch(err){console.error("VentTools verification panel",err);window.__lastFDResult=r;}
+ try{refreshFDManualResource();}catch(err){console.error("VentTools manual resource",err);}
+ const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
 else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);
 else fdMsg("ok",`✅ Verified from the selected ${man.label} tested installation method.${hasStructuredRange?" Permitted minimum and maximum openings are shown below.":range} The stated opening includes the manufacturer-specified casing build-up and installation/expansion gaps where published. Verify the current official manual before construction.`);return r}
 
-function renderFDInstallationRequirements(rules){
+function renderFDInstallationRequirements(rules,selectionToken=""){
+  const liveToken=selectionToken||fdSelectionToken();
   const groups={construction:[],duct:[],supports:[],access:[],position:[],critical:[]};
   const clean=(rules||[]).filter(Boolean);
   clean.forEach(rule=>{
@@ -1140,6 +1314,9 @@ function renderFDInstallationRequirements(rules){
     const el=$(id); if(!el)return;
     const content=el.querySelector(".fd-requirement-content");
     if(!content)return;
+    el.hidden=true;
+    el.dataset.selectionToken=selectionToken||liveToken;
+    content.innerHTML="";
     const items=groups[key];
     if(key==="duct" && !items.length){
       el.hidden=false;
@@ -1161,7 +1338,9 @@ function updateFDSettingOut(r){
     if(status){status.textContent="Check manual";status.className="fd-setting-badge warning";}
     return;
   }
-  const {m}=currentFD();
+  // Use the method captured by the completed calculation, exactly as the other
+  // manufacturer render paths do. Do not re-read the dropdowns during rendering.
+  const m=r.methodSnapshot||null;
   if(r.noBuilderOpening===true){
     clear();
     if(answer)answer.innerHTML="<strong>No separate damper opening is formed.</strong> Coordinate the fire-rated duct penetration and supports to the selected remote-from-wall method.";
@@ -1172,7 +1351,7 @@ function updateFDSettingOut(r){
   const ductH=Number(r.nomH ?? r.dia);
   const openingH=Number(r.openH ?? r.openD ?? r.visualOpen);
   const board=r.includesLining?(Number.isFinite(r.structuralLiningBottom)?Number(r.structuralLiningBottom):(parseFloat($("fdBoardThickness")?.value)||0)):0;
-  const rule=r.settingOut||m.settingOut;
+  const rule=r.settingOut||m?.settingOut||null;
   const casingMapped=rule?.basis==="casing-edge" && Number.isFinite(rule.casingProjectionBottom) && Number.isFinite(rule.bottomClearance);
   const nominalMapped=rule?.basis==="nominal-duct" && Number.isFinite(rule.bottomFinished);
   const tableMapped=rule?.basis==="table-centred" && Number.isFinite(openingH) && Number.isFinite(ductH);
@@ -1379,7 +1558,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.0.9 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.0.13 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
@@ -1390,7 +1569,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.0.9</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.1.0</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
@@ -1443,14 +1622,15 @@ const FD_OFFICIAL_RESOURCES={
   "ADVANCED_AIR::0400MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::0400FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::0500MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
-  "ADVANCED_AIR::0500FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
-  "ADVANCED_AIR::0400FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
-  "ADVANCED_AIR::0500MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::0500FME":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"}
 };
 
 function canonicalFDProductKey(manufacturerKey,select){
   const raw=String(select?.value||"").trim();
+  const manufacturer=FD_MANUFACTURERS?.[manufacturerKey];
+  // The actual select value is always authoritative when it is a registered
+  // product key. This is essential for numeric-looking Advanced Air codes.
+  if(raw && manufacturer?.products?.[raw]) return raw;
   const label=String(select?.options?.[select.selectedIndex]?.textContent||"").trim();
   // Product display labels always begin with the stable model code. Using the
   // label as a second source prevents numeric-looking IDs such as 0160 and 2530
@@ -1518,25 +1698,68 @@ function refreshFDManualResource(){
 
 // Initialise the fire-damper UI only after the official resource registry is ready.
 if($("fdSeries")){
-  $("fdManufacturer").addEventListener("change",fillFDProducts);
-  $("fdSeries").addEventListener("change",()=>{fillFDMethods();refreshFDManualResource()});
+  const fdSelectSnapshot={manufacturer:"",product:"",method:""};
+  const rememberFDSelects=()=>{
+    fdSelectSnapshot.manufacturer=String($("fdManufacturer")?.value||"");
+    fdSelectSnapshot.product=String($("fdSeries")?.value||"");
+    fdSelectSnapshot.method=String($("fdMethod")?.value||"");
+  };
+  const genuineChange=(key,value)=>{
+    value=String(value||"");
+    if(fdSelectSnapshot[key]===value)return false;
+    fdSelectSnapshot[key]=value;
+    return true;
+  };
+  $("fdManufacturer").addEventListener("change",()=>{
+    if(!genuineChange("manufacturer",$("fdManufacturer").value))return;
+    clearFDSelectionDependentUI("Selection changed — recalculating…",true);
+    fillFDProducts();rememberFDSelects();refreshFDManualResource();
+  });
+  $("fdSeries").addEventListener("change",()=>{
+    if(!genuineChange("product",$("fdSeries").value))return;
+    clearFDSelectionDependentUI("Selection changed — recalculating…",true);
+    fillFDMethods();rememberFDSelects();refreshFDManualResource();
+  });
   $("fdManufacturer").addEventListener("change",refreshFDManualResource,true);
   $("fdSeries").addEventListener("change",refreshFDManualResource,true);
   $("fdWk25Config")?.addEventListener("change",updateFDInputs);
   $("fdWk25Axis")?.addEventListener("change",calcFD);
-  $("fdMethod").addEventListener("change",updateFDInputs);
+  $("fdMethod").addEventListener("change",()=>{
+    if(!genuineChange("method",$("fdMethod").value))return;
+    clearFDSelectionDependentUI("Selection changed — recalculating…",true);
+    updateFDInputs();rememberFDSelects();
+  });
   $("fdApertureShape").addEventListener("change",updateFDInputs);
   ["fdWallBuild","fdAllowance","fdDwfxWAllowance","fdDwfxHAllowance","fdHevacGap"].forEach(id=>$(id).addEventListener("change",calcFD));
   $("fdDwfxVariant").addEventListener("change",()=>{configureDwfx(currentFD().m);updateFDInputs()});
   $("fdDwfxInputBasis")?.addEventListener("change",updateFDInputs);
-  ["fdDatumLevel"].forEach(id=>$(id)?.addEventListener("input",()=>updateFDSettingOut(calcFD())));
+  ["fdDatumLevel"].forEach(id=>{const el=$(id);if(!el)return;
+    const liveSetting=()=>{
+      const r=window.__lastFDResult;
+      if(r && r.selectionToken===fdSelectionToken()) updateFDSettingOut(r);
+      else calcFD();
+    };
+    el.addEventListener("input",liveSetting);
+    el.addEventListener("change",liveSetting);
+    el.addEventListener("blur",liveSetting);
+  });
   $("fdHevacVariant").addEventListener("change",calcFD);
   $("fdSpanVariant").addEventListener("change",()=>{updateSpanInputs();calcFD()});
   ["fdWidth","fdHeight","fdDiameter","fdBoardThickness","fdDwfxBoard","fdSpanWidth","fdSpanHeight","fdSpanDiameter"].forEach(id=>$(id).addEventListener("input",calcFD));
   $("fdCopyBtn").addEventListener("click",copyFD);
   document.querySelectorAll("[data-save-pack]").forEach(btn=>btn.addEventListener("click",buildFDSiteSheet));
   $("fdResetBtn").addEventListener("click",resetFD);
-  fillFDProducts();
+  const initialiseFD=()=>{fillFDProducts();rememberFDSelects();refreshFDManualResource();calcFD();rememberFDSelects()};
+  const resumeFD=()=>{
+    const live=currentFD();
+    if(!live.man||!live.p||!live.m){initialiseFD();return;}
+    refreshFDManualResource();
+    calcFD();
+    rememberFDSelects();
+  };
+  initialiseFD();
+  window.addEventListener("pageshow",event=>{event.persisted?resumeFD():refreshFDManualResource()});
+  document.addEventListener("visibilitychange",()=>{if(!document.hidden)resumeFD()});
 }
 
 
