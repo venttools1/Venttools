@@ -975,3 +975,12 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .v5-tool-conversion{background-image:url('./assets/duct-conversion-card.jpg')!important}
 .v5-tool-wrap{background-image:url('./assets/ductwrap-card.jpg')!important}
 .v5-tool-workshop{background-image:url('./assets/workshop-card.jpg')!important}
+
+
+/* V1.2.8 robust homepage card images — real img elements rather than CSS backgrounds */
+.v5-card-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;z-index:0;opacity:.78;filter:saturate(.82) contrast(1.04)}
+.v5-card-shade{z-index:1;background:linear-gradient(180deg,rgba(5,15,25,.08) 0%,rgba(5,15,25,.48) 48%,rgba(5,15,25,.94) 100%)}
+.v5-card-content{z-index:2}
+.v5-tool-card{background-image:none!important}
+.v5-tool-fire .v5-card-image{object-position:center}
+@media(max-width:720px){.v5-card-image{opacity:.82}.v5-card-shade{background:linear-gradient(180deg,rgba(5,15,25,.06) 0%,rgba(5,15,25,.42) 46%,rgba(5,15,25,.94) 100%)}}

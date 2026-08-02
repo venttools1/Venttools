@@ -1,6 +1,6 @@
-# VentTools V1.2.7
+# VentTools V1.2.8
 
-Production build with AdSense-readiness and homepage media polish. See `docs/RELEASE-NOTES-V1.2.7.md`.
+Production build with AdSense-readiness and homepage media polish. See `docs/RELEASE-NOTES-V1.2.8.md`.
 
 # VentTools V1.2.5
 
