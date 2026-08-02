@@ -1,13 +1,8 @@
 # VentTools V1.2.0
 
-## Duct Conversion release
-- Replaces the basic square-to-round page with a VentTools-style Duct Conversion explorer.
-- Adds equal-friction and equal-area rectangular alternatives.
-- Adds a live width/height slider and exact site-limit input.
-- Shows exact and practical 25 mm rounded sizes, area difference, aspect ratio, equal-area round and friction-equivalent round.
-- Warns when the selected rectangular aspect ratio exceeds 4:1.
-- Keeps the issued drawing as the controlling size and states that approval is required before ordering a change.
+Production build with Duct Conversion. See `docs/RELEASE-NOTES-V1.2.0.md`.
 
+# VentTools V1.2.0
 
 ## V1.1.2 production release
 
@@ -24,7 +19,7 @@
 - Replaced the old product-specific 0160 and 2530 calculator branches with one shared data-table resolver.
 - Rebuilt 0160 AFS, 2530 AFS and 2530 HEVAC from the official opening tables.
 - Core diagram and builder setting-out render before optional panels, so a verification/manual-panel error cannot blank a valid result.
-- Public pages display only `VentTools V1.1.4`.
+- Public pages display only `VentTools V1.2.0`.
 - Existing BSB, Swegon/Actionair, Lindab, Project Pack and Site Sheet features are retained.
 
 # VentTools V1.0 Engineering Edition — Four Manufacturer Audit
@@ -654,11 +649,11 @@ This deployment package contains links to official manufacturer resources only. 
 - Uses the registered product select value as the single authoritative key.
 - Prevents Advanced Air numeric model codes from being re-derived from display labels.
 - Keeps product, method, diagram, verification and setting-out state aligned.
-- Public pages show only VentTools V1.1.4.
+- Public pages show only VentTools V1.2.0.
 
 
 ## V1.0.17 — Advanced Air synchronous render fix
 
 - Removed the false post-calculation selection-token retry that trapped Advanced Air on Android in “Selection changed — recalculating”.
 - Advanced Air 0160/2530 table-based methods now complete their centred setting-out calculation and respond to AFFL changes.
-- Public UI shows only VentTools V1.1.4.
+- Public UI shows only VentTools V1.2.0.

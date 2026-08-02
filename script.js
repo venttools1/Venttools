@@ -304,97 +304,36 @@ Results:
   return result;
 }
 function angleUI(){let c=$('angle').value==='custom';$('angleCustom').style.display=c?'block':'none';if(!c)$('angleCustom').value=$('angle').value}function resetOffset(){$('up').value=300;$('over').value=250;$('angle').value='45';$('angleCustom').value=45;$('dia').value=315;$('minStraight').value=120;$('rmFactor').value=1;angleUI();calculateOffset()}async function copyOffset(){let r=calculateOffset();try{await navigator.clipboard.writeText(r);setMsg('ok','✅ Result copied.')}catch(e){setMsg('warn','Could not copy automatically. Long-press working text and copy manually.')}}function toggleWorking(){let o=$('out'),show=o.style.display==='block';o.style.display=show?'none':'block';$('workingBtn').textContent=show?'Show working':'Hide working'}['up','over','dia','minStraight','rmFactor','angle','angleCustom'].forEach(id=>{$(id).addEventListener('input',()=>{angleUI();calculateOffset()});$(id).addEventListener('change',()=>{angleUI();calculateOffset()})});$('resetBtn').addEventListener('click',resetOffset);$('copyBtn').addEventListener('click',copyOffset);$('workingBtn').addEventListener('click',toggleWorking);
-const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450,500,560,600,630,710,800,900,1000,1120,1250];
-function nearestStandard(d){let best=standardSpiral[0];for(const s of standardSpiral){if(Math.abs(s-d)<Math.abs(best-d))best=s}return best}
+const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450,500,560,600,630,710,800,900,1000,1120,1250,1400,1500,1600];
+function nearestStandard(d){let best=standardSpiral[0];for(const size of standardSpiral){if(Math.abs(size-d)<Math.abs(best-d))best=size}return best}
 function ductArea(w,h){return w*h}
 function equalAreaDiameter(w,h){return Math.sqrt((4*w*h)/Math.PI)}
-function equivalentDiameter(w,h){
-  if(!(w>0&&h>0)) return NaN;
-  return 1.30*Math.pow(w*h,0.625)/Math.pow(w+h,0.25);
-}
-function ductAspect(w,h){return Math.max(w,h)/Math.min(w,h)}
-function solveOtherDimension(fixed,target,basis){
-  if(!(fixed>0&&target>0)) return NaN;
-  if(basis==='area') return target/fixed;
-  let lo=1,hi=10000;
-  for(let i=0;i<90;i++){
-    const mid=(lo+hi)/2;
-    if(equivalentDiameter(fixed,mid)<target) lo=mid; else hi=mid;
-  }
-  return (lo+hi)/2;
-}
-function roundDuctSize(v,step=25){return Math.max(step,Math.round(v/step)*step)}
-function fmtArea(v){return Number.isFinite(v)?(v/1e6).toFixed(3)+' m²':'—'}
-function drawDuctulator(sourceW,sourceH,altW,altH,roundDia){
-  const layer=$('ductDiagramLayer'); if(!layer)return;
-  const maxSide=Math.max(sourceW,sourceH,altW,altH,1);
-  const scale=220/maxSide;
-  const sourceRW=Math.max(55,sourceW*scale),sourceRH=Math.max(35,sourceH*scale);
-  const altRW=Math.max(55,altW*scale),altRH=Math.max(35,altH*scale);
-  const sx=35,sy=145-sourceRH/2,ax=290,ay=145-altRH/2,cx=625,cy=145,r=58;
-  layer.innerHTML=`<defs><marker id="arrow2" markerWidth="8" markerHeight="8" refX="4" refY="4" orient="auto" markerUnits="strokeWidth"><path d="M0,0 L8,4 L0,8 Z" fill="#064b82"/></marker></defs>
-  <text x="${sx+sourceRW/2}" y="28" text-anchor="middle" class="duct-svg-title">DRAWING</text><rect x="${sx}" y="${sy}" width="${sourceRW}" height="${sourceRH}" rx="7" class="duct-svg-source"/><text x="${sx+sourceRW/2}" y="270" text-anchor="middle" class="duct-svg-value">${fmt0(sourceW)} × ${fmt0(sourceH)}</text>
-  <path d="M240 145 L275 145" class="duct-svg-arrow" marker-end="url(#arrow2)"/>
-  <text x="${ax+altRW/2}" y="28" text-anchor="middle" class="duct-svg-title">ALTERNATIVE</text><rect x="${ax}" y="${ay}" width="${altRW}" height="${altRH}" rx="7" class="duct-svg-alt"/><text x="${ax+altRW/2}" y="270" text-anchor="middle" class="duct-svg-value">${fmt0(altW)} × ${fmt0(altH)}</text>
-  <path d="M535 145 L560 145" class="duct-svg-arrow" marker-end="url(#arrow2)"/>
-  <text x="${cx}" y="28" text-anchor="middle" class="duct-svg-title">ROUND EQUIVALENT</text><circle cx="${cx}" cy="${cy}" r="${r}" class="duct-svg-round"/><line x1="${cx-r}" y1="${cy}" x2="${cx+r}" y2="${cy}" class="duct-svg-centre"/><text x="${cx}" y="270" text-anchor="middle" class="duct-svg-value">Ø ${fmt0(roundDia)}</text>`;
-}
-function updateDuctSliderBounds(){
-  const side=$('ductFixedSide').value;
-  const original=side==='width'?(parseFloat($('rectW').value)||1500):(parseFloat($('rectH').value)||400);
-  const slider=$('ductAdjust');
-  slider.min=Math.max(50,Math.floor(original*0.35/25)*25);
-  slider.max=Math.max(Number(slider.min)+100,Math.ceil(original*1.75/25)*25);
-  const current=parseFloat($('ductAdjustValue').value)||original;
-  const bounded=Math.min(Number(slider.max),Math.max(Number(slider.min),current));
-  slider.value=bounded;
-}
+function equivalentDiameter(w,h){return 1.30*Math.pow(w*h,0.625)/Math.pow(w+h,0.25)}
+function aspectRatio(w,h){return Math.max(w,h)/Math.min(w,h)}
+function roundTo(value,step){return Math.round(value/step)*step}
+let dcMode='width';
+function setDuctMode(mode){dcMode=mode==='height'?'height':'width';const bw=$('dcFixWidth'),bh=$('dcFixHeight');if(!bw||!bh)return;bw.classList.toggle('active',dcMode==='width');bh.classList.toggle('active',dcMode==='height');$('dcSliderLabel').textContent=dcMode==='width'?'New width (mm)':'New height (mm)';syncDuctSliderBounds();calculateDuct()}
+function syncDuctSliderBounds(){const w=parseFloat($('rectW')?.value)||1500,h=parseFloat($('rectH')?.value)||400,base=dcMode==='width'?w:h,slider=$('dcSizeSlider'),input=$('dcSizeInput');if(!slider||!input)return;slider.min=Math.max(50,roundTo(base*0.25,25));slider.max=Math.max(Number(slider.min)+25,roundTo(base*2,25));let current=parseFloat(input.value)||base;if(current<Number(slider.min)||current>Number(slider.max))current=roundTo(base*0.9,25);slider.value=current;input.value=current}
+function drawDuctConversion(w,h,nw,nh){const o=$('dcOriginalShape'),n=$('dcNewShape');if(!o||!n)return;const max=180,scale=Math.min(max/Math.max(w,h),max/Math.max(nw,nh));const set=(el,a,b)=>{el.style.width=Math.max(48,a*scale)+'px';el.style.height=Math.max(36,b*scale)+'px'};set(o,w,h);set(n,nw,nh);$('dcOriginalShapeText').textContent=`${fmt0(w)} × ${fmt0(h)}`;$('dcNewShapeText').textContent=`${fmt0(nw)} × ${fmt0(nh)}`}
 function calculateDuct(){
-  const w=parseFloat($('rectW').value)||0,h=parseFloat($('rectH').value)||0;
-  const basis=$('ductBasis').value,side=$('ductFixedSide').value;
-  let adjusted=parseFloat($('ductAdjustValue').value)||0;
-  if(!(adjusted>0)) adjusted=side==='width'?w:h;
-  $('ductAdjust').value=Math.min(Number($('ductAdjust').max),Math.max(Number($('ductAdjust').min),adjusted));
-  $('ductAdjustLabel').textContent=side==='width'?'Alternative width':'Alternative height';
-  $('ductAdjustReadout').textContent=fmt0(adjusted)+' mm';
-  const sourceArea=ductArea(w,h),sourceEq=equivalentDiameter(w,h),sourceEqualArea=equalAreaDiameter(w,h);
-  const target=basis==='area'?sourceArea:sourceEq;
-  const other=solveOtherDimension(adjusted,target,basis);
-  const exactW=side==='width'?adjusted:other, exactH=side==='height'?adjusted:other;
-  const practicalOther=roundDuctSize(other,25);
-  const altW=side==='width'?adjusted:practicalOther, altH=side==='height'?adjusted:practicalOther;
-  const altArea=ductArea(altW,altH),areaDiff=sourceArea?((altArea-sourceArea)/sourceArea*100):NaN;
-  const aspect=ductAspect(altW,altH),eqArea=equalAreaDiameter(altW,altH),eqFriction=equivalentDiameter(altW,altH),near=nearestStandard(eqFriction);
-  $('rectArea').textContent=fmtArea(sourceArea);
-  $('sourceAspect').textContent=fmt(ductAspect(w,h))+':1';
-  $('sourceFrictionRound').textContent='Ø '+fmt(sourceEq)+' mm';
-  $('ductExactSize').textContent=`${fmt0(exactW)} × ${fmt(other)} mm`;
-  $('ductPracticalSize').textContent=`${fmt0(altW)} × ${fmt0(altH)} mm`;
-  $('ductBasisNote').textContent=basis==='friction'?'Maintains the drawing size’s calculated equivalent round diameter before practical rounding.':'Maintains the drawing size’s cross-sectional area before practical rounding.';
-  $('altArea').textContent=fmtArea(altArea);
-  $('areaDifference').textContent=(areaDiff>=0?'+':'')+fmt(areaDiff)+'%';
-  $('eqRound').textContent='Ø '+fmt(eqArea)+' mm';
-  $('frictionRound').textContent='Ø '+fmt(eqFriction)+' mm';
-  $('nearestRound').textContent='Ø '+fmt0(near)+' mm';
-  $('altAspect').textContent=fmt(aspect)+':1';
-  const badge=$('ductAspectBadge');
-  badge.textContent=aspect<=4?'✓ '+fmt(aspect)+':1 aspect ratio':'⚠ '+fmt(aspect)+':1 aspect ratio';
-  badge.className='duct-ratio-badge '+(aspect<=4?'ok':'warn');
-  const warning=$('ductWarning');
-  if(aspect>4){warning.className='duct-warning warn';warning.innerHTML='<strong>Aspect-ratio warning:</strong> this option exceeds 4:1. Very flat rectangular ductwork can increase resistance, noise, material and stiffening requirements. Check the project design and DW/144 requirements before proceeding.'}
-  else{warning.className='duct-warning ok';warning.innerHTML='<strong>Within the 4:1 site-check limit.</strong> This is still an equivalent-size proposal only; obtain approval before changing the issued drawing or ordering ductwork.'}
-  drawDuctulator(w,h,altW,altH,eqFriction);
-  return `VentTools — Duct Conversion\n\nDrawing size: ${fmt0(w)} × ${fmt0(h)} mm\nConversion basis: ${basis==='friction'?'Equal friction and airflow':'Equal cross-sectional area'}\nExact alternative: ${fmt0(exactW)} × ${fmt(other)} mm\nPractical 25 mm size: ${fmt0(altW)} × ${fmt0(altH)} mm\nArea difference: ${(areaDiff>=0?'+':'')+fmt(areaDiff)}%\nAspect ratio: ${fmt(aspect)}:1${aspect>4?' (warning: exceeds 4:1)':''}\nEqual-area round: Ø ${fmt(eqArea)} mm\nFriction-equivalent round: Ø ${fmt(eqFriction)} mm\nNearest standard spiral: Ø ${fmt0(near)} mm\n\nApproval required before changing the issued drawing or ordering.`;
+ const w=parseFloat($('rectW')?.value)||0,h=parseFloat($('rectH')?.value)||0;if(!(w>0&&h>0))return '';
+ const area=ductArea(w,h),target=parseFloat($('dcSizeInput')?.value)|| (dcMode==='width'?w:h);
+ let nw,nh;if(dcMode==='width'){nw=target;nh=area/nw}else{nh=target;nw=area/nh}
+ const rw=roundTo(nw,25),rh=roundTo(nh,25),roundedArea=rw*rh,areaDiff=(roundedArea-area)/area*100;
+ const originalRatio=aspectRatio(w,h),newRatio=aspectRatio(rw,rh),equalDia=equalAreaDiameter(w,h),origEq=equivalentDiameter(w,h),newEq=equivalentDiameter(rw,rh),frictionDiff=(newEq-origEq)/origEq*100;
+ $('dcOriginalArea').textContent=`${(area/1e6).toFixed(3)} m²`;$('dcOriginalRatio').textContent=`${originalRatio.toFixed(2)} : 1`;$('eqRound').textContent=`Ø ${fmt0(equalDia)} mm`;
+ $('dcExactSize').textContent=`${fmt0(nw)} × ${fmt0(nh)} mm`;$('dcExactNote').textContent='Mathematically equal cross-sectional area';$('dcRoundedSize').textContent=`${fmt0(rw)} × ${fmt0(rh)} mm`;$('dcAreaDiff').textContent=`${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%`;$('dcRatio').textContent=`${newRatio.toFixed(2)} : 1`;$('dcEqualAreaRound').textContent=`Ø ${fmt0(equalAreaDiameter(rw,rh))} mm`;
+ $('dcOriginalFrictionRound').textContent=`Ø ${fmt0(origEq)} mm`;$('dcNewFrictionRound').textContent=`Ø ${fmt0(newEq)} mm`;$('dcFrictionDiff').textContent=`${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%`;$('nearestRound').textContent=`Ø ${fmt0(nearestStandard(origEq))} mm`;
+ const ratioMsg=$('dcRatioWarning');ratioMsg.className='dc-ratio-message '+(newRatio>4?'warn':'ok');ratioMsg.textContent=newRatio>4?'⚠ Aspect ratio exceeds 4:1. Review pressure loss, noise, stiffening and project requirements.':'✓ Aspect ratio is within the 4:1 VentTools advisory limit.';
+ drawDuctConversion(w,h,rw,rh);
+ const details=`VENTTOOLS DUCT CONVERSION\n\nIssued drawing: ${fmt0(w)} × ${fmt0(h)} mm\nOriginal area: ${fmt0(area)} mm² (${(area/1e6).toFixed(3)} m²)\nOriginal aspect ratio: ${originalRatio.toFixed(2)}:1\n\nExact equal-area alternative: ${fmt0(nw)} × ${fmt0(nh)} mm\nPractical 25 mm alternative: ${fmt0(rw)} × ${fmt0(rh)} mm\nPractical area: ${fmt0(roundedArea)} mm²\nArea difference: ${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%\nAspect ratio: ${newRatio.toFixed(2)}:1\n\nEqual-area round: Ø ${fmt0(equalDia)} mm\nOriginal friction-equivalent round: Ø ${fmt0(origEq)} mm\nAlternative friction-equivalent round: Ø ${fmt0(newEq)} mm\nFriction-equivalent diameter difference: ${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%\n\nMethod: Equal-area is the default site comparison. Advanced equivalent diameter uses the Huebscher/ASHRAE relationship.\nDrawing remains controlling; obtain approval before changing size.`;
+ $('dcCalculationDetails').textContent=details;return details
 }
-async function copyDuct(){let r=calculateDuct();try{await navigator.clipboard.writeText(r)}catch(e){}}
-function resetDuct(){
-  $('rectW').value=1500;$('rectH').value=400;$('ductBasis').value='friction';$('ductFixedSide').value='width';$('ductAdjustValue').value=1350;updateDuctSliderBounds();calculateDuct();
-}
-['rectW','rectH'].forEach(id=>$(id).addEventListener('input',()=>{updateDuctSliderBounds();calculateDuct()}));
-['ductBasis','ductFixedSide'].forEach(id=>$(id).addEventListener('change',()=>{const side=$('ductFixedSide').value;$('ductAdjustValue').value=side==='width'?$('rectW').value:$('rectH').value;updateDuctSliderBounds();calculateDuct()}));
-$('ductAdjust').addEventListener('input',()=>{$('ductAdjustValue').value=$('ductAdjust').value;calculateDuct()});
-$('ductAdjustValue').addEventListener('input',()=>{updateDuctSliderBounds();calculateDuct()});
-$('copyDuctBtn').addEventListener('click',copyDuct);$('resetDuctBtn').addEventListener('click',resetDuct);angleUI();calculateOffset();updateDuctSliderBounds();calculateDuct();
+async function copyDuct(){const text=calculateDuct();try{await navigator.clipboard.writeText(text)}catch(e){}}
+function resetDuct(){$('rectW').value=1500;$('rectH').value=400;$('dcSizeInput').value=1350;$('dcSizeSlider').value=1350;setDuctMode('width')}
+['rectW','rectH'].forEach(id=>$(id)?.addEventListener('input',()=>{syncDuctSliderBounds();calculateDuct()}));
+$('dcSizeSlider')?.addEventListener('input',e=>{$('dcSizeInput').value=e.target.value;calculateDuct()});$('dcSizeInput')?.addEventListener('input',e=>{$('dcSizeSlider').value=e.target.value;calculateDuct()});$('dcFixWidth')?.addEventListener('click',()=>setDuctMode('width'));$('dcFixHeight')?.addEventListener('click',()=>setDuctMode('height'));$('copyDuctBtn')?.addEventListener('click',copyDuct);$('resetDuctBtn')?.addEventListener('click',resetDuct);angleUI();calculateOffset();syncDuctSliderBounds();calculateDuct();
+
 
 
 const VT_ENGINEERING_DB_VERSION="1.2.0-duct-conversion";

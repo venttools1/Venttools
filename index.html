@@ -58,7 +58,7 @@
       <div class="v5-hero-actions">
         <button onclick="showPage('offset')" class="v5-primary">Open Offset Calculator</button>
         <button onclick="showPage('fireDamper')" class="v5-secondary">Open Fire Damper Calculator</button>
-        <button onclick="showPage('ductulator')" class="v5-secondary v5-square-round-quick">▢↔○ Duct Conversion</button>
+        <button onclick="showPage('ductulator')" class="v5-secondary v5-square-round-quick">▢→○ Duct Conversion</button>
         <a href="pack-builder.html" class="v5-secondary" style="text-decoration:none;text-align:center">Open Project Pack</a>
         <button id="installVentToolsBtn" class="v5-install" hidden>📱 Install VentTools</button>
       </div>
@@ -100,7 +100,7 @@
         <div class="v5-card-content">
           <div class="v5-card-top"><span class="v5-card-icon">⭕</span><span class="v5-live-badge">LIVE</span></div>
           <h3>Duct Conversion</h3>
-          <p>Explore equivalent rectangular sizes, equal-area round sizes and equal-friction round sizes.</p>
+          <p>Convert rectangular duct area to an equivalent round spiral diameter.</p>
           <button onclick="showPage('ductulator')">Open Calculator <span>→</span></button>
         </div>
       </article>
@@ -130,7 +130,7 @@
   <section class="v5-info-grid">
     <div class="v5-panel">
       <div class="v5-panel-title"><span>⚡</span><h2>Latest updates</h2></div>
-      <div class="v5-update-row"><span>Privacy, cookie and legal pages</span><b>Added</b></div>
+      <div class="v5-update-row"><span>Duct Conversion — live equal-area explorer</span><b>New</b></div>
       <div class="v5-update-row"><span>Lindab product calculators</span><b>Added</b></div>
       <div class="v5-update-row"><span>Advanced Air product calculators</span><b>Added</b></div>
       <div class="v5-update-row"><span>Manufacturer support overview</span><b>Updated</b></div>
@@ -192,51 +192,38 @@
   </div>
 </div>
 <div id="msg" class="msg ok"></div><div class="actions"><button class="action primary" id="copyBtn">Copy result</button><button class="action" id="workingBtn">Show working</button><button class="action" id="resetBtn">Reset</button></div><div class="out" id="out"></div></div></section>
-<section id="ductulator" class="page">
+<section id="ductulator" class="page duct-conversion-page">
 <div class="app-header">
   <button class="back" onclick="showPage('home')" aria-label="Back to home">← Home</button>
   <div class="brand-lockup">
-    <svg class="brand-mark" viewBox="0 0 500 500" aria-hidden="true">
-  <polygon points="250,35 305,190 470,190 337,287 388,448 250,350 112,448 163,287 30,190 195,190"
-    fill="none" stroke="currentColor" stroke-width="28" stroke-linejoin="round"/>
-  <circle cx="250" cy="250" r="104" fill="white" stroke="currentColor" stroke-width="18"/>
-  <g fill="currentColor">
-    <path d="M250 170C305 170 322 220 292 245C275 260 246 256 230 237C216 220 222 188 250 170Z"/>
-    <path d="M330 250C330 305 280 322 255 292C240 275 244 246 263 230C280 216 312 222 330 250Z"/>
-    <path d="M250 330C195 330 178 280 208 255C225 240 254 244 270 263C284 280 278 312 250 330Z"/>
-    <path d="M170 250C170 195 220 178 245 208C260 225 256 254 237 270C220 284 188 278 170 250Z"/>
-  </g>
-  <circle cx="250" cy="250" r="39" fill="currentColor"/>
-  <text x="250" y="275" text-anchor="middle" font-family="Arial Black,Arial" font-size="82" fill="white">K</text>
-</svg>
+    <svg class="brand-mark" viewBox="0 0 500 500" aria-hidden="true"><polygon points="250,35 305,190 470,190 337,287 388,448 250,350 112,448 163,287 30,190 195,190" fill="none" stroke="currentColor" stroke-width="28" stroke-linejoin="round"/><circle cx="250" cy="250" r="104" fill="white" stroke="currentColor" stroke-width="18"/><circle cx="250" cy="250" r="39" fill="currentColor"/><text x="250" y="275" text-anchor="middle" font-family="Arial Black,Arial" font-size="82" fill="white">K</text></svg>
     <div class="brand-copy"><strong>Vent Tools</strong><span>Duct Conversion</span></div>
   </div>
 </div>
-<div class="page-intro card"><h2>Duct Conversion</h2><p class="sub">Explore equivalent rectangular sizes and linked round diameters</p></div>
-<div class="card duct-conversion-notice"><strong>Drawing size remains controlling.</strong><p>Use this tool to explore an equivalent size where the issued duct cannot physically fit. Any revised size must be approved by the designer or responsible engineer before ordering.</p></div>
-<div class="card"><svg id="ductDiagram" class="diagram" viewBox="0 0 760 300"><g id="ductDiagramLayer"></g></svg></div>
+<div class="page-intro card"><h2>Duct Conversion</h2><p class="sub">Explore equivalent rectangular and round duct sizes from the issued drawing size.</p></div>
+<div class="dc-warning card"><strong>Drawing remains controlling.</strong> Any revised duct size must be reviewed and approved before manufacture or installation.</div>
 <div class="card">
-  <h3 class="duct-section-title">1. Drawing size</h3>
-  <div class="row"><div><label>Drawing width (mm)</label><input id="rectW" type="number" value="1500" min="50" step="25"></div><div><label>Drawing height (mm)</label><input id="rectH" type="number" value="400" min="50" step="25"></div></div>
-  <div class="duct-source-summary"><span>Area <strong id="rectArea">—</strong></span><span>Aspect ratio <strong id="sourceAspect">—</strong></span><span>Friction-equivalent round <strong id="sourceFrictionRound">—</strong></span></div>
+  <div class="dc-section-title"><span>1</span><div><h3>Issued rectangular duct</h3><p>Enter the size shown on the drawing.</p></div></div>
+  <div class="row"><div><label>Drawing width (mm)</label><input id="rectW" type="number" value="1500" min="50" max="5000" step="25"></div><div><label>Drawing height (mm)</label><input id="rectH" type="number" value="400" min="50" max="5000" step="25"></div></div>
+  <div class="dc-summary"><div><span>Original free area</span><strong id="dcOriginalArea">—</strong></div><div><span>Aspect ratio</span><strong id="dcOriginalRatio">—</strong></div><div><span>Equal-area round</span><strong id="eqRound">—</strong></div></div>
 </div>
 <div class="card">
-  <h3 class="duct-section-title">2. Explore an alternative</h3>
-  <div class="row"><div><label for="ductBasis">Conversion basis</label><select id="ductBasis"><option value="friction">Equal friction &amp; airflow</option><option value="area">Equal cross-sectional area</option></select></div><div><label for="ductFixedSide">Dimension to adjust</label><select id="ductFixedSide"><option value="width">Adjust width</option><option value="height">Adjust height</option></select></div></div>
-  <label class="duct-slider-label" for="ductAdjust"><span id="ductAdjustLabel">Alternative width</span><strong id="ductAdjustReadout">—</strong></label>
-  <input id="ductAdjust" class="duct-slider" type="range" min="100" max="3000" value="1350" step="25">
-  <div class="duct-slider-entry"><label for="ductAdjustValue">Enter exact site limit (mm)</label><input id="ductAdjustValue" type="number" min="50" max="5000" value="1350" step="25"></div>
-  <div class="hint">The slider changes one dimension and calculates the other. The equal-friction mode follows the conventional rectangular/round equivalent-diameter relationship used for duct sizing; equal-area mode is provided as a geometric reference.</div>
+  <div class="dc-section-title"><span>2</span><div><h3>Equivalent rectangular explorer</h3><p>Choose which dimension is restricted on site. The other dimension updates to maintain equal cross-sectional area.</p></div></div>
+  <div class="dc-toggle" role="group" aria-label="Dimension to adjust"><button id="dcFixWidth" class="active" type="button">Set new width</button><button id="dcFixHeight" type="button">Set new height</button></div>
+  <label id="dcSliderLabel" for="dcSizeSlider">New width (mm)</label>
+  <div class="dc-slider-row"><input id="dcSizeSlider" type="range" min="100" max="3000" step="25" value="1350"><input id="dcSizeInput" type="number" min="50" max="5000" step="25" value="1350"></div>
+  <div class="dc-visual"><div class="dc-original-shape" id="dcOriginalShape"><span>Drawing<br><b id="dcOriginalShapeText">—</b></span></div><div class="dc-arrow">→</div><div class="dc-new-shape" id="dcNewShape"><span>Alternative<br><b id="dcNewShapeText">—</b></span></div></div>
+  <div class="dc-result-main"><span>Exact equal-area alternative</span><strong id="dcExactSize">—</strong><small id="dcExactNote">—</small></div>
+  <div class="dc-result-grid"><div><span>Practical 25 mm size</span><strong id="dcRoundedSize">—</strong></div><div><span>Area difference</span><strong id="dcAreaDiff">—</strong></div><div><span>Aspect ratio</span><strong id="dcRatio">—</strong></div><div><span>Equal-area round</span><strong id="dcEqualAreaRound">—</strong></div></div>
+  <div id="dcRatioWarning" class="dc-ratio-message">—</div>
 </div>
 <div class="card">
-  <h3 class="duct-section-title">3. Equivalent result</h3>
-  <div class="duct-main-result"><div class="lab">Exact calculated alternative</div><div class="val" id="ductExactSize">—</div><div id="ductBasisNote" class="duct-result-note">—</div></div>
-  <div class="duct-practical-result"><div><div class="lab">Practical 25 mm rounded size</div><div class="val" id="ductPracticalSize">—</div></div><div id="ductAspectBadge" class="duct-ratio-badge">—</div></div>
-  <div class="results duct-results-grid"><div class="tile"><div class="lab">Alternative area</div><div class="val" id="altArea">—</div></div><div class="tile"><div class="lab">Area difference</div><div class="val" id="areaDifference">—</div></div><div class="tile"><div class="lab">Equal-area round</div><div class="val" id="eqRound">—</div></div><div class="tile"><div class="lab">Friction-equivalent round</div><div class="val" id="frictionRound">—</div></div><div class="tile"><div class="lab">Nearest standard spiral</div><div class="val" id="nearestRound">—</div></div><div class="tile"><div class="lab">Alternative aspect ratio</div><div class="val" id="altAspect">—</div></div></div>
-  <div id="ductWarning" class="duct-warning"></div>
-  <div class="actions"><button class="action primary" id="copyDuctBtn">Copy result</button><button class="action" id="resetDuctBtn">Reset</button></div>
-  <div class="hint">Standard spiral sizes used: 80, 100, 125, 150, 160, 180, 200, 224, 250, 280, 300, 315, 355, 400, 450, 500, 560, 600, 630, 710, 800, 900, 1000, 1120 and 1250 mm.</div>
-</div></section>
+  <details class="dc-info"><summary>ⓘ Equal area or equal friction — what is the difference?</summary><div><p><strong>Equal area</strong> keeps the same cross-sectional free area. It is useful for quickly exploring a physical alternative on site, but a different shape can change friction, pressure loss, noise and reinforcement requirements.</p><p><strong>Equal friction</strong> compares ducts using a recognised equivalent-diameter relationship intended to provide equal airflow, resistance and length. It is an engineering comparison, not automatic approval to change a drawing.</p></div></details>
+  <details class="dc-advanced"><summary>Advanced engineering comparison</summary><div class="dc-advanced-body"><p>This uses the Huebscher/ASHRAE rectangular equivalent-diameter relationship:</p><code>Dₑ = 1.30 × (a × b)^0.625 ÷ (a + b)^0.25</code><div class="dc-result-grid"><div><span>Original friction-equivalent round</span><strong id="dcOriginalFrictionRound">—</strong></div><div><span>Alternative friction-equivalent round</span><strong id="dcNewFrictionRound">—</strong></div><div><span>Difference</span><strong id="dcFrictionDiff">—</strong></div><div><span>Nearest spiral to original</span><strong id="nearestRound">—</strong></div></div><p class="hint">Method source: ASHRAE Handbook, Duct Design, rectangular-to-circular equivalence for equal airflow, resistance and length. Actual system pressure loss also depends on airflow, roughness, fittings and installation.</p></div></details>
+  <details class="dc-details"><summary>Calculation details</summary><pre id="dcCalculationDetails">—</pre></details>
+  <div class="actions"><button class="action primary" id="copyDuctBtn">Copy calculation</button><button class="action" id="resetDuctBtn">Reset</button></div>
+</div>
+</section>
 
 <section id="fireDamper" class="page">
 <div class="app-header">
@@ -563,7 +550,7 @@
     </div>
     <div class="legal-card">
       <h2>What VentTools does</h2>
-      <p>VentTools converts published manufacturer information into clearer calculation steps, opening dimensions and practical installation notes. It also provides general ductwork calculators such as offset and square-to-round tools.</p>
+      <p>VentTools converts published manufacturer information into clearer calculation steps, opening dimensions and practical installation notes. It also provides general ductwork calculators such as offset and duct conversion tools.</p>
     </div>
     <div class="legal-card">
       <h2>Independent by design</h2>
