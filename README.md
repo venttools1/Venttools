@@ -1,6 +1,6 @@
-# VentTools V1.2.9
+# VentTools V1.3.0
 
-Production build with AdSense-readiness and homepage media polish. See `docs/RELEASE-NOTES-V1.2.9.md`.
+Production build with AdSense-readiness and homepage media polish. See `docs/RELEASE-NOTES-V1.3.0.md`.
 
 # VentTools V1.2.5
 
@@ -659,5 +659,5 @@ This deployment package contains links to official manufacturer resources only. 
 - Public UI shows only VentTools V1.2.5.
 
 
-## V1.2.9
+## V1.3.0
 Homepage card images are self-contained in index.html to prevent missing-image failures during GitHub deployment.
