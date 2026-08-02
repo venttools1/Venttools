@@ -967,3 +967,11 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .v5-benefit p{margin:0;color:#c9d5df;line-height:1.55}
 .v5-method-note{margin:16px 0 0;color:#b6c5d0;line-height:1.55;font-size:14px}
 @media(max-width:720px){.v5-benefit-grid{grid-template-columns:1fr}.v5-tool-card{background-position:center center}}
+
+
+/* V1.2.7 homepage image loading hotfix — direct CSS assets, no inline custom properties */
+.v5-tool-fire{background-image:url('./assets/fire-damper-card.svg')!important}
+.v5-tool-offset{background-image:url('./assets/offset-card.jpg')!important}
+.v5-tool-conversion{background-image:url('./assets/duct-conversion-card.jpg')!important}
+.v5-tool-wrap{background-image:url('./assets/ductwrap-card.jpg')!important}
+.v5-tool-workshop{background-image:url('./assets/workshop-card.jpg')!important}
