@@ -1,6 +1,6 @@
-# VentTools V1.2.5
+# VentTools V1.2.6
 
-Production build with the simplified, fitter-first Duct Size Converter. See `docs/RELEASE-NOTES-V1.2.5.md`.
+Production build with AdSense-readiness and homepage media polish. See `docs/RELEASE-NOTES-V1.2.6.md`.
 
 # VentTools V1.2.5
 

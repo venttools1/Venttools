@@ -352,7 +352,7 @@ function resetDuct(){$('rectW').value=1500;$('rectH').value=400;if($('roundD'))$
 $('dcSizeSlider')?.addEventListener('input',e=>{$('dcSizeInput').value=e.target.value;calculateDuct()});$('dcSizeInput')?.addEventListener('input',e=>{$('dcSizeSlider').value=e.target.value;calculateDuct()});$('dcFixWidth')?.addEventListener('click',()=>setDuctMode('width'));$('dcFixHeight')?.addEventListener('click',()=>setDuctMode('height'));$('dcSourceRect')?.addEventListener('click',()=>setDuctSource('rect'));$('dcSourceRound')?.addEventListener('click',()=>setDuctSource('round'));$('copyDuctBtn')?.addEventListener('click',copyDuct);$('resetDuctBtn')?.addEventListener('click',resetDuct);angleUI();calculateOffset();syncDuctSliderBounds();calculateDuct();
 
 
-const VT_ENGINEERING_DB_VERSION="1.2.5-round-to-rect-safe-sizing";
+const VT_ENGINEERING_DB_VERSION="1.2.6-adsense-readiness-polish";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -1601,7 +1601,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.2.5 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.2.6 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
