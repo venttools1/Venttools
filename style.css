@@ -953,3 +953,5 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 
 /* V1.2.2 fitter-first duct converter */
 .dc-simple-card{padding-bottom:18px}.dc-simple-results{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.dc-simple-results>div{border:1px solid #d5dfe7;border-radius:12px;padding:12px;background:#f8fafc;text-align:center}.dc-simple-results span{display:block;font-size:12px;color:#607080}.dc-simple-results strong{display:block;margin-top:4px;font-size:19px;color:#073c66}.dc-more-card{padding-top:10px}.dc-more-card>.dc-info,.dc-more-card>.dc-advanced,.dc-more-card>.dc-details{margin:8px 0}.dc-result-main small{color:#536b7b}.dc-slider-row input[type=number]{font-weight:900;font-size:18px;text-align:center}.duct-conversion-page .page-intro h2{margin-bottom:4px}@media(max-width:650px){.dc-simple-results{grid-template-columns:1fr 1fr}.dc-simple-results>div:last-child{grid-column:1/-1}.dc-visual{min-height:170px;padding:12px}.dc-section-title p{font-size:13px}}
+
+.dc-round-source{border-radius:50%!important}.dc-source-hidden{display:none!important}
