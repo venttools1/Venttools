@@ -312,7 +312,7 @@ function equivalentDiameter(w,h){return 1.30*Math.pow(w*h,0.625)/Math.pow(w+h,0.
 function aspectRatio(w,h){return Math.max(w,h)/Math.min(w,h)}
 function roundTo(value,step){return Math.round(value/step)*step}
 let dcMode='width';
-function setDuctMode(mode){dcMode=mode==='height'?'height':'width';const bw=$('dcFixWidth'),bh=$('dcFixHeight');if(!bw||!bh)return;bw.classList.toggle('active',dcMode==='width');bh.classList.toggle('active',dcMode==='height');$('dcSliderLabel').textContent=dcMode==='width'?'New width (mm)':'New height (mm)';syncDuctSliderBounds();calculateDuct()}
+function setDuctMode(mode){dcMode=mode==='height'?'height':'width';const bw=$('dcFixWidth'),bh=$('dcFixHeight');if(!bw||!bh)return;bw.classList.toggle('active',dcMode==='width');bh.classList.toggle('active',dcMode==='height');$('dcSliderLabel').textContent=dcMode==='width'?'Maximum width available (mm)':'Maximum height available (mm)';syncDuctSliderBounds();calculateDuct()}
 function syncDuctSliderBounds(){const w=parseFloat($('rectW')?.value)||1500,h=parseFloat($('rectH')?.value)||400,base=dcMode==='width'?w:h,slider=$('dcSizeSlider'),input=$('dcSizeInput');if(!slider||!input)return;slider.min=Math.max(50,roundTo(base*0.25,25));slider.max=Math.max(Number(slider.min)+25,roundTo(base*2,25));let current=parseFloat(input.value)||base;if(current<Number(slider.min)||current>Number(slider.max))current=roundTo(base*0.9,25);slider.value=current;input.value=current}
 function drawDuctConversion(w,h,nw,nh){const o=$('dcOriginalShape'),n=$('dcNewShape');if(!o||!n)return;const max=180,scale=Math.min(max/Math.max(w,h),max/Math.max(nw,nh));const set=(el,a,b)=>{el.style.width=Math.max(48,a*scale)+'px';el.style.height=Math.max(36,b*scale)+'px'};set(o,w,h);set(n,nw,nh);$('dcOriginalShapeText').textContent=`${fmt0(w)} × ${fmt0(h)}`;$('dcNewShapeText').textContent=`${fmt0(nw)} × ${fmt0(nh)}`}
 function calculateDuct(){
@@ -326,7 +326,7 @@ function calculateDuct(){
  $('dcOriginalFrictionRound').textContent=`Ø ${fmt0(origEq)} mm`;$('dcNewFrictionRound').textContent=`Ø ${fmt0(newEq)} mm`;$('dcFrictionDiff').textContent=`${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%`;$('nearestRound').textContent=`Ø ${fmt0(nearestStandard(origEq))} mm`;
  const ratioMsg=$('dcRatioWarning');ratioMsg.className='dc-ratio-message '+(newRatio>4?'warn':'ok');ratioMsg.textContent=newRatio>4?'⚠ Aspect ratio exceeds 4:1. Review pressure loss, noise, stiffening and project requirements.':'✓ Aspect ratio is within the 4:1 VentTools advisory limit.';
  drawDuctConversion(w,h,rw,rh);
- const details=`VENTTOOLS DUCT CONVERSION\n\nIssued drawing: ${fmt0(w)} × ${fmt0(h)} mm\nOriginal area: ${fmt0(area)} mm² (${(area/1e6).toFixed(3)} m²)\nOriginal aspect ratio: ${originalRatio.toFixed(2)}:1\n\nExact equal-area alternative: ${fmt0(nw)} × ${fmt0(nh)} mm\nPractical 25 mm alternative: ${fmt0(rw)} × ${fmt0(rh)} mm\nPractical area: ${fmt0(roundedArea)} mm²\nArea difference: ${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%\nAspect ratio: ${newRatio.toFixed(2)}:1\n\nEqual-area round: Ø ${fmt0(equalDia)} mm\nOriginal friction-equivalent round: Ø ${fmt0(origEq)} mm\nAlternative friction-equivalent round: Ø ${fmt0(newEq)} mm\nFriction-equivalent diameter difference: ${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%\n\nMethod: Equal-area is the default site comparison. Advanced equivalent diameter uses the Huebscher/ASHRAE relationship.\nDrawing remains controlling; obtain approval before changing size.`;
+ const details=`VENTTOOLS DUCT SIZE CONVERTER\n\nIssued drawing: ${fmt0(w)} × ${fmt0(h)} mm\nOriginal area: ${fmt0(area)} mm² (${(area/1e6).toFixed(3)} m²)\nOriginal aspect ratio: ${originalRatio.toFixed(2)}:1\n\nExact equal-area size: ${fmt0(nw)} × ${fmt0(nh)} mm\nSuggested 25 mm size: ${fmt0(rw)} × ${fmt0(rh)} mm\nPractical area: ${fmt0(roundedArea)} mm²\nArea difference: ${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%\nAspect ratio: ${newRatio.toFixed(2)}:1\n\nEqual-area round: Ø ${fmt0(equalDia)} mm\nOriginal friction-equivalent round: Ø ${fmt0(origEq)} mm\nAlternative friction-equivalent round: Ø ${fmt0(newEq)} mm\nFriction-equivalent diameter difference: ${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%\n\nMethod: Equal-area is the default site comparison. Advanced equivalent diameter uses the Huebscher/ASHRAE relationship.\nDrawing remains controlling; obtain approval before changing size.`;
  $('dcCalculationDetails').textContent=details;return details
 }
 async function copyDuct(){const text=calculateDuct();try{await navigator.clipboard.writeText(text)}catch(e){}}
@@ -336,7 +336,7 @@ $('dcSizeSlider')?.addEventListener('input',e=>{$('dcSizeInput').value=e.target.
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.2.0-duct-conversion";
+const VT_ENGINEERING_DB_VERSION="1.2.2-duct-size-converter";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -1585,7 +1585,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.2.0 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.2.2 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
