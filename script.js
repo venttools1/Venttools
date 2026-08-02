@@ -306,11 +306,14 @@ Results:
 function angleUI(){let c=$('angle').value==='custom';$('angleCustom').style.display=c?'block':'none';if(!c)$('angleCustom').value=$('angle').value}function resetOffset(){$('up').value=300;$('over').value=250;$('angle').value='45';$('angleCustom').value=45;$('dia').value=315;$('minStraight').value=120;$('rmFactor').value=1;angleUI();calculateOffset()}async function copyOffset(){let r=calculateOffset();try{await navigator.clipboard.writeText(r);setMsg('ok','✅ Result copied.')}catch(e){setMsg('warn','Could not copy automatically. Long-press working text and copy manually.')}}function toggleWorking(){let o=$('out'),show=o.style.display==='block';o.style.display=show?'none':'block';$('workingBtn').textContent=show?'Show working':'Hide working'}['up','over','dia','minStraight','rmFactor','angle','angleCustom'].forEach(id=>{$(id).addEventListener('input',()=>{angleUI();calculateOffset()});$(id).addEventListener('change',()=>{angleUI();calculateOffset()})});$('resetBtn').addEventListener('click',resetOffset);$('copyBtn').addEventListener('click',copyOffset);$('workingBtn').addEventListener('click',toggleWorking);
 const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450,500,560,600,630,710,800,900,1000,1120,1250,1400,1500,1600];
 function nearestStandard(d){let best=standardSpiral[0];for(const size of standardSpiral){if(Math.abs(size-d)<Math.abs(best-d))best=size}return best}
+function nextStandardAtOrAbove(d){for(const size of standardSpiral){if(size>=d)return size}return Math.ceil(d/100)*100}
 function ductArea(w,h){return w*h}
 function equalAreaDiameter(w,h){return Math.sqrt((4*w*h)/Math.PI)}
 function equivalentDiameter(w,h){return 1.30*Math.pow(w*h,0.625)/Math.pow(w+h,0.25)}
 function aspectRatio(w,h){return Math.max(w,h)/Math.min(w,h)}
 function roundTo(value,step){return Math.round(value/step)*step}
+function floorTo(value,step){return Math.floor(value/step)*step}
+function ceilTo(value,step){return Math.ceil(value/step)*step}
 let dcMode='width';
 function setDuctMode(mode){dcMode=mode==='height'?'height':'width';const bw=$('dcFixWidth'),bh=$('dcFixHeight');if(!bw||!bh)return;bw.classList.toggle('active',dcMode==='width');bh.classList.toggle('active',dcMode==='height');$('dcSliderLabel').textContent=dcMode==='width'?'Maximum width available (mm)':'Maximum height available (mm)';syncDuctSliderBounds();calculateDuct()}
 function syncDuctSliderBounds(){const w=parseFloat($('rectW')?.value)||1500,h=parseFloat($('rectH')?.value)||400,base=dcMode==='width'?w:h,slider=$('dcSizeSlider'),input=$('dcSizeInput');if(!slider||!input)return;slider.min=Math.max(50,roundTo(base*0.25,25));slider.max=Math.max(Number(slider.min)+25,roundTo(base*2,25));let current=parseFloat(input.value)||base;if(current<Number(slider.min)||current>Number(slider.max))current=roundTo(base*0.9,25);slider.value=current;input.value=current}
@@ -319,14 +322,32 @@ function calculateDuct(){
  const w=parseFloat($('rectW')?.value)||0,h=parseFloat($('rectH')?.value)||0;if(!(w>0&&h>0))return '';
  const area=ductArea(w,h),target=parseFloat($('dcSizeInput')?.value)|| (dcMode==='width'?w:h);
  let nw,nh;if(dcMode==='width'){nw=target;nh=area/nw}else{nh=target;nw=area/nh}
- const rw=roundTo(nw,25),rh=roundTo(nh,25),roundedArea=rw*rh,areaDiff=(roundedArea-area)/area*100;
- const originalRatio=aspectRatio(w,h),newRatio=aspectRatio(rw,rh),equalDia=equalAreaDiameter(w,h),origEq=equivalentDiameter(w,h),newEq=equivalentDiameter(rw,rh),frictionDiff=(newEq-origEq)/origEq*100;
+ // Safe practical sizing rule: never reduce cross-sectional area below the issued duct.
+ // The restricted dimension is rounded down to avoid exceeding the available space;
+ // the linked dimension is always rounded up until the original area is met or exceeded.
+ let rw,rh;
+ if(dcMode==='width'){
+   rw=Math.max(25,floorTo(nw,25));
+   rh=Math.max(25,ceilTo(area/rw,25));
+ }else{
+   rh=Math.max(25,floorTo(nh,25));
+   rw=Math.max(25,ceilTo(area/rh,25));
+ }
+ let roundedArea=rw*rh;
+ // Defensive guard against floating-point or future increment changes.
+ if(roundedArea<area){
+   if(dcMode==='width') rh+=25; else rw+=25;
+   roundedArea=rw*rh;
+ }
+ const areaDiff=(roundedArea-area)/area*100;
+ const originalRatio=aspectRatio(w,h),newRatio=aspectRatio(rw,rh),equalDia=equalAreaDiameter(w,h),suggestedEqualDia=equalAreaDiameter(rw,rh),suggestedRound=nextStandardAtOrAbove(equalDia),origEq=equivalentDiameter(w,h),newEq=equivalentDiameter(rw,rh),frictionDiff=(newEq-origEq)/origEq*100;
  $('dcOriginalArea').textContent=`${(area/1e6).toFixed(3)} m²`;$('dcOriginalRatio').textContent=`${originalRatio.toFixed(2)} : 1`;$('eqRound').textContent=`Ø ${fmt0(equalDia)} mm`;
- $('dcExactSize').textContent=`${fmt0(nw)} × ${fmt0(nh)} mm`;$('dcExactNote').textContent='Mathematically equal cross-sectional area';$('dcRoundedSize').textContent=`${fmt0(rw)} × ${fmt0(rh)} mm`;$('dcAreaDiff').textContent=`${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%`;$('dcRatio').textContent=`${newRatio.toFixed(2)} : 1`;$('dcEqualAreaRound').textContent=`Ø ${fmt0(equalAreaDiameter(rw,rh))} mm`;
- $('dcOriginalFrictionRound').textContent=`Ø ${fmt0(origEq)} mm`;$('dcNewFrictionRound').textContent=`Ø ${fmt0(newEq)} mm`;$('dcFrictionDiff').textContent=`${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%`;$('nearestRound').textContent=`Ø ${fmt0(nearestStandard(origEq))} mm`;
+ $('dcExactSize').textContent=`${fmt0(nw)} × ${fmt0(nh)} mm`;$('dcExactNote').textContent='Rounded safely so the suggested duct is never smaller in free area';$('dcRoundedSize').textContent=`${fmt0(rw)} × ${fmt0(rh)} mm`;$('dcAreaDiff').textContent=`${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%`;$('dcRatio').textContent=`${newRatio.toFixed(2)} : 1`;$('dcEqualAreaRound').textContent=`Ø ${fmt0(equalAreaDiameter(rw,rh))} mm`;
+ $('dcSuggestedRound').textContent=`Ø ${fmt0(suggestedRound)} mm`;$('dcOriginalFrictionRound').textContent=`Ø ${fmt0(origEq)} mm`;$('dcNewFrictionRound').textContent=`Ø ${fmt0(newEq)} mm`;$('dcFrictionDiff').textContent=`${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%`;$('nearestRound').textContent=`Ø ${fmt0(suggestedRound)} mm`;
  const ratioMsg=$('dcRatioWarning');ratioMsg.className='dc-ratio-message '+(newRatio>4?'warn':'ok');ratioMsg.textContent=newRatio>4?'⚠ Aspect ratio exceeds 4:1. Review pressure loss, noise, stiffening and project requirements.':'✓ Aspect ratio is within the 4:1 VentTools advisory limit.';
+ const safeMsg=$('dcSafeAreaMessage');if(safeMsg){safeMsg.className='dc-ratio-message '+(roundedArea>=area?'ok':'warn');safeMsg.textContent=roundedArea>=area?'✓ Safe-size rule applied: suggested free area is equal to or greater than the issued duct.':'⚠ Suggested size is below the issued free area — do not use.';}
  drawDuctConversion(w,h,rw,rh);
- const details=`VENTTOOLS DUCT SIZE CONVERTER\n\nIssued drawing: ${fmt0(w)} × ${fmt0(h)} mm\nOriginal area: ${fmt0(area)} mm² (${(area/1e6).toFixed(3)} m²)\nOriginal aspect ratio: ${originalRatio.toFixed(2)}:1\n\nExact equal-area size: ${fmt0(nw)} × ${fmt0(nh)} mm\nSuggested 25 mm size: ${fmt0(rw)} × ${fmt0(rh)} mm\nPractical area: ${fmt0(roundedArea)} mm²\nArea difference: ${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%\nAspect ratio: ${newRatio.toFixed(2)}:1\n\nEqual-area round: Ø ${fmt0(equalDia)} mm\nOriginal friction-equivalent round: Ø ${fmt0(origEq)} mm\nAlternative friction-equivalent round: Ø ${fmt0(newEq)} mm\nFriction-equivalent diameter difference: ${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%\n\nMethod: Equal-area is the default site comparison. Advanced equivalent diameter uses the Huebscher/ASHRAE relationship.\nDrawing remains controlling; obtain approval before changing size.`;
+ const details=`VENTTOOLS DUCT SIZE CONVERTER\n\nIssued drawing: ${fmt0(w)} × ${fmt0(h)} mm\nOriginal area: ${fmt0(area)} mm² (${(area/1e6).toFixed(3)} m²)\nOriginal aspect ratio: ${originalRatio.toFixed(2)}:1\n\nExact equal-area size: ${fmt0(nw)} × ${fmt0(nh)} mm\nSuggested safe 25 mm size: ${fmt0(rw)} × ${fmt0(rh)} mm\nPractical area: ${fmt0(roundedArea)} mm²\nArea difference: ${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%\nAspect ratio: ${newRatio.toFixed(2)}:1\n\nIssued duct exact equal-area round: Ø ${fmt0(equalDia)} mm\nSuggested standard round duct: Ø ${fmt0(suggestedRound)} mm (rounded up; never smaller in area)\nSuggested rectangular exact equal-area round: Ø ${fmt0(suggestedEqualDia)} mm\nOriginal friction-equivalent round: Ø ${fmt0(origEq)} mm\nAlternative friction-equivalent round: Ø ${fmt0(newEq)} mm\nFriction-equivalent diameter difference: ${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%\n\nMethod: Equal-area is the default site comparison. Practical dimensions use a fail-safe round-up rule so the suggested free area never falls below the issued duct. Advanced equivalent diameter uses the Huebscher/ASHRAE relationship.\nDrawing remains controlling; obtain approval before changing size.`;
  $('dcCalculationDetails').textContent=details;return details
 }
 async function copyDuct(){const text=calculateDuct();try{await navigator.clipboard.writeText(text)}catch(e){}}
@@ -336,7 +357,7 @@ $('dcSizeSlider')?.addEventListener('input',e=>{$('dcSizeInput').value=e.target.
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.2.2-duct-size-converter";
+const VT_ENGINEERING_DB_VERSION="1.2.4-safe-round-sizing";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -1585,7 +1606,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.2.2 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.2.4 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
