@@ -336,7 +336,103 @@ $('dcSizeSlider')?.addEventListener('input',e=>{$('dcSizeInput').value=e.target.
 
 
 
-const VT_ENGINEERING_DB_VERSION="1.2.0-duct-conversion";
+// VentTools V1.2.1 — digital equal-friction duct sizing wheel
+const DW_AIR_DENSITY=1.20;
+const DW_DYNAMIC_VISCOSITY=1.81e-5;
+const DW_GALV_ROUGHNESS=0.00009;
+const DW_STANDARD_SPIRAL=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450,500,560,600,630,710,800,900,1000,1120,1250,1400,1500,1600,1800,2000];
+function dwFrictionFactor(re,diameterM){
+  if(re<=0||diameterM<=0)return NaN;
+  if(re<2300)return 64/re;
+  return 0.25/Math.pow(Math.log10(DW_GALV_ROUGHNESS/(3.7*diameterM)+5.74/Math.pow(re,0.9)),2);
+}
+function dwRoundPerformance(q,diameterMm){
+  const d=diameterMm/1000,area=Math.PI*d*d/4,velocity=q/area,re=DW_AIR_DENSITY*velocity*d/DW_DYNAMIC_VISCOSITY;
+  const factor=dwFrictionFactor(re,d);
+  const friction=factor*(DW_AIR_DENSITY*velocity*velocity/2)/d;
+  return {diameterMm,area,velocity,re,factor,friction};
+}
+function dwDiameterFromVelocity(q,v){return Math.sqrt(4*q/(Math.PI*v))*1000;}
+function dwDiameterFromFriction(q,target){
+  let low=50,high=5000;
+  for(let i=0;i<90;i++){
+    const mid=(low+high)/2,fr=dwRoundPerformance(q,mid).friction;
+    if(fr>target)low=mid;else high=mid;
+  }
+  return (low+high)/2;
+}
+function dwNearestSpiral(d){return DW_STANDARD_SPIRAL.reduce((a,b)=>Math.abs(b-d)<Math.abs(a-d)?b:a);}
+function dwSolveRectSide(eqDiameterMm,fixedSideMm){
+  let low=50,high=6000;
+  for(let i=0;i<80;i++){
+    const mid=(low+high)/2,de=equivalentDiameter(fixedSideMm,mid);
+    if(de<eqDiameterMm)low=mid;else high=mid;
+  }
+  return (low+high)/2;
+}
+function dwRectCandidates(eqDiameterMm){
+  const sides=[100,125,150,175,200,225,250,275,300,325,350,375,400,450,500,550,600,650,700,750,800,900,1000,1100,1200,1250,1300,1350,1400,1500,1600,1800,2000];
+  const seen=new Set(),out=[];
+  for(const a of sides){
+    const exact=dwSolveRectSide(eqDiameterMm,a),b=Math.max(50,Math.round(exact/25)*25);
+    const w=Math.max(a,b),h=Math.min(a,b),ratio=w/h;
+    if(ratio>4.01)continue;
+    const key=`${w}x${h}`;if(seen.has(key))continue;seen.add(key);
+    const actual=equivalentDiameter(w,h),diff=(actual-eqDiameterMm)/eqDiameterMm*100;
+    if(Math.abs(diff)<=5)out.push({w,h,ratio,diff,actual});
+  }
+  return out.sort((x,y)=>Math.abs(x.diff)-Math.abs(y.diff)||x.ratio-y.ratio).slice(0,8);
+}
+let dwMode='velocity',dwSelectedRect=null;
+function setDwMode(mode){
+  dwMode=mode;
+  ['Velocity','Friction','Diameter'].forEach(n=>{
+    const b=document.getElementById('dwMode'+n),f=document.getElementById('dw'+n+'Field');
+    if(b)b.classList.toggle('active',mode===n.toLowerCase());
+    if(f)f.hidden=mode!==n.toLowerCase();
+  });
+  updateDigitalWheel();
+}
+function updateDigitalWheel(){
+  const q=parseFloat(document.getElementById('dwAirflow')?.value||0);
+  if(!(q>0))return;
+  let d;
+  if(dwMode==='velocity')d=dwDiameterFromVelocity(q,parseFloat(document.getElementById('dwVelocity')?.value||0));
+  else if(dwMode==='friction')d=dwDiameterFromFriction(q,parseFloat(document.getElementById('dwFriction')?.value||0));
+  else d=parseFloat(document.getElementById('dwDiameter')?.value||0);
+  if(!(d>0))return;
+  const p=dwRoundPerformance(q,d),standard=dwNearestSpiral(d),options=dwRectCandidates(d);
+  document.getElementById('dwResultDiameter').textContent=`Ø ${Math.round(d)} mm`;
+  document.getElementById('dwResultVelocity').textContent=`${p.velocity.toFixed(2)} m/s`;
+  document.getElementById('dwResultFriction').textContent=`${p.friction.toFixed(3)} Pa/m`;
+  document.getElementById('dwResultStandard').textContent=`Ø ${standard} mm`;
+  const box=document.getElementById('dwRectOptions');
+  if(box){
+    box.innerHTML=options.map((o,i)=>`<button type="button" class="dc-wheel-option${i===0?' selected':''}" data-w="${o.w}" data-h="${o.h}"><strong>${o.w} × ${o.h} mm</strong><span>${o.ratio.toFixed(2)}:1 ratio</span><small>${o.diff>=0?'+':''}${o.diff.toFixed(1)}% equivalent-diameter difference</small></button>`).join('')||'<p>No practical rectangular option found in the current range.</p>';
+    dwSelectedRect=options[0]||null;
+    box.querySelectorAll('button').forEach(btn=>btn.addEventListener('click',()=>{
+      box.querySelectorAll('button').forEach(x=>x.classList.remove('selected'));btn.classList.add('selected');
+      dwSelectedRect={w:+btn.dataset.w,h:+btn.dataset.h};
+    }));
+  }
+}
+function initDigitalWheel(){
+  if(!document.getElementById('dwAirflow'))return;
+  document.getElementById('dwModeVelocity').addEventListener('click',()=>setDwMode('velocity'));
+  document.getElementById('dwModeFriction').addEventListener('click',()=>setDwMode('friction'));
+  document.getElementById('dwModeDiameter').addEventListener('click',()=>setDwMode('diameter'));
+  ['dwAirflow','dwVelocity','dwFriction','dwDiameter'].forEach(id=>document.getElementById(id)?.addEventListener('input',updateDigitalWheel));
+  document.getElementById('dwApplyToExplorer')?.addEventListener('click',()=>{
+    if(!dwSelectedRect)return;
+    document.getElementById('rectW').value=dwSelectedRect.w;
+    document.getElementById('rectH').value=dwSelectedRect.h;
+    document.getElementById('rectW').dispatchEvent(new Event('input',{bubbles:true}));
+  });
+  updateDigitalWheel();
+}
+window.addEventListener('DOMContentLoaded',initDigitalWheel);
+
+const VT_ENGINEERING_DB_VERSION="1.2.1-digital-duct-wheel";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -1585,7 +1681,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.2.0 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.2.1 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
