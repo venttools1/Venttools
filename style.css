@@ -977,7 +977,7 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .v5-tool-workshop{background-image:url('./assets/workshop-card.jpg')!important}
 
 
-/* V1.2.8 robust homepage card images — real img elements rather than CSS backgrounds */
+/* V1.2.9 robust homepage card images — real img elements rather than CSS backgrounds */
 .v5-card-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;z-index:0;opacity:.78;filter:saturate(.82) contrast(1.04)}
 .v5-card-shade{z-index:1;background:linear-gradient(180deg,rgba(5,15,25,.08) 0%,rgba(5,15,25,.48) 48%,rgba(5,15,25,.94) 100%)}
 .v5-card-content{z-index:2}
