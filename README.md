@@ -1,6 +1,6 @@
-# VentTools V1.2.5
+# VentTools V1.2.9
 
-Production build with the simplified, fitter-first Duct Size Converter. See `docs/RELEASE-NOTES-V1.2.5.md`.
+Production build with AdSense-readiness and homepage media polish. See `docs/RELEASE-NOTES-V1.2.9.md`.
 
 # VentTools V1.2.5
 
@@ -657,3 +657,7 @@ This deployment package contains links to official manufacturer resources only. 
 - Removed the false post-calculation selection-token retry that trapped Advanced Air on Android in “Selection changed — recalculating”.
 - Advanced Air 0160/2530 table-based methods now complete their centred setting-out calculation and respond to AFFL changes.
 - Public UI shows only VentTools V1.2.5.
+
+
+## V1.2.9
+Homepage card images are self-contained in index.html to prevent missing-image failures during GitHub deployment.

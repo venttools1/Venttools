@@ -356,7 +356,7 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .v5-tool-card{
   position:relative;min-height:320px;border-radius:18px;overflow:hidden;
   border:1px solid var(--v5-line);
-  background-image:var(--tool-image);background-size:cover;background-position:center;
+  background-color:#263742;background-image:var(--tool-image);background-size:cover;background-position:center center;background-repeat:no-repeat;
   box-shadow:0 14px 30px rgba(0,0,0,.18);
 }
 .v5-card-shade{position:absolute;inset:0;background:linear-gradient(180deg,rgba(5,15,25,.18) 0%,rgba(5,15,25,.74) 46%,rgba(5,15,25,.98) 100%)}
@@ -955,3 +955,32 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .dc-simple-card{padding-bottom:18px}.dc-simple-results{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}.dc-simple-results>div{border:1px solid #d5dfe7;border-radius:12px;padding:12px;background:#f8fafc;text-align:center}.dc-simple-results span{display:block;font-size:12px;color:#607080}.dc-simple-results strong{display:block;margin-top:4px;font-size:19px;color:#073c66}.dc-more-card{padding-top:10px}.dc-more-card>.dc-info,.dc-more-card>.dc-advanced,.dc-more-card>.dc-details{margin:8px 0}.dc-result-main small{color:#536b7b}.dc-slider-row input[type=number]{font-weight:900;font-size:18px;text-align:center}.duct-conversion-page .page-intro h2{margin-bottom:4px}@media(max-width:650px){.dc-simple-results{grid-template-columns:1fr 1fr}.dc-simple-results>div:last-child{grid-column:1/-1}.dc-visual{min-height:170px;padding:12px}.dc-section-title p{font-size:13px}}
 
 .dc-round-source{border-radius:50%!important}.dc-source-hidden{display:none!important}
+
+/* V1.2.6 homepage and media polish */
+.v5-tool-card{isolation:isolate;overflow:hidden;transform:translateZ(0)}
+.v5-card-shade{z-index:0;pointer-events:none}
+.v5-card-content{z-index:1}
+.v5-about-tools{padding-top:8px}
+.v5-benefit-grid{display:grid;grid-template-columns:repeat(3,minmax(0,1fr));gap:14px}
+.v5-benefit{background:rgba(255,255,255,.06);border:1px solid rgba(255,255,255,.14);border-radius:18px;padding:18px}
+.v5-benefit h3{margin:0 0 8px;color:#fff;font-size:18px}
+.v5-benefit p{margin:0;color:#c9d5df;line-height:1.55}
+.v5-method-note{margin:16px 0 0;color:#b6c5d0;line-height:1.55;font-size:14px}
+@media(max-width:720px){.v5-benefit-grid{grid-template-columns:1fr}.v5-tool-card{background-position:center center}}
+
+
+/* V1.2.7 homepage image loading hotfix — direct CSS assets, no inline custom properties */
+.v5-tool-fire{background-image:url('./assets/fire-damper-card.svg')!important}
+.v5-tool-offset{background-image:url('./assets/offset-card.jpg')!important}
+.v5-tool-conversion{background-image:url('./assets/duct-conversion-card.jpg')!important}
+.v5-tool-wrap{background-image:url('./assets/ductwrap-card.jpg')!important}
+.v5-tool-workshop{background-image:url('./assets/workshop-card.jpg')!important}
+
+
+/* V1.2.9 robust homepage card images — real img elements rather than CSS backgrounds */
+.v5-card-image{position:absolute;inset:0;width:100%;height:100%;object-fit:cover;object-position:center;display:block;z-index:0;opacity:.78;filter:saturate(.82) contrast(1.04)}
+.v5-card-shade{z-index:1;background:linear-gradient(180deg,rgba(5,15,25,.08) 0%,rgba(5,15,25,.48) 48%,rgba(5,15,25,.94) 100%)}
+.v5-card-content{z-index:2}
+.v5-tool-card{background-image:none!important}
+.v5-tool-fire .v5-card-image{object-position:center}
+@media(max-width:720px){.v5-card-image{opacity:.82}.v5-card-shade{background:linear-gradient(180deg,rgba(5,15,25,.06) 0%,rgba(5,15,25,.42) 46%,rgba(5,15,25,.94) 100%)}}
