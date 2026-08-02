@@ -11,7 +11,7 @@
   <title>VentTools — Free HVAC Calculators for Duct Fitters</title>
   <link rel="canonical" href="https://venttools.com/">
   <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 100 100'%3E%3Cpolygon points='50,4 61,37 96,37 68,57 79,91 50,70 21,91 32,57 4,37 39,37' fill='none' stroke='%23064b82' stroke-width='7'/%3E%3Ccircle cx='50' cy='50' r='21' fill='%23064b82'/%3E%3Ctext x='50' y='59' text-anchor='middle' font-family='Arial' font-size='28' font-weight='700' fill='white'%3EK%3C/text%3E%3C/svg%3E">
-  <link rel="stylesheet" href="style.css?v=1.1.2">
+  <link rel="stylesheet" href="style.css?v=1.2.0">
 
   <link rel="manifest" href="manifest.webmanifest">
   <link rel="apple-touch-icon" href="icon-192.png">
@@ -58,7 +58,7 @@
       <div class="v5-hero-actions">
         <button onclick="showPage('offset')" class="v5-primary">Open Offset Calculator</button>
         <button onclick="showPage('fireDamper')" class="v5-secondary">Open Fire Damper Calculator</button>
-        <button onclick="showPage('ductulator')" class="v5-secondary v5-square-round-quick">▢→○ Square–Round Conversion</button>
+        <button onclick="showPage('ductulator')" class="v5-secondary v5-square-round-quick">▢↔○ Duct Conversion</button>
         <a href="pack-builder.html" class="v5-secondary" style="text-decoration:none;text-align:center">Open Project Pack</a>
         <button id="installVentToolsBtn" class="v5-install" hidden>📱 Install VentTools</button>
       </div>
@@ -99,8 +99,8 @@
         <div class="v5-card-shade"></div>
         <div class="v5-card-content">
           <div class="v5-card-top"><span class="v5-card-icon">⭕</span><span class="v5-live-badge">LIVE</span></div>
-          <h3>Rect to Round Ductulator</h3>
-          <p>Convert rectangular duct area to an equivalent round spiral diameter.</p>
+          <h3>Duct Conversion</h3>
+          <p>Explore equivalent rectangular sizes, equal-area round sizes and equal-friction round sizes.</p>
           <button onclick="showPage('ductulator')">Open Calculator <span>→</span></button>
         </div>
       </article>
@@ -209,10 +209,34 @@
   <circle cx="250" cy="250" r="39" fill="currentColor"/>
   <text x="250" y="275" text-anchor="middle" font-family="Arial Black,Arial" font-size="82" fill="white">K</text>
 </svg>
-    <div class="brand-copy"><strong>Vent Tools</strong><span>Rect to Round</span></div>
+    <div class="brand-copy"><strong>Vent Tools</strong><span>Duct Conversion</span></div>
   </div>
 </div>
-<div class="page-intro card"><h2>Rect to Round Ductulator</h2><p class="sub">Same-area conversion for quick spiral size check</p></div><div class="card"><svg id="ductDiagram" class="diagram" viewBox="0 0 760 260"><g id="ductDiagramLayer"></g></svg></div><div class="card"><div class="row"><div><label>Rect width (mm)</label><input id="rectW" type="number" value="600" min="1" step="1"></div><div><label>Rect height (mm)</label><input id="rectH" type="number" value="300" min="1" step="1"></div></div><div class="hint">Same-area equivalent, not full equal-friction duct design.</div></div><div class="card"><div class="results"><div class="tile"><div class="lab">Equivalent round</div><div class="val" id="eqRound">—</div></div><div class="tile"><div class="lab">Nearest spiral</div><div class="val" id="nearestRound">—</div></div></div><div class="tile" style="margin-top:10px"><div class="lab">Rectangular area</div><div class="val" id="rectArea">—</div></div><div class="actions"><button class="action primary" id="copyDuctBtn">Copy result</button><button class="action" id="resetDuctBtn">Reset</button></div><div class="hint">Standard sizes used: 80, 100, 125, 150, 160, 180, 200, 224, 250, 280, 300, 315, 355, 400, 450, 500, 560, 600, 630, 710, 800, 900, 1000, 1120, 1250 mm.</div></div></section>
+<div class="page-intro card"><h2>Duct Conversion</h2><p class="sub">Explore equivalent rectangular sizes and linked round diameters</p></div>
+<div class="card duct-conversion-notice"><strong>Drawing size remains controlling.</strong><p>Use this tool to explore an equivalent size where the issued duct cannot physically fit. Any revised size must be approved by the designer or responsible engineer before ordering.</p></div>
+<div class="card"><svg id="ductDiagram" class="diagram" viewBox="0 0 760 300"><g id="ductDiagramLayer"></g></svg></div>
+<div class="card">
+  <h3 class="duct-section-title">1. Drawing size</h3>
+  <div class="row"><div><label>Drawing width (mm)</label><input id="rectW" type="number" value="1500" min="50" step="25"></div><div><label>Drawing height (mm)</label><input id="rectH" type="number" value="400" min="50" step="25"></div></div>
+  <div class="duct-source-summary"><span>Area <strong id="rectArea">—</strong></span><span>Aspect ratio <strong id="sourceAspect">—</strong></span><span>Friction-equivalent round <strong id="sourceFrictionRound">—</strong></span></div>
+</div>
+<div class="card">
+  <h3 class="duct-section-title">2. Explore an alternative</h3>
+  <div class="row"><div><label for="ductBasis">Conversion basis</label><select id="ductBasis"><option value="friction">Equal friction &amp; airflow</option><option value="area">Equal cross-sectional area</option></select></div><div><label for="ductFixedSide">Dimension to adjust</label><select id="ductFixedSide"><option value="width">Adjust width</option><option value="height">Adjust height</option></select></div></div>
+  <label class="duct-slider-label" for="ductAdjust"><span id="ductAdjustLabel">Alternative width</span><strong id="ductAdjustReadout">—</strong></label>
+  <input id="ductAdjust" class="duct-slider" type="range" min="100" max="3000" value="1350" step="25">
+  <div class="duct-slider-entry"><label for="ductAdjustValue">Enter exact site limit (mm)</label><input id="ductAdjustValue" type="number" min="50" max="5000" value="1350" step="25"></div>
+  <div class="hint">The slider changes one dimension and calculates the other. The equal-friction mode follows the conventional rectangular/round equivalent-diameter relationship used for duct sizing; equal-area mode is provided as a geometric reference.</div>
+</div>
+<div class="card">
+  <h3 class="duct-section-title">3. Equivalent result</h3>
+  <div class="duct-main-result"><div class="lab">Exact calculated alternative</div><div class="val" id="ductExactSize">—</div><div id="ductBasisNote" class="duct-result-note">—</div></div>
+  <div class="duct-practical-result"><div><div class="lab">Practical 25 mm rounded size</div><div class="val" id="ductPracticalSize">—</div></div><div id="ductAspectBadge" class="duct-ratio-badge">—</div></div>
+  <div class="results duct-results-grid"><div class="tile"><div class="lab">Alternative area</div><div class="val" id="altArea">—</div></div><div class="tile"><div class="lab">Area difference</div><div class="val" id="areaDifference">—</div></div><div class="tile"><div class="lab">Equal-area round</div><div class="val" id="eqRound">—</div></div><div class="tile"><div class="lab">Friction-equivalent round</div><div class="val" id="frictionRound">—</div></div><div class="tile"><div class="lab">Nearest standard spiral</div><div class="val" id="nearestRound">—</div></div><div class="tile"><div class="lab">Alternative aspect ratio</div><div class="val" id="altAspect">—</div></div></div>
+  <div id="ductWarning" class="duct-warning"></div>
+  <div class="actions"><button class="action primary" id="copyDuctBtn">Copy result</button><button class="action" id="resetDuctBtn">Reset</button></div>
+  <div class="hint">Standard spiral sizes used: 80, 100, 125, 150, 160, 180, 200, 224, 250, 280, 300, 315, 355, 400, 450, 500, 560, 600, 630, 710, 800, 900, 1000, 1120 and 1250 mm.</div>
+</div></section>
 
 <section id="fireDamper" class="page">
 <div class="app-header">
@@ -726,7 +750,7 @@
   </div>
 </div>
 
-<div class="footer"><div class="footer-live-note">VentTools V1.1.4</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Four-manufacturer release • Verify against the current manufacturer IOM before installation</span>
+<div class="footer"><div class="footer-live-note">VentTools V1.2.0</div>© 2026 VentTools. All rights reserved.<br><span class="footer-meta">Four-manufacturer release • Verify against the current manufacturer IOM before installation</span>
 <nav class="footer-links" aria-label="Site information">
   <a class="footer-link-btn" href="engineering.html">Engineering database</a>
   <a class="footer-link-btn" href="about.html">About</a>
@@ -737,7 +761,7 @@
   <a class="footer-link-btn" href="disclaimer.html">Disclaimer</a>
   <button type="button" class="footer-link-btn" onclick="openCookiePreferences()">Cookie preferences</button>
 </nav></div></div>
-<script src="script.js?v=1.1.2"></script>
+<script src="script.js?v=1.2.0"></script>
 
 <script>
 if('serviceWorker' in navigator){navigator.serviceWorker.getRegistrations().then(rs=>rs.forEach(r=>r.unregister())).catch(()=>{});}

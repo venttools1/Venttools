@@ -1,4 +1,13 @@
-# VentTools V1.1.4
+# VentTools V1.2.0
+
+## Duct Conversion release
+- Replaces the basic square-to-round page with a VentTools-style Duct Conversion explorer.
+- Adds equal-friction and equal-area rectangular alternatives.
+- Adds a live width/height slider and exact site-limit input.
+- Shows exact and practical 25 mm rounded sizes, area difference, aspect ratio, equal-area round and friction-equivalent round.
+- Warns when the selected rectangular aspect ratio exceeds 4:1.
+- Keeps the issued drawing as the controlling size and states that approval is required before ordering a change.
+
 
 ## V1.1.2 production release
 
