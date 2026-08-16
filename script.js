@@ -375,7 +375,10 @@ function calculateDuct(commitActive=true){
  $('dcOriginalArea').textContent=`${(area/1e6).toFixed(3)} m²`;$('dcOriginalRatio').textContent=dcSource==='round'?'1.00 : 1 (round)':`${aspectRatio(w,h).toFixed(2)} : 1`;$('eqRound').textContent=`Ø ${fmt0(sourceDia)} mm`;
  $('dcExactSize').textContent=`${fmt0(exactW)} × ${fmt0(exactH)} mm`;$('dcExactNote').textContent='The paired dimension rounds up so free area never falls below the issued duct';$('dcRoundedSize').textContent=`${fmt0(rw)} × ${fmt0(rh)} mm`;$('dcAreaDiff').textContent=`${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%`;$('dcRatio').textContent=`${newRatio.toFixed(2)} : 1`;$('dcEqualAreaRound').textContent=`Ø ${fmt0(suggestedEqualDia)} mm`;
  $('dcSuggestedRound').textContent=`Ø ${fmt0(suggestedRound)} mm`;$('dcOriginalFrictionRound').textContent=`Ø ${fmt0(origEq)} mm`;$('dcNewFrictionRound').textContent=`Ø ${fmt0(newEq)} mm`;$('dcFrictionDiff').textContent=`${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%`;$('nearestRound').textContent=`Ø ${fmt0(suggestedRound)} mm`;
- const ratioMsg=$('dcRatioWarning');ratioMsg.className='dc-ratio-message '+(newRatio>4?'warn':'ok');ratioMsg.textContent=newRatio>4?'⚠ Aspect ratio exceeds 4:1. Review pressure loss, noise, stiffening and project requirements.':'✓ Aspect ratio is within the 4:1 VentTools advisory limit.';
+ const ratioOverLimit=newRatio>4;
+ const ratioMsg=$('dcRatioWarning');ratioMsg.className='dc-ratio-message '+(ratioOverLimit?'warn':'ok');ratioMsg.textContent=ratioOverLimit?'⚠ Aspect ratio exceeds 4:1. Review pressure loss, noise, stiffening and project requirements.':'✓ Aspect ratio is within the 4:1 VentTools advisory limit.';
+ const liveRatio=$('dcLiveRatioStatus');if(liveRatio){liveRatio.className='dc-live-ratio '+(ratioOverLimit?'warn':'ok');liveRatio.textContent=ratioOverLimit?`⚠ ${newRatio.toFixed(2)} : 1 — exceeds the 4:1 advisory limit`:`✓ ${newRatio.toFixed(2)} : 1 — within the 4:1 advisory limit`}
+ $('dcResultMain')?.classList.toggle('ratio-over-limit',ratioOverLimit);$('dcRatioTile')?.classList.toggle('ratio-over-limit',ratioOverLimit);
  const safeMsg=$('dcSafeAreaMessage');if(safeMsg){safeMsg.className='dc-ratio-message '+(roundedArea>=area?'ok':'warn');safeMsg.textContent=roundedArea>=area?'✓ Suggested free area is equal to or greater than the issued duct.':'⚠ Suggested size is below the issued free area — do not use.'}
  drawDuctConversion(w,h,rw,rh);
  const sourceText=dcSource==='round'?`Ø ${fmt0(d)} mm spiral`:`${fmt0(w)} × ${fmt0(h)} mm rectangular`;
@@ -1890,7 +1893,7 @@ window.addEventListener('appinstalled',()=>{
 });
 
 if(installBtn){
-  if(isIOSDevice() && !isStandaloneMode()) installBtn.hidden=false;
+  if(!isStandaloneMode()) installBtn.hidden=false;
   installBtn.addEventListener('click',async()=>{
     if(deferredInstallPrompt){
       deferredInstallPrompt.prompt();

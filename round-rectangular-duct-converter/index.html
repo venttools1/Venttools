@@ -6,7 +6,7 @@
 <title>Round / Rectangular Duct Converter — VentTools</title><meta name="description" content="Convert round or rectangular duct into practical alternative dimensions while keeping equal or greater free area."><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"><link rel="canonical" href="https://venttools.com/round-rectangular-duct-converter/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="VentTools"><meta property="og:title" content="Round / Rectangular Duct Converter — VentTools"><meta property="og:description" content="Convert round or rectangular duct into practical alternative dimensions while keeping equal or greater free area."><meta property="og:url" content="https://venttools.com/round-rectangular-duct-converter/"><meta property="og:image" content="https://venttools.com/assets/site-square-to-round.webp">
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="Round / Rectangular Duct Converter — VentTools"><meta name="twitter:description" content="Convert round or rectangular duct into practical alternative dimensions while keeping equal or greater free area."><meta name="twitter:image" content="https://venttools.com/assets/site-square-to-round.webp">
-<link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/style.css?v=2.0.2"><link rel="stylesheet" href="/v2.css?v=2.0.2">
+<link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/style.css?v=2.0.3"><link rel="stylesheet" href="/v2.css?v=2.0.3">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Round / Rectangular Duct Converter — VentTools","url":"https://venttools.com/round-rectangular-duct-converter/","description":"Convert round or rectangular duct into practical alternative dimensions while keeping equal or greater free area.","isAccessibleForFree":true,"inLanguage":"en-GB","publisher":{"@type":"Organization","name":"VentTools","url":"https://venttools.com/","logo":{"@type":"ImageObject","url":"https://venttools.com/assets/venttools-k-fan-logo.webp"}}}</script>
 </head>
 <body data-page="converter">
@@ -26,7 +26,7 @@
   <nav class="vt-breadcrumbs" aria-label="Breadcrumb"><a href="/">VentTools</a> / Round / Rectangular Duct Converter</nav>
   <header class="vt-tool-hero"><p class="vt-kicker">Free site calculator</p><h1>Round / Rectangular Duct Converter</h1><p>Enter the issued round or rectangular duct, then change either new width or height and see the safe paired dimension immediately.</p><div class="vt-tool-trust"><span>Both dimensions editable</span><span>25 mm practical steps</span><span>Safe-area round-up</span><span>Friction comparison</span></div></header>
   <div class="vt-calculator-mount"><section class="page active duct-conversion-page" id="ductulator">
-<div class="app-header"><button aria-label="Back to home" class="back" onclick="location.href='/'">← Home</button><div class="brand-lockup"><div class="brand-copy"><strong>VentTools</strong><span>Round / Rectangular Duct Converter</span></div></div></div>
+<div class="app-header"><button aria-label="Back to home" class="back" onclick="location.href='/'">← Home</button><div class="brand-lockup"><img alt="" class="brand-mark" height="40" src="/assets/venttools-k-fan-logo.webp" width="40"><div class="brand-copy"><strong>VentTools</strong><span>Round / Rectangular Duct Converter</span></div></div></div>
 <div class="page-intro card"><h2>Round / Rectangular Duct Converter</h2><p class="sub">Enter the drawing duct, then change either new dimension until the route works.</p></div>
 <div class="dc-warning card"><strong>Drawing remains controlling.</strong> Obtain approval before manufacturing or installing a revised duct size.</div>
 <div class="card dc-simple-card">
@@ -43,10 +43,11 @@
   </div>
   <div aria-label="Dimension controlled by slider" class="dc-toggle dc-adjust-toggle" role="group"><button class="active" id="dcFixWidth" type="button">Adjust width</button><button id="dcFixHeight" type="button">Adjust height</button></div>
   <label for="dcSizeSlider" id="dcSliderLabel">Slide the new width</label><div class="dc-slider-only"><input id="dcSizeSlider" min="50" max="3000" step="25" type="range"></div>
+  <div aria-live="polite" class="dc-live-ratio ok" id="dcLiveRatioStatus" role="status">✓ Aspect ratio is within the 4:1 advisory limit.</div>
   <div class="dc-swap-row"><button id="dcSwap" type="button">Swap width and height</button></div>
   <div class="dc-visual"><div class="dc-original-shape" id="dcOriginalShape"><span>Drawing<br><b id="dcOriginalShapeText">—</b></span></div><div class="dc-arrow">→</div><div class="dc-new-shape" id="dcNewShape"><span>Alternative<br><b id="dcNewShapeText">—</b></span></div></div>
-  <div class="dc-result-main"><span>Suggested practical size</span><strong id="dcRoundedSize">—</strong><small id="dcExactNote">—</small></div>
-  <div class="dc-simple-results"><div><span>Area difference</span><strong id="dcAreaDiff">—</strong></div><div><span>Aspect ratio</span><strong id="dcRatio">—</strong></div><div><span>Safe standard round</span><strong id="dcSuggestedRound">—</strong><small>Equal-area result rounded up to a listed spiral diameter</small></div></div>
+  <div class="dc-result-main" id="dcResultMain"><span>Suggested practical size</span><strong id="dcRoundedSize">—</strong><small id="dcExactNote">—</small></div>
+  <div class="dc-simple-results"><div><span>Area difference</span><strong id="dcAreaDiff">—</strong></div><div id="dcRatioTile"><span>Aspect ratio</span><strong id="dcRatio">—</strong></div><div><span>Safe standard round</span><strong id="dcSuggestedRound">—</strong><small>Equal-area result rounded up to a listed spiral diameter</small></div></div>
   <div class="dc-ratio-message" id="dcRatioWarning">—</div><div class="dc-ratio-message ok" id="dcSafeAreaMessage">—</div>
 </div>
 <div class="card dc-more-card"><details class="dc-info"><summary>ⓘ How is the size worked out?</summary><div><p>The dimension you change is rounded down to a 25 mm step. The paired dimension is rounded upward so the alternative free area is not smaller than the issued duct.</p><p>Changing shape can alter resistance, velocity profile, noise and reinforcement. The issued design still needs approval before it is changed.</p></div></details>
@@ -80,9 +81,9 @@
 </div>
 <footer class="vt-site-footer">
   <div class="vt-site-footer-inner">
-    <div><strong class="footer-live-note">VentTools V2.0.2</strong><p>Independent ventilation tools built from site experience.</p><p>Fire-damper results must be checked against the current manufacturer IOM and project fire strategy.</p></div>
+    <div><strong class="footer-live-note">VentTools V2.0.3</strong><p>Independent ventilation tools built from site experience.</p><p>Fire-damper results must be checked against the current manufacturer IOM and project fire strategy.</p></div>
     <nav class="vt-footer-links" aria-label="Site information">
       <a href="/engineering.html">Engineering database</a><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/cookies.html">Cookies</a><a href="/terms.html">Terms</a><a href="/disclaimer.html">Disclaimer</a><button onclick="openCookiePreferences()" type="button">Cookie preferences</button>
     </nav>
   </div>
-</footer><script src="/script.js?v=2.0.2"></script></body></html>
+</footer><script src="/script.js?v=2.0.3"></script></body></html>

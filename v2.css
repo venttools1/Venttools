@@ -42,6 +42,7 @@ a{color:var(--vt-blue)}
 .vt-button{display:inline-flex;align-items:center;justify-content:center;min-height:46px;padding:11px 16px;border:1px solid var(--vt-orange);border-radius:10px;background:var(--vt-orange);color:var(--vt-navy);text-decoration:none;font-weight:900}
 .vt-button:hover{background:#ff8d27;border-color:#ff8d27}
 .vt-button.secondary{background:#fff;color:var(--vt-navy);border-color:#fff}
+.vt-install-button{font:inherit;cursor:pointer}
 .vt-home-trust{display:flex;gap:8px;flex-wrap:wrap;margin-top:22px}
 .vt-home-trust span{padding:7px 10px;border:1px solid rgba(255,255,255,.18);border-radius:999px;background:rgba(255,255,255,.07);color:#eef6fb;font-size:12px;font-weight:800}
 

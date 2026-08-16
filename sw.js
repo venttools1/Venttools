@@ -1,12 +1,12 @@
-const CACHE='venttools-v2-0-2-20260816';
+const CACHE='venttools-v2-0-3-20260816';
 const CORE=[
   '/',
   '/ductwork-offset-calculator/',
   '/round-rectangular-duct-converter/',
   '/fire-damper-opening-calculator/',
-  '/style.css?v=2.0.2',
-  '/v2.css?v=2.0.2',
-  '/script.js?v=2.0.2',
+  '/style.css?v=2.0.3',
+  '/v2.css?v=2.0.3',
+  '/script.js?v=2.0.3',
   '/manifest.webmanifest',
   '/icon-192.png',
   '/assets/venttools-k-fan-logo.webp',

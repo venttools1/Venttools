@@ -6,7 +6,7 @@
 <title>VentTools — Free Ventilation Calculators for Duct Fitters</title><meta name="description" content="Fast ventilation and ductwork calculators for offsets, round and rectangular duct conversion, and manufacturer-specific fire damper openings."><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"><link rel="canonical" href="https://venttools.com/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="VentTools"><meta property="og:title" content="VentTools — Free Ventilation Calculators for Duct Fitters"><meta property="og:description" content="Fast ventilation and ductwork calculators for offsets, round and rectangular duct conversion, and manufacturer-specific fire damper openings."><meta property="og:url" content="https://venttools.com/"><meta property="og:image" content="https://venttools.com/assets/venttools-k-fan-logo.webp">
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="VentTools — Free Ventilation Calculators for Duct Fitters"><meta name="twitter:description" content="Fast ventilation and ductwork calculators for offsets, round and rectangular duct conversion, and manufacturer-specific fire damper openings."><meta name="twitter:image" content="https://venttools.com/assets/venttools-k-fan-logo.webp">
-<link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/style.css?v=2.0.2"><link rel="stylesheet" href="/v2.css?v=2.0.2">
+<link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/style.css?v=2.0.3"><link rel="stylesheet" href="/v2.css?v=2.0.3">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebSite","name":"VentTools — Free Ventilation Calculators for Duct Fitters","url":"https://venttools.com/","description":"Fast ventilation and ductwork calculators for offsets, round and rectangular duct conversion, and manufacturer-specific fire damper openings.","isAccessibleForFree":true,"inLanguage":"en-GB","publisher":{"@type":"Organization","name":"VentTools","url":"https://venttools.com/","logo":{"@type":"ImageObject","url":"https://venttools.com/assets/venttools-k-fan-logo.webp"}}}</script>
 </head>
 <body data-page="home"><script>{const legacy={offset:'/ductwork-offset-calculator/',ductulator:'/round-rectangular-duct-converter/',fireDamper:'/fire-damper-opening-calculator/'};const key=location.hash.slice(1);if(legacy[key])location.replace(legacy[key])}</script>
@@ -26,7 +26,7 @@
   <section class="vt-home-hero">
     <div class="vt-home-brand-intro"><img alt="VentTools orange fan with a white K for Kirby" height="112" src="/assets/venttools-k-fan-logo.webp" width="112"><div><p class="vt-kicker">Built from real ductwork installation</p><h1>Practical ventilation tools for work <span>on site.</span></h1></div></div>
     <p>Fast calculators for duct fitters, installers and supervisors. Choose a tool, enter the measurements and get the result without digging through an article first.</p>
-    <div class="vt-hero-actions"><a class="vt-button" href="#site-tools">Choose a calculator</a><a class="vt-button secondary" href="/pack-builder.html">Open Project Pack</a></div>
+    <div class="vt-hero-actions"><a class="vt-button" href="#site-tools">Choose a calculator</a><button class="vt-button secondary vt-install-button" hidden id="installVentToolsBtn" type="button">📱 Install VentTools</button></div>
     <div class="vt-home-trust" aria-label="VentTools principles"><span>Built by a duct fitter</span><span>Made for mobile</span><span>Working and limits shown</span></div>
   </section>
   <section class="vt-section" id="site-tools" aria-labelledby="tools-heading"><div class="vt-section-head"><div><p class="vt-kicker">VentTools calculators</p><h2 id="tools-heading">Choose a site tool</h2><p>The calculator opens first. Practical guidance and worked examples sit underneath.</p></div></div><div class="vt-tool-links">
@@ -37,6 +37,15 @@
   <section class="vt-home-pack" aria-labelledby="pack-heading"><div><p class="vt-kicker">Project records</p><h2 id="pack-heading">Keep checked damper results together</h2><p>Save results by tag and location, then reopen them or produce a Site Instruction Sheet.</p></div><a class="vt-button secondary" href="/pack-builder.html">Open Project Pack</a></section>
   <section class="vt-home-about" aria-labelledby="about-heading"><div><h2 id="about-heading">Site knowledge, not generic filler</h2><p>VentTools is independent and built around real installation problems. The photographs are original site work, calculation assumptions are shown, and manufacturer-specific fire-damper methods link back to official documents.</p></div><a href="/about.html">About VentTools →</a></section>
 </main>
+<div class="install-modal" hidden id="installHelpModal">
+  <div aria-labelledby="installHelpTitle" aria-modal="true" class="install-modal-card" role="dialog">
+    <button aria-label="Close" class="install-close" id="closeInstallHelp" type="button">×</button>
+    <div class="install-icon">📱</div>
+    <h2 id="installHelpTitle">Install VentTools</h2>
+    <p id="installHelpText">Add VentTools to your home screen for quick site access.</p>
+    <button class="vt-button" id="installHelpOkay" type="button">Got it</button>
+  </div>
+</div>
 <div aria-label="Cookie choices" aria-live="polite" class="cookie-banner" hidden id="cookieBanner" role="dialog">
   <div class="cookie-banner-copy"><strong>Cookie choices</strong><p>VentTools uses essential browser storage. Optional analytics only loads if you choose Accept analytics.</p></div>
   <div class="cookie-banner-actions">
@@ -55,9 +64,9 @@
 </div>
 <footer class="vt-site-footer">
   <div class="vt-site-footer-inner">
-    <div><strong class="footer-live-note">VentTools V2.0.2</strong><p>Independent ventilation tools built from site experience.</p><p>Fire-damper results must be checked against the current manufacturer IOM and project fire strategy.</p></div>
+    <div><strong class="footer-live-note">VentTools V2.0.3</strong><p>Independent ventilation tools built from site experience.</p><p>Fire-damper results must be checked against the current manufacturer IOM and project fire strategy.</p></div>
     <nav class="vt-footer-links" aria-label="Site information">
       <a href="/engineering.html">Engineering database</a><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/cookies.html">Cookies</a><a href="/terms.html">Terms</a><a href="/disclaimer.html">Disclaimer</a><button onclick="openCookiePreferences()" type="button">Cookie preferences</button>
     </nav>
   </div>
-</footer><script src="/script.js?v=2.0.2"></script></body></html>
+</footer><script src="/script.js?v=2.0.3"></script></body></html>
