@@ -1,0 +1,21 @@
+VentTools Proprietary Notice
+
+Copyright © 2026 VentTools. All rights reserved.
+
+The VentTools source code, user-interface design, original written content,
+photographs, diagrams, and the original selection, organisation and verification
+notes within its engineering database may not be copied, republished, sold,
+redistributed, adapted into a competing service, or presented as another
+party's work without prior written permission from VentTools.
+
+Visitors are granted permission to use the published website and its calculator
+outputs for lawful personal and professional work, subject to the website terms
+and safety limitations. This permission does not grant a licence to reproduce
+or distribute the website implementation or its original content.
+
+Manufacturer names, product names, published dimensions and linked documents
+remain the property of their respective owners. This notice does not claim
+ownership of third-party material or of underlying mathematical facts and
+methods.
+
+Permission and licensing enquiries: info@venttools.com
