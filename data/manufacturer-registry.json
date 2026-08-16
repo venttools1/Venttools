@@ -1,0 +1,105 @@
+{
+  "schemaVersion": "6.5.0-rc.12-main-candidate",
+  "generated": "2026-07-19",
+  "releaseStatus": "main-candidate",
+  "qualityRule": "No method may invent a position, clearance, opening, lining or support requirement not stated by the controlling manufacturer document.",
+  "manufacturers": [
+    {
+      "id": "BSB",
+      "status": "structured-engineering-database-integrated",
+      "families": [
+        "FSD-TD",
+        "FD-C",
+        "FSD-C",
+        "MFD-IC",
+        "AT-FSD"
+      ],
+      "referenceModes": [
+        "nominal duct",
+        "damper casing",
+        "installation plate"
+      ],
+      "notes": [
+        "Opening, setting-out, construction, duct connection, support and source fields are stored by tested method.",
+        "No method may inherit a rule from another BSB product family unless the controlling BSB document explicitly states it."
+      ]
+    },
+    {
+      "id": "Actionair",
+      "status": "verified-with-audit-notes",
+      "families": [
+        "CSS",
+        "DWFX-F",
+        "HEVAC/HVCA I/F",
+        "SPAN"
+      ],
+      "referenceModes": [
+        "measured casing",
+        "PTC-shroud-inclusive casing",
+        "installation frame"
+      ],
+      "notes": [
+        "SmokeShield width includes its 28 mm PTC shroud and excludes the peripheral flange.",
+        "Method drawings remain separate records."
+      ]
+    },
+    {
+      "id": "Lindab",
+      "status": "structured-engineering-database-integrated",
+      "families": [
+        "FNC1",
+        "FNC1U",
+        "WH25",
+        "WH45",
+        "WK25",
+        "WK45",
+        "WKS25"
+      ],
+      "referenceModes": [
+        "nominal diameter",
+        "nominal rectangular size"
+      ],
+      "notes": [
+        "Builder setting-out is populated from the selected tested opening geometry; nominal duct bottom is the default datum.",
+        "Supports, fixing flaps, sealing, separation, pairing and access notes remain method-specific.",
+        "FNC1U remains locked for Project Packs until its controlling installation manual is supplied.",
+        "WKS25 Type A discrepancy is retained in the audit log; the full installation booklet controls the live +75 mm method."
+      ]
+    },
+    {
+      "id": "Advanced Air",
+      "status": "structured-range-database-integrated-verification-in-progress",
+      "families": [
+        "0160",
+        "0400MAN",
+        "0400FME",
+        "0500MAN",
+        "0500FME",
+        "2530",
+        "26SCD"
+      ],
+      "referenceModes": [
+        "nominal duct",
+        "overall AFS frame"
+      ],
+      "notes": [
+        "Exact, minimum/maximum and per-edge opening rules use schema v2.0.",
+        "AFS methods permit non-central positioning: builder AFFL requires an explicit bottom clearance/position selection within the manufacturer limits.",
+        "No midpoint is silently presented as a manufacturer requirement.",
+        "Pack enablement remains method-specific until casing/frame-to-nominal datum geometry is fully audited."
+      ]
+    }
+  ],
+  "siteOutputOrder": [
+    "selected tested method",
+    "nominal duct size",
+    "overall casing/frame size",
+    "finished aperture",
+    "structural opening",
+    "bottom/top/left/right setting-out offsets",
+    "support and hanger requirements",
+    "penetration seal",
+    "access and breakaway requirements",
+    "source and audit status"
+  ]
+}

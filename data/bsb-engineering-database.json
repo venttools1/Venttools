@@ -1,0 +1,267 @@
+{
+  "schemaVersion": "1.2.0",
+  "generated": "2026-07-19",
+  "status": "final method audit complete for enabled calculations",
+  "manufacturer": "BSB",
+  "qualityRule": "Only manufacturer-published dimensions and requirements are enabled. Missing values remain manual-check items.",
+  "documents": {
+    "FSD-TD": {
+      "iom": "V62904",
+      "brochure": "V52404"
+    },
+    "FD-C": {
+      "iom": "V13904",
+      "brochure": "V32404/V52011"
+    },
+    "FSD-C": {
+      "iom": "V62904",
+      "brochure": "V132404"
+    },
+    "MFD-IC": {
+      "iom": "V012606",
+      "brochure": "V12606"
+    },
+    "AT-FSD": {
+      "iom": "V12204",
+      "brochure": "V12305"
+    }
+  },
+  "commonRequirements": {
+    "ductConnection": [
+      "Connect ductwork in accordance with DW144/DW145.",
+      "Use aluminium rivets as breakaway fixings where the selected ducted method states this."
+    ],
+    "separation": [
+      "200 mm minimum clear structural separation between separate damper casings.",
+      "75 mm minimum between damper casing and adjacent construction unless a tested drawing states otherwise."
+    ]
+  },
+  "families": {
+    "FSD-TD": {
+      "shape": "rectangular",
+      "methods": {
+        "M5": {
+          "construction": "Drywall, non-cleated frameless",
+          "finishedOpening": {
+            "widthAdd": 121,
+            "heightAdd": 96
+          },
+          "lined": true,
+          "settingOut": {
+            "bottomFromNominal": 48,
+            "basis": "38 mm casing projection + 10 mm gap"
+          },
+          "ductConnection": "Aluminium rivets; DW144/DW145",
+          "source": "IOM sections 8.1\u20138.2"
+        },
+        "M6": {
+          "construction": "Drywall, pattress and cleat",
+          "finishedOpening": {
+            "widthAdd": 156,
+            "heightAdd": 96
+          },
+          "lined": true,
+          "settingOut": {
+            "bottomFromNominal": 48,
+            "basis": "centred vertically with 10 mm bottom gap"
+          },
+          "ductConnection": "Aluminium rivets; DW144/DW145",
+          "source": "IOM section 9"
+        },
+        "M9": {
+          "construction": "Drywall, Easy Fix angle frame",
+          "finishedOpening": {
+            "widthAdd": 122,
+            "heightAdd": 99
+          },
+          "lined": true,
+          "settingOut": {
+            "bottomFromNominal": 49.5,
+            "basis": "39.5 mm casing projection + 10 mm gap"
+          },
+          "ductConnection": "Aluminium rivets; DW144/DW145",
+          "source": "IOM section 10"
+        },
+        "M10": {
+          "construction": "Masonry wall, Easy Fix angle frame",
+          "finishedOpening": {
+            "widthAdd": 122,
+            "heightAdd": 99
+          },
+          "lined": false,
+          "ductConnection": "Aluminium rivets; DW144/DW145",
+          "source": "IOM masonry method"
+        },
+        "M11": {
+          "construction": "Masonry floor, Easy Fix angle frame",
+          "finishedOpening": {
+            "widthAdd": 122,
+            "heightAdd": 99
+          },
+          "lined": false,
+          "ductConnection": "Aluminium rivets; DW144/DW145",
+          "source": "IOM floor method"
+        }
+      }
+    },
+    "FD-C": {
+      "shape": "circular",
+      "methods": {
+        "M9": {
+          "construction": "Drywall, lined opening",
+          "openingAdd": 20,
+          "lined": true,
+          "settingOut": {
+            "bottomFinished": 10
+          },
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        },
+        "M10": {
+          "construction": "Masonry wall",
+          "openingAdd": 20,
+          "lined": false,
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        },
+        "M11": {
+          "construction": "Masonry floor",
+          "openingAdd": 20,
+          "lined": false,
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        },
+        "M14": {
+          "construction": "Flexible fire curtain",
+          "trimTolerance": 10,
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        }
+      }
+    },
+    "FSD-C": {
+      "shape": "circular",
+      "methods": {
+        "M9": {
+          "construction": "Drywall, lined opening",
+          "openingAdd": 20,
+          "lined": true,
+          "settingOut": {
+            "bottomFinished": 10
+          },
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        },
+        "M10": {
+          "construction": "Masonry wall",
+          "openingAdd": 20,
+          "lined": false,
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        },
+        "M11": {
+          "construction": "Masonry floor",
+          "openingAdd": 20,
+          "lined": false,
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        },
+        "M14": {
+          "construction": "Flexible fire curtain",
+          "trimTolerance": 10,
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        }
+      }
+    },
+    "MFD-IC": {
+      "shape": "circular",
+      "openingTable": {
+        "100": 140,
+        "125": 165,
+        "150": 190,
+        "160": 200,
+        "200": 240,
+        "250": 290,
+        "300": 340,
+        "315": 355
+      },
+      "methods": {
+        "M9": {
+          "construction": "Drywall with two-layer ablative batt",
+          "lined": false,
+          "fixing": "All fixing positions; drywall screws into track",
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        },
+        "M10": {
+          "construction": "Masonry wall with two-layer ablative batt",
+          "lined": false,
+          "fixing": "All outer-row fixing positions; minimum 5 x 50 mm steel fixings",
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        },
+        "M11": {
+          "construction": "Masonry floor with two-layer ablative batt",
+          "lined": false,
+          "fixing": "All outer-row fixing positions; minimum 5 x 50 mm steel fixings",
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        },
+        "M15": {
+          "construction": "Masonry floor, mortar infill",
+          "openingDiameterTable": {
+            "100": 178.5,
+            "125": 203.5,
+            "150": 228.5,
+            "160": 238.5,
+            "200": 278.5,
+            "250": 328.5,
+            "300": 378.5,
+            "315": 393.5
+          },
+          "ductConnection": "Aluminium rivets; DW144/DW145"
+        }
+      }
+    },
+    "AT-FSD": {
+      "shape": "rectangular-unducted",
+      "methods": {
+        "M9": {
+          "construction": "Drywall, fully lined aperture",
+          "finishedOpening": "Nominal width x nominal height; manufacturer tolerance +5/-0 mm",
+          "structuralCut": "Finished opening plus two aperture-lining board thicknesses",
+          "sleeve": "Actual sleeve is nominal minus 10 mm, giving 5 mm each side",
+          "fixing": "3.5 x 38 mm drywall screws through outer flange holes into track",
+          "ductConnection": "Unducted installation; no duct connection"
+        },
+        "M10": {
+          "construction": "Masonry wall",
+          "finishedOpening": "Nominal width x nominal height; manufacturer tolerance +5/-0 mm",
+          "fixing": "Minimum 5 x 40 mm steel fixings through outer flange holes",
+          "ductConnection": "Unducted installation; no duct connection"
+        }
+      }
+    }
+  },
+  "audit": {
+    "auditDate": "2026-07-19",
+    "scope": "All BSB methods exposed by VentTools",
+    "rule": "A green calculation requires a published opening rule plus a complete finished-opening/structural-cut and setting-out chain. Drawing-led methods remain amber.",
+    "enabledVerified": [
+      "FSD-TD M5",
+      "FSD-TD M6",
+      "FSD-TD M9",
+      "FSD-TD M10",
+      "FSD-TD M11",
+      "FD-C M9",
+      "FD-C M10",
+      "FD-C M11",
+      "FD-C M14",
+      "FSD-C M9",
+      "FSD-C M10",
+      "FSD-C M11",
+      "FSD-C M14",
+      "MFD-IC M9",
+      "MFD-IC M10",
+      "MFD-IC M11",
+      "MFD-IC M15",
+      "AT-FSD M9",
+      "AT-FSD M10"
+    ],
+    "manualOnly": [],
+    "notes": [
+      "For lined drywall methods, structural cut is calculated only after the finished aperture is established.",
+      "No generic duct-edge datum is substituted where the method is casing-based."
+    ]
+  }
+}

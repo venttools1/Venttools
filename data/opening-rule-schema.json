@@ -1,0 +1,58 @@
+{
+  "schemaVersion": "2.0.0",
+  "title": "VentTools opening and setting-out rule schema",
+  "generated": "2026-07-19",
+  "ruleTypes": {
+    "exact": {
+      "description": "One manufacturer-required opening.",
+      "fields": [
+        "width",
+        "height"
+      ]
+    },
+    "additionRange": {
+      "description": "Opening derived from nominal size plus manufacturer minimum and maximum additions.",
+      "fields": [
+        "width.minAdd",
+        "width.maxAdd",
+        "height.minAdd",
+        "height.maxAdd"
+      ]
+    },
+    "edgeClearanceRange": {
+      "description": "Clearance stored independently at left, right, top and bottom. Required for non-central or asymmetric setting-out.",
+      "fields": [
+        "left.min",
+        "left.max",
+        "right.min",
+        "right.max",
+        "top.min",
+        "top.max",
+        "bottom.min",
+        "bottom.max"
+      ]
+    },
+    "tableRange": {
+      "description": "Size-band table returns minimum and maximum openings.",
+      "fields": [
+        "bands"
+      ]
+    }
+  },
+  "selectionPolicy": {
+    "manufacturerPreferred": "Use only where manufacturer states a preferred value.",
+    "projectSelected": "A project value inside the tested range; never label it as a manufacturer requirement.",
+    "default": "Do not silently use midpoint. Where no preferred value is stated, display minimum and maximum and require a selected value for builder setting-out."
+  },
+  "settingOutPolicy": {
+    "requiredChain": [
+      "nominal duct datum",
+      "casing/frame projection",
+      "selected bottom clearance",
+      "aperture lining where applicable",
+      "structural opening bottom/top"
+    ],
+    "nonCentralMethods": "Builder AFFL remains locked until a bottom clearance or explicit position is selected within the documented range.",
+    "noGuess": "A total opening range must not be halved unless the controlling drawing requires a centralised damper."
+  }
+}

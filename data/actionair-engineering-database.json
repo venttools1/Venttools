@@ -1,0 +1,253 @@
+{
+  "schemaVersion": "2.1.0",
+  "generated": "2026-07-19",
+  "manufacturer": "Swegon / Actionair",
+  "status": "audited-supported-methods-2026-07-19",
+  "qualityRule": "Each tested installation drawing is a separate record. Opening ranges, board build-up, asymmetric head conditions and casing references must not be inherited between methods.",
+  "documents": {
+    "CSS": "LNNN00356 v6.0, 27 May 2025",
+    "DWFX-F": "LNNN00354 v6.0, 17 March 2026",
+    "SPAN": "L00009 v3.0, 13 January 2026",
+    "HEVAC/HVCA": "LNNN00352 v5.1, 26 May 2022"
+  },
+  "families": {
+    "CSS": {
+      "shape": "circular casing in square aperture",
+      "methods": {
+        "plasterboard": {
+          "openingRule": {
+            "type": "additionRange",
+            "width": {
+              "minAdd": 10,
+              "maxAdd": 40
+            },
+            "height": {
+              "minAdd": 10,
+              "maxAdd": 40
+            }
+          },
+          "structuralCut": {
+            "boardThicknessesWidth": 2,
+            "boardThicknessesHeight": 2
+          },
+          "fixings": "Minimum 50 mm drywall screws into aperture framing; 4 screws for casing diameter up to 200 mm and 8 screws above 200 mm.",
+          "duct": "Independently support ductwork and use a break-away joint on both sides.",
+          "separation": {
+            "betweenDampers": 200,
+            "toConstruction": 75
+          },
+          "source": "CSS guide page 3"
+        }
+      }
+    },
+    "DWFX-F": {
+      "shape": "rectangular",
+      "casingReference": "For SmokeShield include the 28 mm PTC shroud in width and exclude peripheral flange.",
+      "methods": {
+        "plasterboard-one-board": {
+          "openingRule": {
+            "type": "exactAddition",
+            "widthAdd": 30,
+            "heightAdd": 30
+          },
+          "structuralCut": {
+            "boardThicknessesWidth": 2,
+            "boardThicknessesHeight": 2
+          }
+        },
+        "plasterboard-two-board-fireShield": {
+          "openingRule": {
+            "type": "additionRange",
+            "width": {
+              "minAdd": 10,
+              "maxAdd": 40
+            },
+            "height": {
+              "minAdd": 10,
+              "maxAdd": 40
+            }
+          },
+          "structuralCut": {
+            "boardThicknessesWidth": 2,
+            "boardThicknessesHeight": 2
+          }
+        },
+        "plasterboard-two-board-smokeShield": {
+          "openingRule": {
+            "type": "additionRange",
+            "width": {
+              "minAdd": 10,
+              "maxAdd": 52
+            },
+            "height": {
+              "minAdd": 10,
+              "maxAdd": 40
+            }
+          },
+          "structuralCut": {
+            "boardThicknessesWidth": 2,
+            "boardThicknessesHeight": 2
+          }
+        },
+        "under-slab-fireShield": {
+          "openingRule": {
+            "type": "additionRange",
+            "width": {
+              "minAdd": 10,
+              "maxAdd": 60
+            },
+            "height": {
+              "minAdd": 5,
+              "maxAdd": 30
+            }
+          },
+          "structuralCut": {
+            "boardThicknessesWidth": 2,
+            "boardThicknessesHeight": 1
+          },
+          "position": "top flange removed; damper head against slab"
+        },
+        "under-slab-smokeShield": {
+          "openingRule": {
+            "type": "additionRange",
+            "width": {
+              "minAdd": 10,
+              "maxAdd": 57
+            },
+            "height": {
+              "minAdd": 10,
+              "maxAdd": 30
+            }
+          },
+          "structuralCut": {
+            "boardThicknessesWidth": 2,
+            "boardThicknessesHeight": 1
+          },
+          "position": "top flange removed; damper head against slab"
+        }
+      },
+      "fixings": "Flange holes at 150 mm centres; selected pattress method may require 300 mm centres.",
+      "duct": "Independently support ductwork and use appropriate break-away joints.",
+      "separation": {
+        "betweenDampers": 200,
+        "toConstruction": 75
+      },
+      "dimensionalData": {
+        "SmokeShieldPTCRectangular": {
+          "nominal100to150": {
+            "casingWidthIncludingPTCShroud": 228,
+            "casingHeight": 200,
+            "source": "LNNN00354 v6.0 page 15"
+          },
+          "nominal151to199": {
+            "casingWidthIncludingPTCShroud": 278,
+            "casingHeight": 250,
+            "source": "LNNN00354 v6.0 page 15"
+          },
+          "nominal200to1000": {
+            "casingWidthFormula": "ductWidth + 78",
+            "casingHeightFormula": "ductHeight + 50",
+            "source": "LNNN00354 v6.0 page 15"
+          }
+        },
+        "SmokeShieldPTCCircular": {
+          "diameter100to150": {
+            "casingWidthIncludingPTCShroud": 228,
+            "casingHeight": 200
+          },
+          "diameter151to199": {
+            "casingWidthIncludingPTCShroud": 278,
+            "casingHeight": 250
+          },
+          "diameter200to1000": {
+            "casingWidthFormula": "ductDiameter + 78",
+            "casingHeightFormula": "ductDiameter + 50"
+          },
+          "source": "LNNN00354 v6.0 page 14"
+        }
+      }
+    },
+    "SPAN": {
+      "shape": "horizontal floor installation",
+      "support": "1.5 mm minimum Unistrut bolted to four damper cleats with minimum M10 bolts; suitable fire-resisting floor fixings.",
+      "mortar": "4:1 sand/cement or compliant fire refractory mortar; protect interface shroud and do not fill above casing.",
+      "positionRange": {
+        "minimum": 75,
+        "maximum": 300,
+        "basis": "drawing dimension; retain per selected access-side method"
+      },
+      "source": "SPAN guide pages 3-6"
+    },
+    "HEVAC-HVCA": {
+      "shape": "rectangular installation frame",
+      "methods": [
+        "vertical masonry wall",
+        "horizontal slab"
+      ],
+      "duct": "Independently support ductwork and use break-away joints on both sides.",
+      "separation": {
+        "betweenDampers": 200,
+        "toConstruction": 75
+      },
+      "status": "drawing-led; use exact frame geometry from selected drawing",
+      "frameDimensionalData": {
+        "SmokeShieldRectangular": [
+          {
+            "range": "width and height 100-150",
+            "frameWidth": 314,
+            "frameHeight": 340
+          },
+          {
+            "range": "width and height 151-199",
+            "frameWidth": 364,
+            "frameHeight": 390
+          },
+          {
+            "range": "width 200-1000, height 100-199",
+            "frameWidthFormula": "ductWidth + 114",
+            "frameHeight": "use matching 100-150 or 151-199 band"
+          },
+          {
+            "range": "width and height 200-1000",
+            "frameWidthFormula": "ductWidth + 114",
+            "frameHeightFormula": "ductHeight + 140"
+          }
+        ],
+        "SmokeShieldCircular": [
+          {
+            "range": "diameter 100-150",
+            "frameWidth": 314,
+            "frameHeight": 340
+          },
+          {
+            "range": "diameter 151-199",
+            "frameWidth": 364,
+            "frameHeight": 390
+          },
+          {
+            "range": "diameter 200-969",
+            "frameWidthFormula": "diameter + 166",
+            "frameHeightFormula": "diameter + 190"
+          },
+          {
+            "range": "diameter 970-1000",
+            "frameWidth": 1198,
+            "frameHeight": 1195
+          }
+        ],
+        "FireShield": {
+          "frameWidthFormula": "duct width + 114",
+          "heightBands": {
+            "100-249": "duct height + 114",
+            "250-450": "duct height + 133",
+            "451-650": "duct height + 140",
+            "651-1000": "duct height + 170"
+          }
+        },
+        "source": "LNNN00352 v5.1 pages 9-11"
+      }
+    }
+  },
+  "auditNote": "Supported OPE-backed and drawing-backed methods audited. Drawing-specific/link-only methods remain locked and are not represented as verified calculations.",
+  "documentAccess": "Official manufacturer links only; no manufacturer manuals, spreadsheets, drawings or photographs are bundled in the public release."
+}

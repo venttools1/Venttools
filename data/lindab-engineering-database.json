@@ -1,0 +1,109 @@
+{
+  "schemaVersion": "1.0.0",
+  "generated": "2026-07-19",
+  "status": "audited-supported-methods-2026-07-19",
+  "manufacturer": "Lindab",
+  "qualityRule": "No setting-out result is enabled unless the selected installation detail defines the opening allowance and position used by the calculator.",
+  "documents": {
+    "FNC1": "1MUBFNC1EN-LIND rev 20-12",
+    "FNC1U": "datasheet 2024-09-26; controlling installation manual still required",
+    "WH25": "1MUBWH25EN-LIND rev 20-10",
+    "WH45": "1MUBWH45EN-LIND rev 20-10",
+    "WK25": "1MUBWK25EN-LIND rev 25-03",
+    "WK45": "1MUBWK45EN-LIND rev 25-12",
+    "WKS25": "1MUBWKS25EN-LIND rev 25-03"
+  },
+  "settingOutPolicy": {
+    "datum": "bottom of nominal duct / nominal damper size AFFL",
+    "centredOpening": "For Lindab methods whose tested drawing gives total opening allowance about the nominal damper, structural opening bottom = nominal duct bottom - half the total height allowance.",
+    "noGuess": "Methods without a complete documented opening-position chain remain locked."
+  },
+  "families": {
+    "FNC1": {
+      "packReady": true,
+      "sizeRange": "Ø100-400",
+      "methods": {
+        "wet30": {
+          "opening": "Ø+30",
+          "settingOutBottomOffset": 15
+        },
+        "dry10": {
+          "opening": "Ø+10",
+          "settingOutBottomOffset": 5
+        },
+        "floor": {
+          "opening": "selected documented allowance",
+          "settingOut": "centred"
+        }
+      },
+      "access": "approximately 200 mm at mechanism; inspection hatches recommended both sides"
+    },
+    "FNC1U": {
+      "packReady": false,
+      "reason": "Uploaded datasheet does not contain full installation/fixing/support methods."
+    },
+    "WH25": {
+      "packReady": true,
+      "sizeRange": "Ø100-315",
+      "settingOut": "centred on selected tested opening",
+      "access": "approximately 200 mm at mechanism"
+    },
+    "WH45": {
+      "packReady": true,
+      "sizeRange": "Ø200-800",
+      "settingOut": "centred on selected tested opening",
+      "access": "approximately 200 mm at mechanism"
+    },
+    "WK25": {
+      "packReady": true,
+      "settingOut": "centred on selected minimum/recommended tested opening",
+      "supports": "damper weight and connected ductwork independently supported; remote methods retain method-specific suspension notes",
+      "pairing": "maximum two with official kit; prohibited arrangements retained",
+      "openingDatum": "The published B/H opening dimensions are the structural D-hole. Plasterboard/calcium-silicate strips and rock-wool or mortar sealing are installed inside that D-hole; no separate finished clear-opening dimension is published.",
+      "singleDamperVerification": "Supported single-damper methods return a verified structural D-hole, a no-separate-finished-opening status, and centred builder setting-out from the selected allowance."
+    },
+    "WK45": {
+      "packReady": true,
+      "settingOut": "centred on selected tested opening",
+      "supports": "damper weight and connected ductwork independently supported",
+      "pairing": "maximum two; 200 mm between paired installations where stated"
+    },
+    "WKS25": {
+      "packReady": true,
+      "methods": {
+        "rigid": {
+          "openingAdd": [
+            50,
+            50
+          ],
+          "bottomOffset": 25
+        },
+        "light": {
+          "openingAdd": [
+            75,
+            75
+          ],
+          "bottomOffset": 37.5
+        },
+        "gypsum": {
+          "openingAdd": [
+            50,
+            50
+          ],
+          "bottomOffset": 25
+        },
+        "shaft": {
+          "openingAdd": [
+            90,
+            90
+          ],
+          "bottomOffset": 45
+        }
+      },
+      "fixings": "factory fixing flaps raised and used as shown",
+      "pairing": "maximum two; no three; prohibited vertical-axis arrangement retained"
+    }
+  },
+  "auditNote": "FNC1, WH25, WH45, WK25, WK45 and WKS25 supported method records audited against the manufacturer booklets. WK25 single-damper D-hole semantics and verification are explicitly mapped. FNC1U remains locked because only a datasheet is available.",
+  "documentAccess": "Official manufacturer links only; no manufacturer manuals, spreadsheets, drawings or photographs are bundled in the public release."
+}

@@ -1,0 +1,6 @@
+tests/
+docs/
+README.md
+wrangler.jsonc
+.gitignore
+*.zip

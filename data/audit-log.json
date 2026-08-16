@@ -1,0 +1,49 @@
+{
+  "version": "7.0.0-beta.1",
+  "blockingPrinciple": "A calculator is disabled where the controlling geometry or installation rule cannot be established from the supplied documents.",
+  "items": [
+    {
+      "manufacturer": "Actionair",
+      "family": "CSS",
+      "issue": "The slab drawing combines an overall +10 to +30 mm opening with 5 to 20 mm edge clearances.",
+      "decision": "Store overall oversize and per-edge constraints separately; do not assume central positioning."
+    },
+    {
+      "manufacturer": "Actionair",
+      "family": "DWFX-F",
+      "issue": "Ordinary masonry pages do not publish a complete numerical opening rule.",
+      "decision": "Keep those methods guidance-only unless the official drawing or hole-sizing logic is available."
+    },
+    {
+      "manufacturer": "Lindab",
+      "family": "WKS25",
+      "issue": "Type A light-wall opening is +75 in the installation booklet and +70 in the short datasheet.",
+      "decision": "Use +75 provisionally and show an audit warning."
+    },
+    {
+      "manufacturer": "Advanced Air",
+      "family": "26SCD",
+      "issue": "Published tables are based on centralised installation but the detailed AFS constraints permit non-central positioning.",
+      "decision": "Store table result and edge-limit logic separately; maximum case-to-edge clearance 130 mm, recommended batt space 25 mm."
+    },
+    {
+      "manufacturer": "All",
+      "family": "All",
+      "issue": "Nominal duct and casing/frame dimensions are not interchangeable.",
+      "decision": "Every setting-out calculation must identify its geometry reference explicitly."
+    }
+  ],
+  "entries": [
+    {
+      "date": "2026-07-19",
+      "manufacturer": "Lindab",
+      "release": "RC10-LINDAB",
+      "summary": "Added method-specific builder setting-out mapping and Lindab engineering database for FNC1, WH25, WH45, WK25, WK45 and WKS25. FNC1U remains locked pending installation manual.",
+      "controls": [
+        "No invented casing projection",
+        "Centred opening used only where shown/defined by tested opening detail",
+        "Method-specific supports/fixings/separations retained"
+      ]
+    }
+  ]
+}

@@ -1,5 +1,6 @@
 const $=id=>document.getElementById(id);function showPage(id){
- const page=$(id)||$("home");
+ const page=$(id)||$("home")||document.querySelector(".page");
+ if(!page)return;
  document.querySelectorAll(".page").forEach(p=>p.classList.remove("active"));
  page.classList.add("active");
  if(id==="offset")calculateOffset();
@@ -303,7 +304,19 @@ Results:
   }
   return result;
 }
-function angleUI(){let c=$('angle').value==='custom';$('angleCustom').style.display=c?'block':'none';if(!c)$('angleCustom').value=$('angle').value}function resetOffset(){$('up').value=300;$('over').value=250;$('angle').value='45';$('angleCustom').value=45;$('dia').value=315;$('minStraight').value=120;$('rmFactor').value=1;angleUI();calculateOffset()}async function copyOffset(){let r=calculateOffset();try{await navigator.clipboard.writeText(r);setMsg('ok','✅ Result copied.')}catch(e){setMsg('warn','Could not copy automatically. Long-press working text and copy manually.')}}function toggleWorking(){let o=$('out'),show=o.style.display==='block';o.style.display=show?'none':'block';$('workingBtn').textContent=show?'Show working':'Hide working'}['up','over','dia','minStraight','rmFactor','angle','angleCustom'].forEach(id=>{$(id).addEventListener('input',()=>{angleUI();calculateOffset()});$(id).addEventListener('change',()=>{angleUI();calculateOffset()})});$('resetBtn').addEventListener('click',resetOffset);$('copyBtn').addEventListener('click',copyOffset);$('workingBtn').addEventListener('click',toggleWorking);
+function angleUI(){let c=$('angle').value==='custom';$('angleCustom').style.display=c?'block':'none';if(!c)$('angleCustom').value=$('angle').value}function resetOffset(){$('up').value=300;$('over').value=250;$('angle').value='45';$('angleCustom').value=45;$('dia').value=315;$('minStraight').value=120;$('rmFactor').value=1;angleUI();calculateOffset()}async function copyOffset(){let r=calculateOffset();try{await navigator.clipboard.writeText(r);setMsg('ok','✅ Result copied.')}catch(e){setMsg('warn','Could not copy automatically. Long-press working text and copy manually.')}}function toggleWorking(){let o=$('out'),show=o.style.display==='block';o.style.display=show?'none':'block';$('workingBtn').textContent=show?'Show working':'Hide working'}
+function initOffsetCalculator(){
+ if(!$('up'))return;
+ ['up','over','dia','minStraight','rmFactor','angle','angleCustom'].forEach(id=>{
+  const el=$(id);if(!el)return;
+  el.addEventListener('input',()=>{angleUI();calculateOffset()});
+  el.addEventListener('change',()=>{angleUI();calculateOffset()});
+ });
+ $('resetBtn')?.addEventListener('click',resetOffset);
+ $('copyBtn')?.addEventListener('click',copyOffset);
+ $('workingBtn')?.addEventListener('click',toggleWorking);
+ angleUI();calculateOffset();
+}
 const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450,500,560,600,630,710,800,900,1000,1120,1250,1400,1500,1600];
 function nearestStandard(d){let best=standardSpiral[0];for(const size of standardSpiral){if(Math.abs(size-d)<Math.abs(best-d))best=size}return best}
 function nextStandardAtOrAbove(d){for(const size of standardSpiral){if(size>=d)return size}return Math.ceil(d/100)*100}
@@ -316,40 +329,83 @@ function roundTo(value,step){return Math.round(value/step)*step}
 function floorTo(value,step){return Math.floor(value/step)*step}
 function ceilTo(value,step){return Math.ceil(value/step)*step}
 let dcMode='width',dcSource='rect';
+function sourceArea(){if(dcSource==='round'){const d=parseFloat($('roundD')?.value)||0;return d>0?roundArea(d):0}const w=parseFloat($('rectW')?.value)||0,h=parseFloat($('rectH')?.value)||0;return w>0&&h>0?w*h:0}
+function sourceReferenceDimension(){if(dcSource==='round')return parseFloat($('roundD')?.value)||900;return dcMode==='width'?(parseFloat($('rectW')?.value)||1200):(parseFloat($('rectH')?.value)||330)}
+function activeAlternativeInput(){return dcMode==='width'?$('dcNewWidth'):$('dcNewHeight')}
 function setDuctSource(source){
  dcSource=source==='round'?'round':'rect';
  $('dcSourceRect')?.classList.toggle('active',dcSource==='rect');$('dcSourceRound')?.classList.toggle('active',dcSource==='round');
  if($('dcRectInputs'))$('dcRectInputs').style.display=dcSource==='rect'?'grid':'none';
  if($('dcRoundInputs'))$('dcRoundInputs').style.display=dcSource==='round'?'block':'none';
- syncDuctSliderBounds();calculateDuct();
+ seedDuctAlternative();
 }
-function setDuctMode(mode){dcMode=mode==='height'?'height':'width';const bw=$('dcFixWidth'),bh=$('dcFixHeight');if(!bw||!bh)return;bw.classList.toggle('active',dcMode==='width');bh.classList.toggle('active',dcMode==='height');$('dcSliderLabel').textContent=dcMode==='width'?'Maximum width available (mm)':'Maximum height available (mm)';syncDuctSliderBounds();calculateDuct()}
-function sourceArea(){if(dcSource==='round'){const d=parseFloat($('roundD')?.value)||0;return d>0?roundArea(d):0}const w=parseFloat($('rectW')?.value)||0,h=parseFloat($('rectH')?.value)||0;return w>0&&h>0?w*h:0}
-function sourceReferenceDimension(){if(dcSource==='round'){const d=parseFloat($('roundD')?.value)||900;return d}const w=parseFloat($('rectW')?.value)||1500,h=parseFloat($('rectH')?.value)||400;return dcMode==='width'?w:h}
-function syncDuctSliderBounds(){const base=sourceReferenceDimension(),slider=$('dcSizeSlider'),input=$('dcSizeInput');if(!slider||!input)return;slider.min=Math.max(50,roundTo(base*0.25,25));slider.max=Math.max(Number(slider.min)+25,roundTo(base*2,25));let current=parseFloat(input.value)||base;if(current<Number(slider.min)||current>Number(slider.max))current=roundTo(base*0.9,25);slider.value=current;input.value=current}
+function setDuctMode(mode){
+ dcMode=mode==='height'?'height':'width';
+ $('dcFixWidth')?.classList.toggle('active',dcMode==='width');$('dcFixHeight')?.classList.toggle('active',dcMode==='height');
+ $('dcWidthField')?.classList.toggle('active',dcMode==='width');$('dcHeightField')?.classList.toggle('active',dcMode==='height');
+ if($('dcSliderLabel'))$('dcSliderLabel').textContent=dcMode==='width'?'Slide the new width':'Slide the new height';
+ syncDuctSliderBounds();calculateDuct(false);
+}
+function seedDuctAlternative(){
+ const area=sourceArea();if(!(area>0))return;
+ const reference=sourceReferenceDimension();
+ const fixed=Math.max(25,floorTo(reference,25));
+ if(dcMode==='width'){$('dcNewWidth').value=fixed;$('dcNewHeight').value=Math.max(25,ceilTo(area/fixed,25))}
+ else{$('dcNewHeight').value=fixed;$('dcNewWidth').value=Math.max(25,ceilTo(area/fixed,25))}
+ syncDuctSliderBounds();calculateDuct(true);
+}
+function syncDuctSliderBounds(){
+ const slider=$('dcSizeSlider'),input=activeAlternativeInput();if(!slider||!input)return;
+ const base=Math.max(sourceReferenceDimension(),parseFloat(input.value)||0);
+ slider.min=50;slider.max=Math.max(3000,ceilTo(base*2,25));slider.value=Math.max(50,Math.min(Number(slider.max),parseFloat(input.value)||sourceReferenceDimension()));
+}
 function drawDuctConversion(w,h,nw,nh){const o=$('dcOriginalShape'),n=$('dcNewShape');if(!o||!n)return;const max=180;let oa=w,ob=h;if(dcSource==='round'){const d=parseFloat($('roundD')?.value)||900;oa=d;ob=d;o.classList.add('dc-round-source')}else{o.classList.remove('dc-round-source')}const scale=Math.min(max/Math.max(oa,ob),max/Math.max(nw,nh));const set=(el,a,b)=>{el.style.width=Math.max(48,a*scale)+'px';el.style.height=Math.max(36,b*scale)+'px'};set(o,oa,ob);set(n,nw,nh);$('dcOriginalShapeText').textContent=dcSource==='round'?`Ø ${fmt0(parseFloat($('roundD')?.value)||0)}`:`${fmt0(w)} × ${fmt0(h)}`;$('dcNewShapeText').textContent=`${fmt0(nw)} × ${fmt0(nh)}`}
-function calculateDuct(){
+function calculateDuct(commitActive=true){
  const w=parseFloat($('rectW')?.value)||0,h=parseFloat($('rectH')?.value)||0,d=parseFloat($('roundD')?.value)||0;
  const area=sourceArea();if(!(area>0))return '';
- const target=parseFloat($('dcSizeInput')?.value)||sourceReferenceDimension();
- let nw,nh;if(dcMode==='width'){nw=target;nh=area/nw}else{nh=target;nw=area/nh}
- let rw,rh;if(dcMode==='width'){rw=Math.max(25,floorTo(nw,25));rh=Math.max(25,ceilTo(area/rw,25))}else{rh=Math.max(25,floorTo(nh,25));rw=Math.max(25,ceilTo(area/rh,25))}
+ const active=activeAlternativeInput();const rawTarget=parseFloat(active?.value)||sourceReferenceDimension();const target=Math.max(25,floorTo(rawTarget,25));
+ let exactW,exactH,rw,rh;
+ if(dcMode==='width'){rw=target;exactW=rw;exactH=area/rw;rh=Math.max(25,ceilTo(exactH,25))}
+ else{rh=target;exactH=rh;exactW=area/rh;rw=Math.max(25,ceilTo(exactW,25))}
  let roundedArea=rw*rh;if(roundedArea<area){if(dcMode==='width')rh+=25;else rw+=25;roundedArea=rw*rh}
+ if(commitActive&&active)active.value=target;
+ if(dcMode==='width')$('dcNewHeight').value=rh;else $('dcNewWidth').value=rw;
+ if($('dcSizeSlider'))$('dcSizeSlider').value=target;
  const areaDiff=(roundedArea-area)/area*100,newRatio=aspectRatio(rw,rh),sourceDia=dcSource==='round'?d:equalAreaDiameter(w,h),suggestedEqualDia=equalAreaDiameter(rw,rh),suggestedRound=nextStandardAtOrAbove(sourceDia),origEq=dcSource==='round'?d:equivalentDiameter(w,h),newEq=equivalentDiameter(rw,rh),frictionDiff=(newEq-origEq)/origEq*100;
  $('dcOriginalArea').textContent=`${(area/1e6).toFixed(3)} m²`;$('dcOriginalRatio').textContent=dcSource==='round'?'1.00 : 1 (round)':`${aspectRatio(w,h).toFixed(2)} : 1`;$('eqRound').textContent=`Ø ${fmt0(sourceDia)} mm`;
- $('dcExactSize').textContent=`${fmt0(nw)} × ${fmt0(nh)} mm`;$('dcExactNote').textContent='Rounded safely so the suggested duct is never smaller in free area';$('dcRoundedSize').textContent=`${fmt0(rw)} × ${fmt0(rh)} mm`;$('dcAreaDiff').textContent=`${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%`;$('dcRatio').textContent=`${newRatio.toFixed(2)} : 1`;$('dcEqualAreaRound').textContent=`Ø ${fmt0(suggestedEqualDia)} mm`;
+ $('dcExactSize').textContent=`${fmt0(exactW)} × ${fmt0(exactH)} mm`;$('dcExactNote').textContent='The paired dimension rounds up so free area never falls below the issued duct';$('dcRoundedSize').textContent=`${fmt0(rw)} × ${fmt0(rh)} mm`;$('dcAreaDiff').textContent=`${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%`;$('dcRatio').textContent=`${newRatio.toFixed(2)} : 1`;$('dcEqualAreaRound').textContent=`Ø ${fmt0(suggestedEqualDia)} mm`;
  $('dcSuggestedRound').textContent=`Ø ${fmt0(suggestedRound)} mm`;$('dcOriginalFrictionRound').textContent=`Ø ${fmt0(origEq)} mm`;$('dcNewFrictionRound').textContent=`Ø ${fmt0(newEq)} mm`;$('dcFrictionDiff').textContent=`${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%`;$('nearestRound').textContent=`Ø ${fmt0(suggestedRound)} mm`;
- const ratioMsg=$('dcRatioWarning');ratioMsg.className='dc-ratio-message '+(newRatio>4?'warn':'ok');ratioMsg.textContent=newRatio>4?'⚠ Aspect ratio exceeds 4:1. Review pressure loss, noise, stiffening and project requirements.':'✓ Aspect ratio is within the 4:1 VentTools advisory limit.';
- const safeMsg=$('dcSafeAreaMessage');if(safeMsg){safeMsg.className='dc-ratio-message '+(roundedArea>=area?'ok':'warn');safeMsg.textContent=roundedArea>=area?'✓ Safe-size rule applied: suggested free area is equal to or greater than the issued duct.':'⚠ Suggested size is below the issued free area — do not use.'}
+ const ratioOverLimit=newRatio>4;
+ const ratioMsg=$('dcRatioWarning');ratioMsg.className='dc-ratio-message '+(ratioOverLimit?'warn':'ok');ratioMsg.textContent=ratioOverLimit?'⚠ Aspect ratio exceeds 4:1. Review pressure loss, noise, stiffening and project requirements.':'✓ Aspect ratio is within the 4:1 VentTools advisory limit.';
+ const liveRatio=$('dcLiveRatioStatus');if(liveRatio){liveRatio.className='dc-live-ratio '+(ratioOverLimit?'warn':'ok');liveRatio.textContent=ratioOverLimit?`⚠ ${newRatio.toFixed(2)} : 1 — exceeds the 4:1 advisory limit`:`✓ ${newRatio.toFixed(2)} : 1 — within the 4:1 advisory limit`}
+ $('dcResultMain')?.classList.toggle('ratio-over-limit',ratioOverLimit);$('dcRatioTile')?.classList.toggle('ratio-over-limit',ratioOverLimit);
+ const safeMsg=$('dcSafeAreaMessage');if(safeMsg){safeMsg.className='dc-ratio-message '+(roundedArea>=area?'ok':'warn');safeMsg.textContent=roundedArea>=area?'✓ Suggested free area is equal to or greater than the issued duct.':'⚠ Suggested size is below the issued free area — do not use.'}
  drawDuctConversion(w,h,rw,rh);
  const sourceText=dcSource==='round'?`Ø ${fmt0(d)} mm spiral`:`${fmt0(w)} × ${fmt0(h)} mm rectangular`;
- const details=`VENTTOOLS DUCT SIZE CONVERTER\n\nIssued drawing: ${sourceText}\nOriginal area: ${fmt0(area)} mm² (${(area/1e6).toFixed(3)} m²)\n\nExact equal-area rectangular size: ${fmt0(nw)} × ${fmt0(nh)} mm\nSuggested safe 25 mm size: ${fmt0(rw)} × ${fmt0(rh)} mm\nPractical area: ${fmt0(roundedArea)} mm²\nArea difference: ${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%\nAspect ratio: ${newRatio.toFixed(2)}:1\n\nIssued duct equal-area round reference: Ø ${fmt0(sourceDia)} mm\nSuggested rectangular exact equal-area round: Ø ${fmt0(suggestedEqualDia)} mm\nIssued duct friction-equivalent round: Ø ${fmt0(origEq)} mm\nAlternative friction-equivalent round: Ø ${fmt0(newEq)} mm\nFriction-equivalent diameter difference: ${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%\n\nMethod: Equal-area is the default site comparison. Practical dimensions use a fail-safe round-up rule so the suggested free area never falls below the issued duct.\nDrawing remains controlling; obtain approval before changing size.`;
+ const details=`VENTTOOLS ROUND / RECTANGULAR DUCT CONVERTER\n\nIssued drawing: ${sourceText}\nOriginal area: ${fmt0(area)} mm² (${(area/1e6).toFixed(3)} m²)\n\nExact equal-area rectangular size: ${fmt0(exactW)} × ${fmt0(exactH)} mm\nSuggested safe 25 mm size: ${fmt0(rw)} × ${fmt0(rh)} mm\nPractical area: ${fmt0(roundedArea)} mm²\nArea difference: ${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%\nAspect ratio: ${newRatio.toFixed(2)}:1\n\nIssued duct equal-area round reference: Ø ${fmt0(sourceDia)} mm\nSuggested rectangular exact equal-area round: Ø ${fmt0(suggestedEqualDia)} mm\nIssued duct friction-equivalent round: Ø ${fmt0(origEq)} mm\nAlternative friction-equivalent round: Ø ${fmt0(newEq)} mm\nFriction-equivalent diameter difference: ${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%\n\nMethod: Equal area is the default site comparison. The paired dimension rounds upward in 25 mm steps so the suggested free area is not smaller than the issued duct.\nDrawing remains controlling; obtain approval before changing size.`;
  $('dcCalculationDetails').textContent=details;return details
 }
-async function copyDuct(){const text=calculateDuct();try{await navigator.clipboard.writeText(text)}catch(e){}}
-function resetDuct(){$('rectW').value=1500;$('rectH').value=400;if($('roundD'))$('roundD').value=900;$('dcSizeInput').value=1350;$('dcSizeSlider').value=1350;setDuctSource('rect');setDuctMode('width')}
-['rectW','rectH','roundD'].forEach(id=>$(id)?.addEventListener('input',()=>{syncDuctSliderBounds();calculateDuct()}));
-$('dcSizeSlider')?.addEventListener('input',e=>{$('dcSizeInput').value=e.target.value;calculateDuct()});$('dcSizeInput')?.addEventListener('input',e=>{$('dcSizeSlider').value=e.target.value;calculateDuct()});$('dcFixWidth')?.addEventListener('click',()=>setDuctMode('width'));$('dcFixHeight')?.addEventListener('click',()=>setDuctMode('height'));$('dcSourceRect')?.addEventListener('click',()=>setDuctSource('rect'));$('dcSourceRound')?.addEventListener('click',()=>setDuctSource('round'));$('copyDuctBtn')?.addEventListener('click',copyDuct);$('resetDuctBtn')?.addEventListener('click',resetDuct);angleUI();calculateOffset();syncDuctSliderBounds();calculateDuct();
+async function copyDuct(){const text=calculateDuct(true);try{await navigator.clipboard.writeText(text)}catch(e){}}
+function resetDuct(){$('rectW').value=1200;$('rectH').value=330;if($('roundD'))$('roundD').value=355;dcMode='width';setDuctSource('rect');setDuctMode('width')}
+function nudgeDuctDimension(target,delta){setDuctMode(target);const input=activeAlternativeInput();input.value=Math.max(25,(parseFloat(input.value)||25)+delta);calculateDuct(true);syncDuctSliderBounds()}
+function swapDuctAlternative(){const w=parseFloat($('dcNewWidth').value)||0,h=parseFloat($('dcNewHeight').value)||0;$('dcNewWidth').value=h;$('dcNewHeight').value=w;setDuctMode('width');calculateDuct(true)}
+function initDuctConverter(){
+ if(!$('dcNewWidth'))return;
+ ['rectW','rectH','roundD'].forEach(id=>$(id)?.addEventListener('input',seedDuctAlternative));
+ $('dcNewWidth').addEventListener('focus',()=>setDuctMode('width'));$('dcNewHeight').addEventListener('focus',()=>setDuctMode('height'));
+ $('dcNewWidth').addEventListener('input',()=>setDuctMode('width'));$('dcNewHeight').addEventListener('input',()=>setDuctMode('height'));
+ ['dcNewWidth','dcNewHeight'].forEach(id=>{$(id).addEventListener('change',()=>calculateDuct(true));$(id).addEventListener('blur',()=>calculateDuct(true))});
+ $('dcSizeSlider')?.addEventListener('input',e=>{activeAlternativeInput().value=e.target.value;calculateDuct(true)});
+ $('dcFixWidth')?.addEventListener('click',()=>setDuctMode('width'));$('dcFixHeight')?.addEventListener('click',()=>setDuctMode('height'));
+ $('dcSourceRect')?.addEventListener('click',()=>setDuctSource('rect'));$('dcSourceRound')?.addEventListener('click',()=>setDuctSource('round'));
+ document.querySelectorAll('[data-duct-nudge]').forEach(button=>button.addEventListener('click',()=>nudgeDuctDimension(button.dataset.target,Number(button.dataset.ductNudge))));
+ $('dcSwap')?.addEventListener('click',swapDuctAlternative);$('copyDuctBtn')?.addEventListener('click',copyDuct);$('resetDuctBtn')?.addEventListener('click',resetDuct);
+ seedDuctAlternative();
+}
+
+initDuctConverter();
+
+initOffsetCalculator();
 
 
 const VT_ENGINEERING_DB_VERSION="1.2.7-homepage-image-hotfix";
@@ -1538,7 +1594,7 @@ function showPackSaveSuccess(entry){
   </style>`;
   document.body.appendChild(overlay);
   overlay.querySelector(".vt-stay").onclick=()=>overlay.remove();
-  overlay.querySelector(".vt-back").onclick=()=>window.location.assign("pack-builder.html?added="+encodeURIComponent(entry.id));
+  overlay.querySelector(".vt-back").onclick=()=>window.location.assign("/pack-builder.html?added="+encodeURIComponent(entry.id));
 }
 
 async function buildFDSiteSheet(){
@@ -1659,7 +1715,9 @@ const FD_OFFICIAL_RESOURCES={
   "BSB::FSD-C":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_c_iom_11zon.pdf",title:"BSB FSD-C Installation, Operation and Maintenance Instructions",revision:"V62904"},
   "BSB::MFD-IC":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2026/06/MFD-IC-IOM.pdf",title:"BSB MFD-IC Installation, Operation and Maintenance Instructions",revision:"V012606"},
   "BSB::AT-FSD":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/at_fsd_iom_compressed.pdf",title:"BSB AT-FSD Installation, Operation and Maintenance Instructions",revision:"V12204"},
-  "ADVANCED_AIR::0160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.0"},
+  // Advanced Air retains Rev1.0 in the URL, while the PDF served at that URL
+  // identifies itself internally as 0160_IOM_Rev1.1_Apr26.
+  "ADVANCED_AIR::0160":{url:"https://www.advancedair.co.uk/app/uploads/0160_IOM_Rev1.0.pdf",title:"0160 Installation Manual",revision:"Rev 1.1 • April 2026"},
   "ADVANCED_AIR::2530":{url:"https://www.advancedair.co.uk/app/uploads/2530_IOM_Rev1.1.pdf",title:"2530 Installation Manual",revision:"Rev 1.1"},
   "ADVANCED_AIR::26SCD":{url:"https://www.advancedair.co.uk/app/uploads/26SCD_IOM_Rev1.0.pdf",title:"26SCD Installation Manual",revision:"Rev 1.0"},
   "ADVANCED_AIR::0400MAN":{url:"https://www.advancedair.co.uk/app/uploads/0400-0500_IOM_Rev1.1.pdf",title:"0400/0500 Installation Manual",revision:"Rev 1.1"},
@@ -1807,13 +1865,6 @@ if($("fdSeries")){
 
 
 
-['up','over','dia','minStraight','rmFactor','angleCustom'].forEach(id=>{
-  const el=$(id);
-  if(el) el.addEventListener('input',calculateOffset);
-});
-if($('angle')) $('angle').addEventListener('change',()=>{angleUI();calculateOffset()});
-
-
 // VentTools install-to-home-screen support.
 let deferredInstallPrompt=null;
 const installBtn=document.getElementById('installVentToolsBtn');
@@ -1842,7 +1893,7 @@ window.addEventListener('appinstalled',()=>{
 });
 
 if(installBtn){
-  if(isIOSDevice() && !isStandaloneMode()) installBtn.hidden=false;
+  if(!isStandaloneMode()) installBtn.hidden=false;
   installBtn.addEventListener('click',async()=>{
     if(deferredInstallPrompt){
       deferredInstallPrompt.prompt();
@@ -1895,12 +1946,11 @@ function loadVentToolsAnalytics(){
 }
 
 function sendVentToolsPageView(){
-  if(!vtAnalyticsLoaded || typeof window.gtag!=="function") return;
-  const page=(location.hash||"#home").slice(1);
-  window.gtag("event","page_view",{
-    page_title:`VentTools — ${page}`,
+ if(!vtAnalyticsLoaded || typeof window.gtag!=="function") return;
+ window.gtag("event","page_view",{
+    page_title:document.title,
     page_location:location.href,
-    page_path:`/${page==="home"?"":`#${page}`}`
+    page_path:`${location.pathname}${location.search}`
   });
 }
 
@@ -1951,6 +2001,10 @@ function initialiseVentToolsSite(){
   applyCookieConsent(consent||{analytics:false});
   const banner=$("cookieBanner");
   if(banner)banner.hidden=!!consent;
+  if(document.body?.dataset?.page){
+    document.querySelector(".page")?.classList.add("active");
+    return;
+  }
   const requested=(location.hash||"#home").slice(1);
   const allowed=["home","offset","ductulator","ductwrap","fireDamper","contact","about","privacy","cookies","terms","disclaimer"];
   showPage(allowed.includes(requested)?requested:"home");

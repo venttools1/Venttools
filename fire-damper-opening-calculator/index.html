@@ -1,0 +1,310 @@
+<!doctype html>
+<html lang="en-GB"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><meta name="theme-color" content="#06192b">
+<meta name="google-adsense-account" content="ca-pub-6160116893773400">
+<script>window.VENTTOOLS_GA_ID="G-KWBWNN0WCB";</script>
+<title>Fire Damper Opening Calculator — VentTools</title><meta name="description" content="Calculate manufacturer-specific fire damper finished apertures, structural openings and setting-out levels from verified installation methods."><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"><link rel="canonical" href="https://venttools.com/fire-damper-opening-calculator/">
+<meta property="og:type" content="website"><meta property="og:site_name" content="VentTools"><meta property="og:title" content="Fire Damper Opening Calculator — VentTools"><meta property="og:description" content="Calculate manufacturer-specific fire damper finished apertures, structural openings and setting-out levels from verified installation methods."><meta property="og:url" content="https://venttools.com/fire-damper-opening-calculator/"><meta property="og:image" content="https://venttools.com/assets/site-fire-damper.webp">
+<meta name="twitter:card" content="summary"><meta name="twitter:title" content="Fire Damper Opening Calculator — VentTools"><meta name="twitter:description" content="Calculate manufacturer-specific fire damper finished apertures, structural openings and setting-out levels from verified installation methods."><meta name="twitter:image" content="https://venttools.com/assets/site-fire-damper.webp">
+<link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/style.css?v=2.0.3"><link rel="stylesheet" href="/v2.css?v=2.0.3">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Fire Damper Opening Calculator — VentTools","url":"https://venttools.com/fire-damper-opening-calculator/","description":"Calculate manufacturer-specific fire damper finished apertures, structural openings and setting-out levels from verified installation methods.","isAccessibleForFree":true,"inLanguage":"en-GB","publisher":{"@type":"Organization","name":"VentTools","url":"https://venttools.com/","logo":{"@type":"ImageObject","url":"https://venttools.com/assets/venttools-k-fan-logo.webp"}}}</script>
+</head>
+<body data-page="fire">
+<a class="vt-skip" href="#main-content">Skip to calculator</a>
+<header class="vt-site-header">
+  <div class="vt-site-header-inner">
+    <a class="vt-wordmark" href="/" aria-label="VentTools home"><img alt="" height="44" src="/assets/venttools-k-fan-logo.webp" width="44"><span>VENT<span>TOOLS</span></span></a>
+    <nav class="vt-main-nav" aria-label="Main navigation">
+      <a  href="/ductwork-offset-calculator/">Offset</a>
+      <a  href="/round-rectangular-duct-converter/">Duct converter</a>
+      <a aria-current="page" href="/fire-damper-opening-calculator/">Fire dampers</a>
+      <a class="vt-nav-pack" href="/pack-builder.html">Project Pack</a>
+    </nav>
+  </div>
+</header>
+<main class="vt-tool-main" id="main-content">
+  <nav class="vt-breadcrumbs" aria-label="Breadcrumb"><a href="/">VentTools</a> / Fire Damper Opening Calculator</nav>
+  <header class="vt-tool-hero"><p class="vt-kicker">Free site calculator</p><h1>Fire Damper Opening Calculator</h1><p>Choose the manufacturer, exact product and certified method to calculate the opening and show the full setting-out chain.</p><div class="vt-tool-trust"><span>Manufacturer-specific</span><span>Official IOM links</span><span>Dimension chain shown</span><span>Project Pack ready</span></div></header>
+  <div class="vt-calculator-mount"><section class="page active" id="fireDamper">
+<div class="app-header">
+<button class="back" onclick="location.href='/'">← Home</button>
+<div class="brand-lockup"><img alt="" class="brand-mark" height="40" src="/assets/venttools-k-fan-logo.webp" width="40"><div class="brand-copy"><strong>VentTools</strong><span>Fire Damper Openings</span></div></div>
+</div>
+<div class="page-intro card"><h2>Fire Damper Hole Calculator</h2><p class="sub">Choose the manufacturer, exact product and tested installation method.</p></div>
+<div aria-label="Fire damper safety notice" class="fd-safety-notice compact" role="note">
+<div aria-hidden="true" class="fd-safety-icon">⚠</div>
+<div>
+<h2>Fire Damper Safety Notice</h2>
+<p><strong>Fire dampers are life-safety devices.</strong></p>
+<p>This calculator is intended only for persons competent in fire damper installation, inspection, testing and maintenance, or those working under their direct supervision.</p>
+<p>Always follow the manufacturer's current installation instructions and the project fire strategy.</p>
+</div>
+</div>
+<div class="card">
+<div class="row">
+<div><label for="fdManufacturer">Select Manufacturer</label><select id="fdManufacturer"><option selected="" value="BSB">BSB</option><option value="ACTIONAIR">Swegon — Actionair products</option><option value="LINDAB">Lindab</option><option value="ADVANCED_AIR">Advanced Air</option></select></div>
+<div><label for="fdSeries">Product / series</label><select id="fdSeries"></select></div>
+</div>
+<label for="fdMethod">Select Certified Installation Method</label><select id="fdMethod"></select>
+<div class="fd-manual-banner" role="note">
+<div class="fd-manual-banner-copy">
+<span class="fd-section-kicker">Official manufacturer instructions</span>
+<strong id="fdManualTitle">Select a product to open its official installation manual.</strong>
+<p>The official manufacturer manual and project fire strategy take precedence over every VentTools result. Do not deviate from the tested installation method.</p>
+</div>
+<a class="action fd-manual-primary" href="#" id="fdManualLink" rel="noopener" target="_blank">📖 Open Official Manufacturer Installation Manual</a>
+</div>
+<div id="fdWk25Wrap" style="display:none">
+<div class="row">
+<div><label for="fdWk25Config">Damper configuration</label><select id="fdWk25Config"><option value="single">Single damper</option><option value="pair-side">Twin dampers — side by side</option><option value="pair-stack">Twin dampers — stacked</option></select></div>
+<div><label for="fdWk25Axis">Blade-axis arrangement</label><select id="fdWk25Axis"><option value="horizontal">Horizontal axis</option><option value="vertical">Vertical axis</option><option value="mixed">Mixed / one of each</option></select></div>
+</div>
+<div class="hint">For a paired assembly, enter the measured overall joined assembly width and height below, including the approved Lindab connection kit.</div>
+</div>
+<div id="fdRectInputs"><div class="row">
+<div><label for="fdWidth" id="fdWidthLabel">Nominal duct width (mm)</label><input id="fdWidth" min="1" type="number" value="500"/></div>
+<div><label for="fdHeight" id="fdHeightLabel">Nominal duct height (mm)</label><input id="fdHeight" min="1" type="number" value="300"/></div>
+</div></div>
+<div id="fdDwfxWrap" style="display:none">
+<div class="row">
+<div><label for="fdDwfxVariant">Damper type</label><select id="fdDwfxVariant"><option value="SMOKE">SmokeShield PTC</option><option value="FIRE">FireShield</option></select></div>
+<div><label for="fdDwfxInputBasis">Dimensions entered</label><select id="fdDwfxInputBasis"><option value="NOMINAL">Nominal duct size — calculate SmokeShield casing</option><option value="MEASURED">Measured overall casing size</option></select></div>
+</div>
+<div class="row">
+<div><label for="fdDwfxBoard">Aperture lining-board thickness (mm)</label><input id="fdDwfxBoard" min="0" step="0.5" type="number" value="12.5"/></div>
+<div class="fd-dimension-key" id="fdDwfxDimensionKey">
+<strong>SmokeShield automatic dimensions</strong>
+<span>Nominal duct → casing → 28 mm PTC shroud → finished opening.</span>
+</div>
+</div>
+<div class="row" id="fdDwfxAllowanceWrap">
+<div><label for="fdDwfxWAllowance">Finished-opening width allowance (mm)</label><select id="fdDwfxWAllowance"></select></div>
+<div><label for="fdDwfxHAllowance">Finished-opening height allowance (mm)</label><select id="fdDwfxHAllowance"></select></div>
+</div>
+<div class="hint" id="fdDwfxHint">Enter the measured overall casing size. For SmokeShield, width must include the 28 mm PTC shroud. Do not include the peripheral flange.</div>
+</div>
+<div id="fdHevacWrap" style="display:none">
+<div class="row">
+<div><label for="fdHevacVariant">Damper type</label><select id="fdHevacVariant"><option value="SMOKE">SmokeShield PTC</option><option value="FIRE">FireShield</option></select></div>
+<div><label for="fdHevacGap">Clear mortar gap all round</label><select id="fdHevacGap"></select></div>
+</div>
+<div class="hint">Enter the measured outside width and height of the installation-frame upstand. Do not include building ties. The official drawing permits 5–75 mm from the frame upstand to the aperture face all round.</div>
+</div>
+<div id="fdSpanWrap" style="display:none">
+<div class="row">
+<div>
+<label for="fdSpanVariant">Damper format</label>
+<select id="fdSpanVariant">
+<option value="501">SmokeShield 501 PTC — rectangular</option>
+<option value="601">SmokeShield 601 PTC — circular</option>
+</select>
+</div>
+<div id="fdSpanWidthWrap">
+<label for="fdSpanWidth">Duct width (mm)</label>
+<input id="fdSpanWidth" max="1000" min="100" step="1" type="number" value="250"/>
+</div>
+</div>
+<div class="row">
+<div id="fdSpanHeightWrap">
+<label for="fdSpanHeight">Duct height (mm)</label>
+<input id="fdSpanHeight" max="1000" min="100" step="1" type="number" value="200"/>
+</div>
+<div id="fdSpanDiameterWrap" style="display:none">
+<label for="fdSpanDiameter">Duct diameter (mm)</label>
+<input id="fdSpanDiameter" max="1000" min="100" step="1" type="number" value="500"/>
+</div>
+</div>
+<div class="hint">
+      VentTools calculates the recommended SPAN builder's opening and shows the manufacturer's permitted minimum and maximum range.
+    </div>
+</div>
+<div id="fdCircularInputs" style="display:none">
+<label for="fdDiameter" id="fdDiameterLabel">Nominal damper diameter (mm)</label><input id="fdDiameter" min="1" type="number" value="250"/>
+<div id="fdBoardWrap" style="display:none"><label for="fdBoardThickness">Single board thickness lining each internal edge of the cut aperture (mm)</label><input id="fdBoardThickness" min="0" step="0.5" type="number" value="12.5"/><div class="hint">The cut size adds one lining-board thickness at each opposite edge: two thicknesses overall in width and two overall in height. Wall-face boards are not added again.</div></div>
+<div id="fdWallBuildWrap" style="display:none"><label for="fdWallBuild">Plasterboard wall method</label><select id="fdWallBuild"><option value="AA/F13440">AA/F13440 — 1 × Type F board each wall face</option><option value="AA/F12820">AA/F12820 — 2 × Type F boards each wall face</option></select></div>
+<div id="fdShapeWrap" style="display:none"><label for="fdApertureShape">Aperture shape</label><select id="fdApertureShape"><option value="square">Square opening</option><option value="circular">Circular opening</option></select></div>
+<div id="fdAllowanceWrap" style="display:none"><label for="fdAllowance">Total clearance added to casing diameter (mm)</label><select id="fdAllowance"></select><div class="hint" id="fdAllowanceHint"></div></div>
+</div>
+</div>
+<div class="card">
+<svg class="diagram" id="fdDiagram" viewbox="0 0 760 340" xmlns="http://www.w3.org/2000/svg"><defs><marker id="fdArrow" markerheight="8" markerwidth="8" orient="auto" refx="4" refy="4"><path d="M0,0 L8,4 L0,8 Z" fill="#064b82"></path></marker></defs><g id="fdDiagramLayer"></g></svg>
+<div class="fd-section-heading">Calculation Results</div>
+<div class="fd-professional-result" style="margin-top:12px">
+<div class="fd-opening-hero">
+<div class="result-label" id="fdOpeningLabel">Structural Hole to Cut</div>
+<div class="fd-opening-value" id="fdOpeningBig">—</div>
+<div class="fd-result-status" id="fdResultStatus">Waiting for calculation</div>
+<section aria-live="polite" class="fd-opening-range" hidden="" id="fdOpeningRange">
+<div class="fd-opening-range-title">Permitted Opening Range</div>
+<div class="fd-opening-range-grid">
+<div class="fd-range-head"></div><div class="fd-range-head">Width</div><div class="fd-range-head">Height</div>
+<div class="fd-range-label">Minimum</div><strong id="fdRangeMinW">—</strong><strong id="fdRangeMinH">—</strong>
+<div class="fd-range-label">Maximum</div><strong id="fdRangeMaxW">—</strong><strong id="fdRangeMaxH">—</strong>
+</div>
+<p id="fdRangeNote">The minimum published opening is used as the main result.</p>
+</section>
+</div>
+<div class="fd-certified-method">
+<div class="fd-section-kicker">Certified Installation Method</div>
+<div class="fd-method-value" id="fdMethodBig">—</div>
+</div>
+<details class="fd-calculation-details fd-damper-details">
+<summary>Damper &amp; Opening Details</summary>
+<div aria-label="Damper and opening calculation breakdown" class="fd-build-flow">
+<div class="fd-flow-card">
+<span class="fd-flow-label">Nominal Damper Size</span>
+<strong id="fdNominalStage">—</strong>
+</div>
+<span aria-hidden="true" class="fd-flow-arrow">→</span>
+<div class="fd-flow-card">
+<span class="fd-flow-label">Overall Damper Casing / Frame</span>
+<strong id="fdCasingStage">—</strong>
+</div>
+<span aria-hidden="true" class="fd-flow-arrow">→</span>
+<div class="fd-flow-card">
+<span class="fd-flow-label">Finished Opening</span>
+<strong id="fdFinishedStage">—</strong>
+</div>
+<span aria-hidden="true" class="fd-flow-arrow">→</span>
+<div class="fd-flow-card fd-flow-final">
+<span class="fd-flow-label">Structural Hole to Cut</span>
+<strong id="fdCutStage">—</strong>
+</div>
+</div>
+<div class="fd-traceability-grid compact">
+<div class="fd-trace-card">
+<span>Calculation summary</span>
+<strong id="fdRuleSummary">—</strong>
+</div>
+</div>
+<div class="fd-source-compact">
+<strong>Manufacturer source:</strong> <span id="fdGuideSummary">—</span>
+</div>
+<div class="fd-trust-note">
+        Shows the nominal size, casing or frame build-up, tested opening allowance, lining and final structural cut.
+      </div>
+</details>
+<details class="fd-reference-details fd-installation-details">
+<summary>Installation Requirements</summary>
+<div class="fd-critical-rules">
+<div class="fd-section-kicker">Manufacturer Installation Requirements</div>
+<div class="fd-requirements-grid" id="fdRequirementsGrid">
+<section class="fd-requirement-group" hidden="" id="fdReqConstruction">
+<h4><span aria-hidden="true">🧱</span> Supporting Construction</h4>
+<div class="fd-requirement-content"></div>
+</section>
+<section class="fd-requirement-group fd-duct-connection" id="fdReqDuct">
+<h4><span aria-hidden="true">🔧</span> Duct Connection</h4>
+<div class="fd-requirement-content">Loading selected method requirements…</div>
+</section>
+<section class="fd-requirement-group" hidden="" id="fdReqSupports">
+<h4><span aria-hidden="true">🏗️</span> Supports &amp; Hangers</h4>
+<div class="fd-requirement-content"></div>
+</section>
+<section class="fd-requirement-group" hidden="" id="fdReqAccess">
+<h4><span aria-hidden="true">⚙️</span> Actuator &amp; Access</h4>
+<div class="fd-requirement-content"></div>
+</section>
+<section class="fd-requirement-group" hidden="" id="fdReqPosition">
+<h4><span aria-hidden="true">📏</span> Separation &amp; Positioning</h4>
+<div class="fd-requirement-content"></div>
+</section>
+<section class="fd-requirement-group" hidden="" id="fdReqCritical">
+<h4><span aria-hidden="true">⚠️</span> Critical Installation Notes</h4>
+<div class="fd-requirement-content"></div>
+</section>
+</div>
+</div>
+<div class="fd-independent-note">
+        VentTools is an independent aid. The current official manufacturer manual, tested installation detail and project fire strategy always take precedence.
+      </div>
+</details>
+<section aria-labelledby="fdSettingOutTitle" class="fd-setting-out">
+<div class="fd-setting-out-head">
+<div>
+<div class="fd-section-kicker">Site Setting Out</div>
+<h3 id="fdSettingOutTitle">Where to start the opening</h3>
+</div>
+<span class="fd-setting-badge" id="fdSettingStatus">Manual-led</span>
+</div>
+<div aria-live="polite" class="fd-setting-out-answer" id="fdSettingAnswer">
+        Select a product and certified method.
+      </div>
+<div class="row fd-setting-controls">
+<div>
+<label for="fdDatumLevel">Bottom of nominal duct above finished floor (mm)</label>
+<input id="fdDatumLevel" step="0.5" type="number" value="2400"/>
+<div class="hint">Enter the duct level you already know. VentTools will only calculate the hole start where the selected official method gives enough information.</div>
+</div>
+<div class="fd-setting-level-card">
+<span>Bottom of structural opening level</span>
+<strong id="fdSetOpeningBottom">—</strong>
+</div>
+</div>
+<div aria-live="polite" class="fd-setting-results">
+<div><span>Bottom of structural opening below duct</span><strong id="fdSetBottomOffset">—</strong></div>
+<div><span>Top of structural opening</span><strong id="fdSetOpeningTop">—</strong></div>
+<div><span>Nominal duct bottom</span><strong id="fdSetDuctBottom">—</strong></div>
+<div><span>Nominal duct top</span><strong id="fdSetDuctTop">—</strong></div>
+</div>
+<section class="vt-explicit-save" id="vtExplicitSave">
+<div class="vt-explicit-save-head">
+<span aria-hidden="true" class="vt-explicit-save-icon">✓</span>
+<div><strong>Save this damper to the Project Pack</strong><small>The damper will only appear in the schedule after this save is confirmed.</small></div>
+</div>
+<div class="vt-explicit-save-grid">
+<label><span>Damper tag / drawing reference</span><input id="vtPackRef" maxlength="80" placeholder="For example FD-01" type="text"/></label>
+<label><span>Location</span><input id="vtPackLoc" maxlength="120" placeholder="For example Level 1 corridor" type="text"/></label>
+</div>
+<button class="vt-explicit-save-button" id="vtExplicitSaveButton" onclick="window.vtSaveDamperToPackStandalone()" type="button">Save damper to schedule</button>
+<div aria-live="polite" class="vt-explicit-save-status" id="vtExplicitSaveStatus">Not saved yet</div>
+<a class="vt-explicit-back" hidden="" href="/pack-builder.html" id="vtExplicitBack">Back to Project Pack</a>
+</section>
+<div class="msg ok" id="fdMessage"></div>
+<p class="fd-setting-warning" hidden="" id="fdSettingWarning"></p>
+</section>
+</div>
+<span class="sr-only" id="fdDamperSummary">—</span>
+<span class="sr-only" id="fdReferenceSummary">—</span>
+<div class="fd-venttools-actions">
+<div class="fd-section-kicker">VentTools Actions</div>
+<button class="action fd-copy-secondary" id="fdSiteSheetBtn" onclick="document.getElementById('vtExplicitSave')?.scrollIntoView({behavior:'smooth',block:'center'})" type="button"><span aria-hidden="true">✓</span> Save this damper to schedule</button>
+<button class="action fd-copy-secondary" id="fdCopyBtn"><span aria-hidden="true">📋</span> Copy Results</button>
+<button class="action reset-button" id="fdResetBtn"><span aria-hidden="true">↻</span> Start New Calculation</button>
+</div>
+</div>
+</section></div>
+  <article class="vt-supporting-content">
+<figure class="vt-site-photo vt-site-photo-portrait"><img alt="Round fire damper installation in masonry with actuator and access section visible" decoding="async" height="1280" loading="lazy" src="/assets/site-fire-damper.webp" width="960"><figcaption>A real fire-damper installation on site. The photograph is illustrative only: the exact product, supporting construction and certified method must be verified for each damper.</figcaption></figure>
+<section><h2>Manufacturer-specific fire damper openings</h2><p>Fire dampers cannot safely use one universal “duct size plus a gap” rule. VentTools asks for the manufacturer, exact product and certified installation method because the controlling reference may be nominal duct size, the outside damper casing, an installation frame or a published opening table.</p><p>The calculator keeps the nominal damper, overall casing or frame, finished opening, aperture lining and structural hole as separate stages. If the selected manufacturer document does not provide enough geometry for a reliable calculation, the method remains guidance-only instead of borrowing a rule from another product.</p></section>
+<section><h2>Nominal duct edge versus casing edge</h2><p>The bottom of the duct is not automatically the bottom of the damper casing. For setting out, VentTools uses the method-specific casing projection beyond the nominal duct, the required clearance below that casing and any structural aperture lining. This is why “10 mm below the casing” must never be treated as “10 mm below the duct”.</p></section>
+<section><h2>Site workflow</h2><ol><li>Select the manufacturer and exact product shown on the approved schedule.</li><li>Select the tested installation method that matches the supporting construction.</li><li>Enter the nominal or measured dimensions requested by that method.</li><li>Review the full dimension chain and official source shown with the result.</li><li>Enter the known nominal duct level to calculate the structural-opening level only where the selected record supports it.</li><li>Save the checked result to the Project Pack with its damper tag and location.</li></ol></section>
+<section class="vt-example"><h2>Why the full chain matters</h2><p>A structural opening can include three different additions below the nominal duct: casing projection, manufacturer clearance and aperture lining. VentTools displays these stages so the builder’s cut line can be checked rather than presenting an unexplained final number.</p></section>
+<section><h2>Supported data and verification</h2><p>The current database includes mapped products from BSB, Swegon/Actionair, Lindab and Advanced Air. Product names and manufacturer documents remain the property of their owners. VentTools is independent and links to official manufacturer-hosted instructions for verification.</p><p>Some methods are intentionally marked for engineering review or official-drawing use. That is a safety control, not a missing generic formula.</p></section>
+<section><h2>Limitations</h2><p>The current manufacturer IOM, Declaration of Performance, approved fire strategy, supporting construction and project-specific detail remain controlling. Stop and verify if a result conflicts with the site drawing or the current manufacturer document. Do not issue a draft or review-only Project Pack record as a verified installation instruction.</p></section>
+<section><h2>Related VentTools</h2><div class="vt-related"><a href="/pack-builder.html">Open the Project Pack →</a><a href="/engineering.html">Engineering database and audit status →</a></div></section></article>
+</main>
+<div aria-label="Cookie choices" aria-live="polite" class="cookie-banner" hidden id="cookieBanner" role="dialog">
+  <div class="cookie-banner-copy"><strong>Cookie choices</strong><p>VentTools uses essential browser storage. Optional analytics only loads if you choose Accept analytics.</p></div>
+  <div class="cookie-banner-actions">
+    <button class="cookie-secondary" onclick="saveCookieConsent(false)" type="button">Essential only</button>
+    <button class="cookie-primary" onclick="saveCookieConsent(true)" type="button">Accept analytics</button>
+    <a class="cookie-link" href="/cookies.html">Learn more</a>
+  </div>
+</div>
+<div class="cookie-modal-backdrop" hidden id="cookieModal">
+  <div aria-labelledby="cookieModalTitle" aria-modal="true" class="cookie-modal" role="dialog">
+    <h2 id="cookieModalTitle">Cookie preferences</h2>
+    <div class="cookie-option"><div><strong>Essential</strong><p>Required for core site operation and remembering your choice.</p></div><span class="cookie-always">Always on</span></div>
+    <label class="cookie-option cookie-toggle"><div><strong>Analytics</strong><p>Allows optional measurement tools to understand usage and improve VentTools.</p></div><input id="analyticsConsentToggle" type="checkbox"></label>
+    <div class="cookie-modal-actions"><button class="cookie-secondary" onclick="closeCookiePreferences()" type="button">Cancel</button><button class="cookie-primary" onclick="saveCookiePreferences()" type="button">Save preferences</button></div>
+  </div>
+</div>
+<footer class="vt-site-footer">
+  <div class="vt-site-footer-inner">
+    <div><strong class="footer-live-note">VentTools V2.0.3</strong><p>Independent ventilation tools built from site experience.</p><p>Fire-damper results must be checked against the current manufacturer IOM and project fire strategy.</p></div>
+    <nav class="vt-footer-links" aria-label="Site information">
+      <a href="/engineering.html">Engineering database</a><a href="/about.html">About</a><a href="/contact.html">Contact</a><a href="/privacy.html">Privacy</a><a href="/cookies.html">Cookies</a><a href="/terms.html">Terms</a><a href="/disclaimer.html">Disclaimer</a><button onclick="openCookiePreferences()" type="button">Cookie preferences</button>
+    </nav>
+  </div>
+</footer><script src="/script.js?v=2.0.3"></script></body></html>
