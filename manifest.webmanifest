@@ -1,12 +1,13 @@
 {
   "name": "VentTools",
   "short_name": "VentTools",
-  "description": "Professional HVAC installation calculators for duct fitters.",
+  "description": "Fast ventilation and ductwork calculators for duct fitters and installers.",
+  "id": "/",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
   "background_color": "#06121f",
-  "theme_color": "#06121f",
+  "theme_color": "#075d96",
   "orientation": "portrait-primary",
   "icons": [
     {
@@ -20,6 +21,23 @@
       "sizes": "512x512",
       "type": "image/png",
       "purpose": "any maskable"
+    }
+  ],
+  "shortcuts": [
+    {
+      "name": "Offset Calculator",
+      "short_name": "Offset",
+      "url": "/ductwork-offset-calculator/"
+    },
+    {
+      "name": "Duct Converter",
+      "short_name": "Converter",
+      "url": "/round-rectangular-duct-converter/"
+    },
+    {
+      "name": "Fire Damper Openings",
+      "short_name": "Fire Dampers",
+      "url": "/fire-damper-opening-calculator/"
     }
   ]
 }
