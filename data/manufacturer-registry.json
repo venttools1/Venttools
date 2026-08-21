@@ -1,6 +1,6 @@
 {
   "schemaVersion": "6.5.0-rc.12-main-candidate",
-  "generated": "2026-07-19",
+  "generated": "2026-08-21",
   "releaseStatus": "main-candidate",
   "qualityRule": "No method may invent a position, clearance, opening, lining or support requirement not stated by the controlling manufacturer document.",
   "manufacturers": [
@@ -9,6 +9,8 @@
       "status": "structured-engineering-database-integrated",
       "families": [
         "FSD-TD",
+        "FSD-TD-C",
+        "FD-C-AF",
         "FD-C",
         "FSD-C",
         "MFD-IC",
@@ -21,7 +23,12 @@
       ],
       "notes": [
         "Opening, setting-out, construction, duct connection, support and source fields are stored by tested method.",
-        "No method may inherit a rule from another BSB product family unless the controlling BSB document explicitly states it."
+        "No method may inherit a rule from another BSB product family unless the controlling BSB document explicitly states it.",
+        "FSD-TD-S and FSD-TD-C share the FSD-TD tested installation-method records but retain separate spigot and casing geometry.",
+        "FSD-TD-C is enabled only for the circular diameters explicitly listed in BSB FSD-TD Series V12607.",
+        "FD-C-AF is a separate FD Series curtain-blade product code: Type C circular spigot plus Angle Frame. BSB FD Series V12607 permits Ø100–1000 in millimetre increments, including Ø355 and Ø560.",
+        "FD-C-AF casing and Angle Frame dimensions remain separate from the nominal duct and from the aperture gap.",
+        "FSD-TD-O remains verification-required because the supplied series document does not publish a complete orderable flat-oval size/configuration table for validating arbitrary inputs."
       ]
     },
     {
