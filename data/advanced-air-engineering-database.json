@@ -1,0 +1,714 @@
+{
+  "schemaVersion": "2.1.0",
+  "generated": "2026-07-19",
+  "status": "method audit complete for enabled calculators; drawing/table-led methods retained as amber",
+  "manufacturer": "Advanced Air",
+  "qualityRule": "Each tested installation method is a separate record. Minimum/maximum openings and per-edge position limits are retained; no centred assumption is made where the IOM permits non-central installation.",
+  "documents": {
+    "0160": {
+      "brochure": "0160 Series V3",
+      "iom": "0160 IOM Rev 1.1 Apr 2026"
+    },
+    "0400-0500": {
+      "iom": "0400/0500 IOM Rev 1.1 Dec 2025",
+      "datasheets": [
+        "0400MAN Rev 1.1 Mar 2026",
+        "0400FME Rev 1.1 Mar 2026",
+        "0500MAN Rev 1.1 Mar 2026"
+      ]
+    },
+    "2530": {
+      "brochure": "2500 Series V3",
+      "iom": "2530 IOM Rev 1.1 Apr 2026"
+    },
+    "26SCD": {
+      "brochure": "26SCD brochure V5",
+      "iom": "26SCD IOM Rev 1.0 Apr 2026"
+    }
+  },
+  "commonAFS": {
+    "openingPosition": {
+      "centralisationRequired": false,
+      "caseToOpeningEdge": {
+        "min": 25,
+        "minStatus": "manufacturer recommendation for adequate fire batt installation",
+        "max": 130,
+        "maxStatus": "manufacturer maximum"
+      },
+      "note": "AFS brackets and rails project nearly 50 mm from each side of the casing; opening must accommodate them."
+    },
+    "penetrationSeal": "Two layers of 50 mm, 140 kg/m\u00b3 coated fire batt where stated by selected method.",
+    "ductConnection": {
+      "expansionGap": 10,
+      "fixing": "low-resistance breakaway fixing such as aluminium rivets",
+      "support": "connected ductwork independently supported within 1 metre"
+    }
+  },
+  "families": {
+    "0160": {
+      "shape": "rectangular/circular/flat-oval spigot",
+      "packReady": false,
+      "status": "database structured; method verification continuing",
+      "methods": {
+        "AFS_WALL_60": {
+          "supportingConstruction": "flexible or rigid wall",
+          "rating": "E60",
+          "minWallThickness": 94,
+          "support": "two M10 drop rods on access side; optional second pair where shown",
+          "openingRule": {
+            "type": "tableRange",
+            "width": {
+              "nominalMin": 100,
+              "nominalMax": 1000,
+              "minAdd": 194,
+              "maxAdd": 350
+            },
+            "height": {
+              "bands": [
+                {
+                  "nominalMin": 100,
+                  "nominalMax": 100,
+                  "minAdd": 100,
+                  "maxAdd": 350
+                },
+                {
+                  "nominalMin": 101,
+                  "nominalMax": 300,
+                  "minAdd": 125,
+                  "maxAdd": 375
+                },
+                {
+                  "nominalMin": 301,
+                  "nominalMax": 525,
+                  "minAdd": 150,
+                  "maxAdd": 400
+                },
+                {
+                  "nominalMin": 526,
+                  "nominalMax": 700,
+                  "minAdd": 175,
+                  "maxAdd": 425
+                },
+                {
+                  "nominalMin": 701,
+                  "nominalMax": 925,
+                  "minAdd": 200,
+                  "maxAdd": 450
+                },
+                {
+                  "nominalMin": 926,
+                  "nominalMax": 1000,
+                  "minAdd": 225,
+                  "maxAdd": 475
+                }
+              ]
+            }
+          },
+          "positionRule": {
+            "type": "edgeClearanceRange",
+            "inherits": "commonAFS.openingPosition",
+            "selectionRequiredForBuilderHeight": true
+          },
+          "source": "0160 IOM page 6"
+        },
+        "AFS_WALL_120": {
+          "supportingConstruction": "flexible or rigid wall",
+          "rating": "E120",
+          "minWallThickness": 131,
+          "multiSectionMinWallThickness": 136,
+          "support": "M10 drop rods one side/in wall; both sides for multi-section",
+          "openingRule": {
+            "type": "tableRange",
+            "width": {
+              "nominalMin": 100,
+              "nominalMax": 1000,
+              "minAdd": 194,
+              "maxAdd": 350
+            },
+            "height": {
+              "bands": [
+                {
+                  "nominalMin": 100,
+                  "nominalMax": 100,
+                  "minAdd": 100,
+                  "maxAdd": 350
+                },
+                {
+                  "nominalMin": 101,
+                  "nominalMax": 300,
+                  "minAdd": 125,
+                  "maxAdd": 375
+                },
+                {
+                  "nominalMin": 301,
+                  "nominalMax": 525,
+                  "minAdd": 150,
+                  "maxAdd": 400
+                },
+                {
+                  "nominalMin": 526,
+                  "nominalMax": 700,
+                  "minAdd": 175,
+                  "maxAdd": 425
+                },
+                {
+                  "nominalMin": 701,
+                  "nominalMax": 925,
+                  "minAdd": 200,
+                  "maxAdd": 450
+                },
+                {
+                  "nominalMin": 926,
+                  "nominalMax": 1000,
+                  "minAdd": 225,
+                  "maxAdd": 475
+                }
+              ]
+            }
+          },
+          "positionRule": {
+            "type": "edgeClearanceRange",
+            "inherits": "commonAFS.openingPosition",
+            "selectionRequiredForBuilderHeight": true
+          },
+          "source": "0160 IOM pages 7-12 as applicable"
+        },
+        "HEVAC_WALL_120": {
+          "supportingConstruction": "rigid wall",
+          "rating": "E120",
+          "minWallThickness": 150,
+          "support": "steel bend-out tabs encased in cement",
+          "openingRule": {
+            "type": "tableRange",
+            "width": {
+              "minAdd": 160,
+              "maxAdd": 185
+            },
+            "height": {
+              "bands": [
+                {
+                  "nominalMin": 100,
+                  "nominalMax": 100,
+                  "minAdd": 160,
+                  "maxAdd": 185
+                },
+                {
+                  "nominalMin": 101,
+                  "nominalMax": 300,
+                  "minAdd": 185,
+                  "maxAdd": 210
+                },
+                {
+                  "nominalMin": 301,
+                  "nominalMax": 525,
+                  "minAdd": 210,
+                  "maxAdd": 235
+                },
+                {
+                  "nominalMin": 526,
+                  "nominalMax": 700,
+                  "minAdd": 235,
+                  "maxAdd": 260
+                },
+                {
+                  "nominalMin": 701,
+                  "nominalMax": 925,
+                  "minAdd": 260,
+                  "maxAdd": 285
+                },
+                {
+                  "nominalMin": 926,
+                  "nominalMax": 1000,
+                  "minAdd": 285,
+                  "maxAdd": 310
+                }
+              ]
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0160 brochure spigot option HEVAC and IOM page 14"
+        },
+        "DRYWALL_PLATE_120": {
+          "supportingConstruction": "flexible or rigid wall",
+          "rating": "E120",
+          "minWallThickness": 131,
+          "support": "plate attached to wall face on one side",
+          "openingRule": {
+            "type": "tableRange",
+            "width": {
+              "minAdd": 150,
+              "maxAdd": 150
+            },
+            "height": {
+              "bands": [
+                {
+                  "nominalMin": 100,
+                  "nominalMax": 100,
+                  "minAdd": 90,
+                  "maxAdd": 90
+                },
+                {
+                  "nominalMin": 101,
+                  "nominalMax": 300,
+                  "minAdd": 115,
+                  "maxAdd": 115
+                },
+                {
+                  "nominalMin": 301,
+                  "nominalMax": 525,
+                  "minAdd": 140,
+                  "maxAdd": 140
+                },
+                {
+                  "nominalMin": 526,
+                  "nominalMax": 700,
+                  "minAdd": 165,
+                  "maxAdd": 165
+                },
+                {
+                  "nominalMin": 701,
+                  "nominalMax": 925,
+                  "minAdd": 190,
+                  "maxAdd": 190
+                },
+                {
+                  "nominalMin": 926,
+                  "nominalMax": 1000,
+                  "minAdd": 215,
+                  "maxAdd": 215
+                }
+              ]
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0160 brochure drywall plate dimensions; IOM pages 15-16"
+        },
+        "AFS_FLOOR_120": {
+          "supportingConstruction": "rigid concrete floor",
+          "rating": "E120",
+          "minFloorThickness": 150,
+          "support": "40 x 40 x 4 mm angle supplied by others",
+          "openingRule": {
+            "type": "tableRange",
+            "width": {
+              "minAdd": 140,
+              "maxAdd": 350
+            },
+            "height": {
+              "bands": [
+                {
+                  "nominalMin": 100,
+                  "nominalMax": 100,
+                  "minAdd": 140,
+                  "maxAdd": 350
+                },
+                {
+                  "nominalMin": 101,
+                  "nominalMax": 300,
+                  "minAdd": 165,
+                  "maxAdd": 375
+                },
+                {
+                  "nominalMin": 301,
+                  "nominalMax": 525,
+                  "minAdd": 190,
+                  "maxAdd": 400
+                },
+                {
+                  "nominalMin": 526,
+                  "nominalMax": 700,
+                  "minAdd": 215,
+                  "maxAdd": 425
+                },
+                {
+                  "nominalMin": 701,
+                  "nominalMax": 925,
+                  "minAdd": 240,
+                  "maxAdd": 450
+                },
+                {
+                  "nominalMin": 926,
+                  "nominalMax": 1000,
+                  "minAdd": 265,
+                  "maxAdd": 475
+                }
+              ]
+            }
+          },
+          "positionRule": {
+            "type": "edgeClearanceRange",
+            "inherits": "commonAFS.openingPosition",
+            "selectionRequiredForBuilderHeight": true
+          },
+          "source": "0160 brochure AFS floor dimensions; IOM page 25"
+        },
+        "TRIMOTERM_120": {
+          "supportingConstruction": "Trimoterm sandwich panel",
+          "rating": "E120",
+          "minWallThickness": 120,
+          "openingRule": {
+            "type": "additionRange",
+            "width": {
+              "minAdd": 45,
+              "selectedAdd": 55,
+              "maxAdd": 65
+            },
+            "height": {
+              "minAdd": 45,
+              "selectedAdd": 55,
+              "maxAdd": 65
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0160 IOM pages 23-24"
+        }
+      }
+    },
+    "2530": {
+      "shape": "rectangular/circular spigot",
+      "packReady": false,
+      "status": "opening tables structured; casing-to-datum audit required",
+      "methods": {
+        "AFS_WALL": {
+          "ratings": [
+            "E60 S",
+            "E120 S"
+          ],
+          "wallThickness": {
+            "E60": 94,
+            "E120": 122,
+            "multiSectionE120": 150
+          },
+          "support": "M10 drop rods on access side; both sides for multi-section",
+          "openingRule": {
+            "type": "tableRange",
+            "source": "2530 IOM method pages"
+          },
+          "positionRule": {
+            "type": "edgeClearanceRange",
+            "inherits": "commonAFS.openingPosition",
+            "selectionRequiredForBuilderHeight": true
+          }
+        },
+        "HEVAC_RIGID_WALL_120": {
+          "rating": "E120 S",
+          "minWallThickness": 150,
+          "support": "HEVAC frame and turnback tabs",
+          "openingRule": {
+            "type": "tableRange",
+            "source": "2530 IOM page 11"
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          }
+        },
+        "REMOTE_FROM_WALL_120": {
+          "rating": "E120 S",
+          "openingRule": {
+            "type": "methodSpecific",
+            "source": "2530 IOM page 12"
+          },
+          "packReady": false
+        },
+        "SHAFT_WALL_120": {
+          "rating": "E120 S",
+          "minWallThickness": 107,
+          "openingRule": {
+            "type": "methodSpecific",
+            "source": "2530 IOM page 13"
+          },
+          "packReady": false
+        },
+        "FLOOR_AFS_120": {
+          "rating": "E120 S",
+          "minFloorThickness": 150,
+          "openingRule": {
+            "type": "methodSpecific",
+            "source": "2530 IOM page 14"
+          },
+          "packReady": false
+        }
+      }
+    },
+    "0400MAN": {
+      "shape": "circular",
+      "sizeRange": {
+        "min": 100,
+        "max": 315
+      },
+      "packReady": false,
+      "methods": {
+        "FLEX_WALL_60": {
+          "rating": "E60",
+          "minWallThickness": 106,
+          "openingRule": {
+            "type": "additionRange",
+            "shape": "square",
+            "diameter": {
+              "minAdd": 51,
+              "selectedAdd": 55,
+              "maxAdd": 59
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0400/0500 IOM page 5, opening tolerance \u00b14 mm"
+        },
+        "FLEX_WALL_120": {
+          "rating": "E120",
+          "minWallThickness": 131,
+          "openingRule": {
+            "type": "additionRange",
+            "shape": "square",
+            "diameter": {
+              "minAdd": 51,
+              "selectedAdd": 55,
+              "maxAdd": 59
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0400/0500 IOM page 6, opening tolerance \u00b14 mm"
+        },
+        "RIGID_WALL_60": {
+          "rating": "E60",
+          "minWallThickness": 106,
+          "openingRule": {
+            "type": "additionRange",
+            "shape": "square-or-round",
+            "diameter": {
+              "minAdd": 10,
+              "selectedAdd": 35,
+              "maxAdd": 60
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0400/0500 IOM page 7, published \u00b125 mm tolerance"
+        },
+        "RIGID_WALL_120": {
+          "rating": "E120",
+          "minWallThickness": 131,
+          "openingRule": {
+            "type": "additionRange",
+            "shape": "square-or-round",
+            "diameter": {
+              "minAdd": 10,
+              "selectedAdd": 35,
+              "maxAdd": 60
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0400/0500 IOM page 8, published \u00b125 mm tolerance"
+        }
+      }
+    },
+    "0400FME": {
+      "shape": "circular",
+      "sizeRange": {
+        "min": 100,
+        "max": 315
+      },
+      "packReady": false,
+      "methods": {
+        "FLEX_WALL_60": {
+          "rating": "E60",
+          "minWallThickness": 106,
+          "openingRule": {
+            "type": "additionRange",
+            "shape": "square",
+            "diameter": {
+              "minAdd": 51,
+              "selectedAdd": 55,
+              "maxAdd": 59
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0400/0500 IOM page 9, opening tolerance \u00b14 mm"
+        },
+        "FLEX_WALL_120": {
+          "rating": "E120",
+          "minWallThickness": 131,
+          "openingRule": {
+            "type": "additionRange",
+            "shape": "square",
+            "diameter": {
+              "minAdd": 51,
+              "selectedAdd": 55,
+              "maxAdd": 59
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0400/0500 IOM page 10, opening tolerance \u00b14 mm"
+        },
+        "RIGID_WALL_60": {
+          "rating": "E60",
+          "minWallThickness": 106,
+          "openingRule": {
+            "type": "additionRange",
+            "shape": "square-or-round",
+            "diameter": {
+              "minAdd": 10,
+              "selectedAdd": 35,
+              "maxAdd": 60
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0400/0500 IOM page 11, published \u00b125 mm tolerance"
+        },
+        "RIGID_WALL_120": {
+          "rating": "E120",
+          "minWallThickness": 131,
+          "openingRule": {
+            "type": "additionRange",
+            "shape": "square-or-round",
+            "diameter": {
+              "minAdd": 10,
+              "selectedAdd": 35,
+              "maxAdd": 60
+            }
+          },
+          "positionRule": {
+            "centralisationRequired": true
+          },
+          "source": "0400/0500 IOM page 12, published \u00b125 mm tolerance"
+        }
+      }
+    },
+    "0500MAN": {
+      "shape": "circular",
+      "sizeRange": {
+        "min": 100,
+        "max": 315
+      },
+      "packReady": false,
+      "methods": {
+        "RIGID_FLOOR_120": {
+          "rating": "E120",
+          "minFloorThickness": 150,
+          "openingRule": {
+            "type": "range",
+            "min": "nominal diameter +10 mm",
+            "max": "1800 x 1800 mm"
+          },
+          "positionRule": {
+            "selectionRequiredForBuilderHeight": true
+          },
+          "support": "mounting brackets; connected ductwork independently supported within 1 metre",
+          "source": "0400/0500 IOM page 13"
+        }
+      }
+    },
+    "0500FME": {
+      "shape": "circular",
+      "sizeRange": {
+        "min": 100,
+        "max": 315
+      },
+      "packReady": false,
+      "methods": {
+        "RIGID_FLOOR_120": {
+          "rating": "E120",
+          "minFloorThickness": 150,
+          "openingRule": {
+            "type": "range",
+            "min": "nominal diameter +10 mm",
+            "max": "1800 x 1800 mm"
+          },
+          "positionRule": {
+            "selectionRequiredForBuilderHeight": true
+          },
+          "support": "mounting brackets; connected ductwork independently supported within 1 metre",
+          "source": "0400/0500 IOM page 14"
+        }
+      }
+    },
+    "26SCD": {
+      "shape": "rectangular",
+      "packReady": false,
+      "status": "methods structured; dimensional tables and remote support chain under audit",
+      "methods": {
+        "AFS_FLEX_WALL_120": {
+          "rating": "EI120 S / smoke-control classification per selected method",
+          "openingRule": {
+            "type": "tableRange",
+            "source": "26SCD IOM page 5"
+          },
+          "positionRule": {
+            "type": "edgeClearanceRange",
+            "inherits": "commonAFS.openingPosition",
+            "selectionRequiredForBuilderHeight": true
+          }
+        },
+        "AFS_RIGID_WALL_120": {
+          "rating": "EI120 S / smoke-control classification per selected method",
+          "openingRule": {
+            "type": "tableRange",
+            "source": "26SCD IOM page 6"
+          },
+          "positionRule": {
+            "type": "edgeClearanceRange",
+            "inherits": "commonAFS.openingPosition",
+            "selectionRequiredForBuilderHeight": true
+          }
+        },
+        "REMOTE_INLINE_120": {
+          "openingRule": {
+            "type": "methodSpecific",
+            "source": "26SCD IOM page 7"
+          },
+          "packReady": false
+        },
+        "REMOTE_SIDE_120": {
+          "openingRule": {
+            "type": "methodSpecific",
+            "source": "26SCD IOM page 8"
+          },
+          "packReady": false
+        }
+      }
+    }
+  },
+  "audit": {
+    "auditDate": "2026-07-19",
+    "scope": "0160, 2530, 0400MAN, 0400FME, 0500MAN, 0500FME and 26SCD methods exposed by VentTools",
+    "verifiedEnabled": [
+      "0160 AFS 60",
+      "0160 AFS 120",
+      "0160 Trimoterm 120",
+      "2530 AFS wall",
+      "2530 HEVAC rigid wall",
+      "0400MAN flexible 60/120",
+      "0400MAN rigid 60/120",
+      "0400FME flexible 60/120",
+      "0400FME rigid 60/120",
+      "0500MAN floor",
+      "0500FME floor"
+    ],
+    "amberManual": [
+      "2530 remote from wall",
+      "2530 shaft wall",
+      "2530 floor AFS",
+      "26SCD AFS and remote methods"
+    ],
+    "reason": "These methods require method-specific dimensional tables or support geometry not yet represented by a safe universal calculator. They are deliberately not inherited from another product.",
+    "commonDuctRule": "Leave 10 mm between damper case and ductwork; use the method-appropriate fixing and support arrangement."
+  }
+}

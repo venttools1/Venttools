@@ -1,0 +1,4 @@
+Contact: mailto:info@venttools.com
+Canonical: https://venttools.com/.well-known/security.txt
+Expires: 2027-08-16T23:59:59Z
+Preferred-Languages: en

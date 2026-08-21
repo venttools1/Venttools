@@ -375,7 +375,10 @@ function calculateDuct(commitActive=true){
  $('dcOriginalArea').textContent=`${(area/1e6).toFixed(3)} m²`;$('dcOriginalRatio').textContent=dcSource==='round'?'1.00 : 1 (round)':`${aspectRatio(w,h).toFixed(2)} : 1`;$('eqRound').textContent=`Ø ${fmt0(sourceDia)} mm`;
  $('dcExactSize').textContent=`${fmt0(exactW)} × ${fmt0(exactH)} mm`;$('dcExactNote').textContent='The paired dimension rounds up so free area never falls below the issued duct';$('dcRoundedSize').textContent=`${fmt0(rw)} × ${fmt0(rh)} mm`;$('dcAreaDiff').textContent=`${areaDiff>=0?'+':''}${areaDiff.toFixed(2)}%`;$('dcRatio').textContent=`${newRatio.toFixed(2)} : 1`;$('dcEqualAreaRound').textContent=`Ø ${fmt0(suggestedEqualDia)} mm`;
  $('dcSuggestedRound').textContent=`Ø ${fmt0(suggestedRound)} mm`;$('dcOriginalFrictionRound').textContent=`Ø ${fmt0(origEq)} mm`;$('dcNewFrictionRound').textContent=`Ø ${fmt0(newEq)} mm`;$('dcFrictionDiff').textContent=`${frictionDiff>=0?'+':''}${frictionDiff.toFixed(2)}%`;$('nearestRound').textContent=`Ø ${fmt0(suggestedRound)} mm`;
- const ratioMsg=$('dcRatioWarning');ratioMsg.className='dc-ratio-message '+(newRatio>4?'warn':'ok');ratioMsg.textContent=newRatio>4?'⚠ Aspect ratio exceeds 4:1. Review pressure loss, noise, stiffening and project requirements.':'✓ Aspect ratio is within the 4:1 VentTools advisory limit.';
+ const ratioOverLimit=newRatio>4;
+ const ratioMsg=$('dcRatioWarning');ratioMsg.className='dc-ratio-message '+(ratioOverLimit?'warn':'ok');ratioMsg.textContent=ratioOverLimit?'⚠ Aspect ratio exceeds 4:1. Review pressure loss, noise, stiffening and project requirements.':'✓ Aspect ratio is within the 4:1 VentTools advisory limit.';
+ const liveRatio=$('dcLiveRatioStatus');if(liveRatio){liveRatio.className='dc-live-ratio '+(ratioOverLimit?'warn':'ok');liveRatio.textContent=ratioOverLimit?`⚠ ${newRatio.toFixed(2)} : 1 — exceeds the 4:1 advisory limit`:`✓ ${newRatio.toFixed(2)} : 1 — within the 4:1 advisory limit`}
+ $('dcResultMain')?.classList.toggle('ratio-over-limit',ratioOverLimit);$('dcRatioTile')?.classList.toggle('ratio-over-limit',ratioOverLimit);
  const safeMsg=$('dcSafeAreaMessage');if(safeMsg){safeMsg.className='dc-ratio-message '+(roundedArea>=area?'ok':'warn');safeMsg.textContent=roundedArea>=area?'✓ Suggested free area is equal to or greater than the issued duct.':'⚠ Suggested size is below the issued free area — do not use.'}
  drawDuctConversion(w,h,rw,rh);
  const sourceText=dcSource==='round'?`Ø ${fmt0(d)} mm spiral`:`${fmt0(w)} × ${fmt0(h)} mm rectangular`;
@@ -405,7 +408,7 @@ initDuctConverter();
 initOffsetCalculator();
 
 
-const VT_ENGINEERING_DB_VERSION="1.2.7-homepage-image-hotfix";
+const VT_ENGINEERING_DB_VERSION="1.4.0-bsb-fd-c-af";
 const VT_ENGINEERING_MODE_KEY="venttoolsEngineeringMode";
 function isVTEngineeringMode(){
   try{
@@ -513,22 +516,41 @@ const ADVANCED_AIR_DOCUMENTS={
   IOM_26SCD:{url:"https://www.advancedair.co.uk/app/uploads/26SCD_IOM_Rev1.0.pdf",title:"26SCD Installation Manual"}
 };
 
+const BSB_FSD_TD_IOM_URL="https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf";
+const BSB_FSD_TD_SERIES_URL="https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_series.pdf";
+const BSB_FD_SERIES_URL="https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_series.pdf";
+const BSB_FSD_TD_C_DIMENSIONS=Object.freeze({
+  100:{a:84,b:41},150:{a:109,b:41},200:{a:84,b:41},250:{a:159,b:41},300:{a:184,b:41},350:{a:159,b:41},
+  400:{a:184,b:55},450:{a:259,b:55},500:{a:284,b:55},550:{a:259,b:55},600:{a:284,b:55},650:{a:359,b:55},
+  700:{a:384,b:55},750:{a:359,b:55},800:{a:384,b:55},850:{a:459,b:55},900:{a:484,b:55},950:{a:459,b:55},1000:{a:484,b:55}
+});
+
+function bsbFsdTdMethods(dryType="bsb-rect-dry",solidType="bsb-rect-solid"){
+  return {
+    M5:{label:"M5 — Drywall, non-cleated frameless",type:dryType,finishedW:121,finishedH:96,casingAddW:76,casingAddH:76,clearanceLeft:10,clearanceRight:35,clearanceBottom:10,clearanceTop:10,reference:"FSD-TD M5",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Two-layer plasterboard pattress each side; void filling is not required",classification:"See BSB method M5",note:"Finished aperture allows 10 mm top/bottom, 10 mm non-actuator side and 35 mm actuator side.",settingOut:{basis:"casing-edge",casingProjectionBottom:38,casingProjectionTop:38,bottomClearance:10,topClearance:10,source:"BSB FSD-TD IOM 8.1.2 and 8.2.9: finished aperture is nominal height +96 mm, with 10 mm clearance above and below the damper casing; the damper is centred vertically."}},
+    M6:{label:"M6 — Drywall, pattress and cleat",type:dryType,finishedW:156,finishedH:96,casingAddW:76,casingAddH:76,clearanceLeft:40,clearanceRight:40,clearanceBottom:10,clearanceTop:10,reference:"FSD-TD M6",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening with tested pattress and cleat arrangement",classification:"See BSB method M6",note:"Use every fixing position and ensure screws pick up the aperture track.",settingOut:{basis:"casing-edge",casingProjectionBottom:38,casingProjectionTop:38,bottomClearance:10,topClearance:10,source:"BSB FSD-TD IOM 9.1: nominal height +96 mm, with 10 mm above and below the casing; the damper is centred vertically."}},
+    M9:{label:"M9 — Drywall, AF Easy Fix angle frame",type:dryType,finishedW:122,finishedH:99,casingAddW:77,casingAddH:79,clearanceLeft:10,clearanceRight:35,clearanceBottom:10,clearanceTop:10,reference:"FSD-TD M9",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening; Easy Fix angle frame fixed through the tested pilot holes",classification:"See BSB method M9",note:"Finished aperture includes the manufacturer-specified installation gaps around the casing. Use the inner row of pilot holes for drywall.",settingOut:{basis:"casing-edge",casingProjectionBottom:39.5,casingProjectionTop:39.5,bottomClearance:10,topClearance:10,source:"BSB FSD-TD IOM 10.1: published finished opening is nominal +122 mm wide and +99 mm high, with 10 mm top/bottom, 10 mm non-actuator-side and 35 mm actuator-side casing clearances."}},
+    M10:{label:"M10 — Masonry wall, AF Easy Fix angle frame",type:solidType,finishedW:122,finishedH:99,casingAddW:77,casingAddH:79,clearanceLeft:10,clearanceRight:35,clearanceBottom:10,clearanceTop:10,reference:"FSD-TD M10",wall:"Masonry wall matching the BSB tested construction",seal:"Easy Fix angle frame; void behind the frame does not require filling where stated",classification:"See BSB method M10",note:"Use the outer pilot holes and keep fixing anchors at least 20 mm from aperture edges.",settingOut:{basis:"casing-edge",casingProjectionBottom:39.5,casingProjectionTop:39.5,bottomClearance:10,topClearance:10,source:"BSB FSD-TD IOM 11.1: published finished opening is nominal +122 mm wide and +99 mm high, with 10 mm top/bottom, 10 mm non-actuator-side and 35 mm actuator-side casing clearances."}},
+    M11:{label:"M11 — Masonry floor, AF Easy Fix angle frame",type:solidType,finishedW:122,finishedH:99,casingAddW:77,casingAddH:79,clearanceLeft:10,clearanceRight:35,clearanceBottom:10,clearanceTop:10,reference:"FSD-TD M11",wall:"Masonry floor, minimum 150 mm, density 580 kg/m³",seal:"Easy Fix angle frame; no need to fill the opening void",classification:"E 120 (ho i←o) S",note:"Finished aperture: nominal width +122 mm and nominal height +99 mm.",settingOut:{basis:"casing-edge",casingProjectionBottom:39.5,casingProjectionTop:39.5,bottomClearance:10,topClearance:10,source:"BSB FSD-TD IOM 12.1: published finished opening is nominal +122 mm wide and +99 mm high, with 10 mm top/bottom, 10 mm non-actuator-side and 35 mm actuator-side casing clearances."}}
+  };
+}
+
 const FD_MANUFACTURERS={
   BSB:{label:"BSB",products:{
-    "FSD-TD":{label:"FSD-TD — Rectangular fire/smoke damper",shape:"rect",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",guide:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904",methods:{
-      M5:{label:"M5 — Drywall, non-cleated frameless",type:"bsb-rect-dry",finishedW:121,finishedH:96,reference:"FSD-TD M5",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Two-layer plasterboard pattress each side; void filling is not required",classification:"See BSB method M5",note:"Finished aperture allows 10 mm top/bottom, 10 mm non-actuator side and 35 mm actuator side.",settingOut:{basis:"casing-edge",casingProjectionBottom:38,casingProjectionTop:38,bottomClearance:10,topClearance:10,source:"BSB FSD-TD M5 sections 8.1.2 and 8.2.9: finished aperture is nominal height +96 mm, with 10 mm clearance above and below the damper case; the damper is positioned centrally. This gives a 38 mm casing projection beyond the nominal duct at both top and bottom."}},
-      M6:{label:"M6 — Drywall, pattress and cleat",type:"bsb-rect-dry",finishedW:156,finishedH:96,settingOut:{basis:"nominal-duct",bottomFinished:48,topFinished:48,source:"BSB FSD-TD M6: nominal height +96 mm and damper positioned centrally in the lined opening."},reference:"FSD-TD M6",wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening with tested pattress and cleat arrangement",classification:"See BSB method M6",note:"Use every fixing position and ensure screws pick up the aperture track."},
-      M9:{label:"M9 — Drywall, AF Easy Fix angle frame",type:"bsb-rect-dry",finishedW:122,finishedH:99,casingAddW:102,casingAddH:79,clearanceLeft:10,clearanceRight:10,clearanceBottom:10,clearanceTop:10,reference:"FSD-TD M9",settingOut:{basis:"casing-edge",casingProjectionBottom:39.5,casingProjectionTop:39.5,bottomClearance:10,topClearance:10,source:"BSB FSD-TD M9: overall casing is derived from the published nominal-size build-up and the finished aperture provides 10 mm clearance above and below the casing."},wall:"Symmetrical drywall: 50 mm steel frame with two layers of 12.5 mm D&F fire board on each wall face. These wall-face layers are separate from the single aperture-lining board fitted around each internal edge",seal:"Lined opening; Easy Fix angle frame fixed through the tested pilot holes",classification:"See BSB method M9",note:"Finished aperture includes the manufacturer-specified installation/expansion gaps around the casing. Use the inner row of pilot holes for drywall."},
-      M10:{label:"M10 — Masonry wall, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,settingOut:{basis:"nominal-duct",bottomFinished:49.5,topFinished:49.5,source:"BSB FSD-TD M10: published opening height is nominal +99 mm and the damper is positioned centrally."},reference:"FSD-TD M10",wall:"Masonry wall matching the BSB tested construction",seal:"Easy Fix angle frame; void behind the frame does not require filling where stated",classification:"See BSB method M10",note:"Use the outer pilot holes and keep fixing anchors at least 20 mm from aperture edges."},
-      M11:{label:"M11 — Masonry floor, AF Easy Fix angle frame",type:"bsb-rect-solid",finishedW:122,finishedH:99,settingOut:{basis:"nominal-duct",bottomFinished:49.5,topFinished:49.5,source:"BSB FSD-TD M11: published opening height is nominal +99 mm and the damper is positioned centrally."},reference:"FSD-TD M11",wall:"Masonry floor, minimum 150 mm, density 580 kg/m³",seal:"Easy Fix angle frame; no need to fill the opening void",classification:"E 120 (ho i←o) S",note:"Finished aperture: nominal width +122 mm and nominal height +99 mm."}
+    "FSD-TD":{label:"FSD-TD-S — Rectangular-spigot fire/smoke damper",shape:"rect",variant:"S",manual:BSB_FSD_TD_IOM_URL,brochure:BSB_FSD_TD_SERIES_URL,guide:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904",methods:bsbFsdTdMethods()},
+    "FSD-TD-C":{label:"FSD-TD-C — Circular-spigot multiblade (listed Ø100–1000)",shape:"circle",variant:"C",manual:BSB_FSD_TD_IOM_URL,brochure:BSB_FSD_TD_SERIES_URL,guide:"BSB FSD-TD Series dimensions and Installation, Operation and Maintenance Instructions",revision:"FSD-TD Series V12607 • IOM V62904",dimensionTable:BSB_FSD_TD_C_DIMENSIONS,spigotOutsideAdd:-3,minSize:100,maxSize:1000,methods:bsbFsdTdMethods("bsb-fsd-td-c-dry","bsb-fsd-td-c-solid")},
+    "FD-C-AF":{label:"FD-C-AF — FD Series curtain-blade, circular spigot, angle frame (Ø100–1000)",shape:"circle",variant:"C-AF",manual:BSB_FD_SERIES_URL,guide:"BSB FD Series dimensions and verified installation method drawings",revision:"FD Series V12607",spigotOutsideAdd:-3,minSize:100,maxSize:1000,methods:{
+      M9:{label:"M9 — Drywall, angle frame, lined opening",type:"bsb-fd-c-af-dry",gapNominal:10,gapTolerance:5,reference:"FD M9",wall:"BSB FD M9 tested symmetrical drywall construction selected to match the required classification",seal:"Angle frame fixed to the supporting track; opening lined; no filling of the opening void required",note:"The manufacturer drawing specifies a 10 ±5 mm gap all around the rectangular damper casing. Match the single- or double-skin M9 sheet to the required wall construction.",settingOut:{basis:"casing-edge",casingProjectionBottom:29.5,casingProjectionTop:29.5,bottomClearance:10,topClearance:10,source:"BSB FD Series V12607 Type C dimensions and FD M9: circular spigot O.D. is nominal diameter -3 mm; rectangular casing extends 31 mm beyond the spigot at the bottom; finished lined aperture has 10 ±5 mm gap all around the casing."}},
+      M10:{label:"M10 — Masonry wall, angle frame",type:"bsb-fd-c-af-solid",gapNominal:10,gapTolerance:5,reference:"FD M10",wall:"150 mm masonry wall, density 650 kg/m³, matching BSB FD M10",seal:"Angle frame fixed with the tested steel fixings; no filling of the opening void required",note:"The manufacturer drawing specifies a 10 ±5 mm gap all around the rectangular damper casing.",settingOut:{basis:"casing-edge",casingProjectionBottom:29.5,casingProjectionTop:29.5,bottomClearance:10,topClearance:10,source:"BSB FD Series V12607 Type C dimensions and FD M10: circular spigot O.D. is nominal diameter -3 mm; rectangular casing extends 31 mm beyond the spigot at the bottom; aperture has 10 ±5 mm gap all around the casing."}},
+      M11:{label:"M11 — Masonry floor, angle frame",type:"bsb-fd-c-af-solid",gapNominal:10,gapTolerance:5,reference:"FD M11",wall:"150 mm masonry floor, density 580 kg/m³, matching BSB FD M11",seal:"Angle frame fixed with the tested steel fixings; no filling of the opening void required",note:"The manufacturer drawing specifies a 10 ±5 mm gap around the rectangular damper casing.",settingOut:{basis:"casing-edge",casingProjectionBottom:29.5,casingProjectionTop:29.5,bottomClearance:10,topClearance:10,source:"BSB FD Series V12607 Type C dimensions and FD M11: circular spigot O.D. is nominal diameter -3 mm; rectangular casing extends 31 mm beyond the spigot at the bottom; aperture has 10 ±5 mm gap around the casing."}}
     }},
-    "FD-C":{label:"FD-C — Circular fire damper",shape:"circle",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_c_series_iom.pdf",guide:"BSB FD-C Installation, Operation and Maintenance Instructions",revision:"V62904",minSize:100,maxSize:315,methods:{
+    "FD-C":{label:"FD-C — FD-C Series externally resettable circular single-blade (Ø100–315)",shape:"circle",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_c_series_iom.pdf",guide:"BSB FD-C Installation, Operation and Maintenance Instructions",revision:"V62904",minSize:100,maxSize:315,methods:{
       M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; opening lined with fire-rated wall board",note:"Finished aperture is square and nominal diameter +20 mm.",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FD-C M9: 10 mm nominal gap all round"}},
       M10:{label:"M10 — Masonry wall",type:"bsb-circle-solid",add:20,reference:"FD-C M10",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FD M10: opening is 10 mm larger than the casing on each side and the damper is centred."},wall:"Masonry wall matching the tested detail",seal:"Follow the tested BSB masonry sealing and plate fixing arrangement",note:"Opening is nominal diameter +20 mm."},
       M11:{label:"M11 — Masonry floor",type:"bsb-circle-solid",add:20,reference:"FD-C M11",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FD M11: opening is 10 mm larger than the casing on each side and the damper is centred."},wall:"Concrete/masonry floor matching the tested detail",seal:"Follow the tested BSB floor sealing and plate fixing arrangement",note:"Opening is nominal diameter +20 mm."},
       M14:{label:"M14 — Flexible fire curtain",type:"bsb-circle-trim",add:10,reference:"FD-C M14",wall:"Tested flexible fire-curtain construction",seal:"Trim opening to the BSB tested fire-curtain detail",note:"Use nominal diameter with up to 10 mm trim tolerance."}
     }},
-    "FSD-C":{label:"FSD-C — Circular fire/smoke damper",shape:"circle",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_c_iom_11zon.pdf",guide:"BSB FSD-C Installation, Operation and Maintenance Instructions",revision:"V62904",minSize:100,maxSize:315,methods:{
+    "FSD-C":{label:"FSD-C — Circular single-blade fire/smoke damper (Ø100–315)",shape:"circle",manual:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_c_iom_11zon.pdf",guide:"BSB FSD-C Installation, Operation and Maintenance Instructions",revision:"V62904",minSize:100,maxSize:315,methods:{
       M9:{label:"M9 — Drywall partition, lined opening",type:"bsb-circle-dry-lined",add:20,reference:"FSD-C M9",wall:"Fire-rated drywall supporting construction",seal:"10 mm nominal gap all round; line opening to the tested BSB detail",note:"Use every installation-plate fixing position.",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FSD-C M9: 10 mm nominal gap all round"}},
       M10:{label:"M10 — Masonry wall",type:"bsb-circle-solid",add:20,reference:"FSD-C M10",settingOut:{basis:"nominal-duct",bottomFinished:10,topFinished:10,source:"BSB FSD-C M10: nominal diameter +20 mm opening, damper centred."},wall:"Masonry wall matching the tested detail",seal:"Tested plate and penetration-seal arrangement",note:"Opening is nominal diameter +20 mm."},
       M11:{label:"M11 — Masonry floor / Batt infill",type:"bsb-circle-solid",add:20,reference:"FSD-C M11",wall:"Masonry floor matching the tested detail",seal:"Ablative Batt infill where required by the selected drawing",note:"Use all fixing holes and the exact Batt arrangement."},
@@ -833,11 +855,12 @@ function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="c
   const dwBasis=$("fdDwfxInputBasis")?.value||"NOMINAL",dwSmoke=$("fdDwfxVariant")?.value==="SMOKE",dwAuto=dwfx&&dwSmoke&&dwBasis==="NOMINAL";
   $("fdWidthLabel").textContent=dwfx?(dwAuto?"Nominal duct width (mm)":"Measured overall casing width (mm)"):hevac?"Nominal duct width (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly width (mm)":"Nominal duct width (mm)";
   $("fdHeightLabel").textContent=dwfx?(dwAuto?"Nominal duct height (mm)":"Measured overall casing height (mm)"):hevac?"Nominal duct height (mm)":wk25&&wkConfig!=="single"?"Measured overall joined assembly height (mm)":"Nominal duct height (mm)";
-  $("fdBoardWrap").style.display=["bsb-dry","bsb-rect-dry","bsb-circle-dry-lined","bsb-at-dry","css-dry"].includes(m.type)?"block":"none";
+  $("fdBoardWrap").style.display=["bsb-dry","bsb-rect-dry","bsb-fsd-td-c-dry","bsb-fd-c-af-dry","bsb-circle-dry-lined","bsb-at-dry","css-dry"].includes(m.type)?"block":"none";
   $("fdWallBuildWrap").style.display=m.type==="css-dry"?"block":"none";
   $("fdShapeWrap").style.display=["css-masonry"].includes(m.type)?"block":"none";
   $("fdAllowanceWrap").style.display=["css-dry","css-masonry","css-slab"].includes(m.type)?"block":"none";
-  $("fdDiameterLabel").textContent=m.type&&m.type.startsWith("css-")?"Overall damper casing diameter (mm)":"Nominal damper diameter (mm)";
+  $("fdDiameterLabel").textContent=["FSD-TD-C","FD-C-AF"].includes(productKey)?"Nominal circular duct diameter (mm)":m.type&&m.type.startsWith("css-")?"Overall damper casing diameter (mm)":"Nominal damper diameter (mm)";
+  const circularHint=$("fdCircularProductHint");if(circularHint){circularHint.hidden=!(["FSD-TD-C","FD-C-AF","FD-C","FSD-C"].includes(productKey));circularHint.textContent=productKey==="FSD-TD-C"?"FSD-TD-C is the motorised multiblade product and only its published diameter table is accepted. Its circular spigot and rectangular casing are different geometries.":productKey==="FD-C-AF"?"FD-C-AF is the FD Series mechanical curtain-blade damper with a Type C circular spigot and rectangular Angle Frame casing. BSB permits Ø100–1000 in millimetre increments, including Ø355 and Ø560.":productKey==="FD-C"?"FD-C is BSB's separate externally resettable circular single-blade product, limited to Ø100–315. Do not confuse it with the FD Series FD-C-AF curtain-blade product.":"FSD-C is the separate motorised circular single-blade product. Product ranges overlap, so select the model stated on the project specification or damper label.";}
   if(m.type==="css-dry")setAllowanceOptions(m.min,m.max,m.step,m.defaultAllowance);
   if(m.type==="css-masonry"){const shape=$("fdApertureShape").value;setAllowanceOptions(shape==="square"?m.squareMin:m.circleMin,shape==="square"?m.squareMax:m.circleMax,m.step,m.defaultAllowance)}
   if(m.type==="css-slab")setAllowanceOptions(m.squareMin,m.squareMax,m.step,m.defaultAllowance);
@@ -1018,6 +1041,37 @@ function calculateAdvancedAirDirect(){
   fdMsg("ok",`✅ Advanced Air ${productKey} calculation complete.`);
   return r;
 }
+function bsbFsdTdCircularGeometry(product,method,diameter,boardThickness=12.5){
+  const dia=Number(diameter),dimensions=product?.dimensionTable?.[dia];
+  if(!Number.isFinite(dia)||!dimensions)return {valid:false,diameter:dia};
+  const lined=method.type==="bsb-fsd-td-c-dry";
+  const board=lined?Number(boardThickness):0;
+  const finishedW=dia+Number(method.finishedW),finishedH=dia+Number(method.finishedH);
+  const casingW=dia+Number(method.casingAddW),casingH=dia+Number(method.casingAddH);
+  return {valid:true,diameter:dia,dimensions,lined,board,spigotOutside:dia+Number(product.spigotOutsideAdd),casingW,casingH,finishedW,finishedH,cutW:finishedW+2*board,cutH:finishedH+2*board};
+}
+
+function bsbFdSeriesCircularAfGeometry(product,method,diameter,boardThickness=12.5){
+  const dia=Number(diameter),min=Number(product?.minSize),max=Number(product?.maxSize);
+  if(!Number.isInteger(dia)||dia<min||dia>max)return {valid:false,diameter:dia};
+  const spigotOutside=dia+Number(product.spigotOutsideAdd);
+  const topReturn=dia<=300?31:dia<=500?55:dia<=750?75:95;
+  const casingSideReturn=31,casingBottomReturn=31;
+  const nominalToSpigotEdge=(dia-spigotOutside)/2;
+  const casingProjectionLeft=casingSideReturn-nominalToSpigotEdge;
+  const casingProjectionRight=casingProjectionLeft;
+  const casingProjectionBottom=casingBottomReturn-nominalToSpigotEdge;
+  const casingProjectionTop=topReturn-nominalToSpigotEdge;
+  const casingW=spigotOutside+casingSideReturn*2;
+  const casingH=spigotOutside+casingBottomReturn+topReturn;
+  const gap=Number(method.gapNominal),tolerance=Number(method.gapTolerance);
+  const lined=method.type==="bsb-fd-c-af-dry",board=lined?Number(boardThickness):0;
+  const finishedW=casingW+2*gap,finishedH=casingH+2*gap;
+  const cutW=finishedW+2*board,cutH=finishedH+2*board;
+  const frameHeightAdd=dia<=300?180:dia<=500?204:dia<=750?224:244;
+  return {valid:true,diameter:dia,spigotOutside,topReturn,casingSideReturn,casingBottomReturn,casingProjectionLeft,casingProjectionRight,casingProjectionBottom,casingProjectionTop,casingW,casingH,gap,tolerance,lined,board,finishedW,finishedH,cutW,cutH,frameW:dia+180,frameH:dia+frameHeightAdd,finishedMinW:casingW+2*(gap-tolerance),finishedMinH:casingH+2*(gap-tolerance),finishedMaxW:casingW+2*(gap+tolerance),finishedMaxH:casingH+2*(gap+tolerance)};
+}
+
 function calcFD(){const aaDirect=calculateAdvancedAirDirect();if(aaDirect)return aaDirect;if(!$("fdSeries")?.value)return null;const startSelection=currentFD(),startToken=fdSelectionToken(startSelection);const {man,p,m,manKey,productKey,methodKey}=startSelection;if(!man||!p||!m){clearFDSelectionDependentUI("Installation method did not initialise.");refreshFDManualResource();return null;}let r;
  if(productKey==="SPAN"){
    r=calculateActionairSpan();
@@ -1176,7 +1230,48 @@ function calcFD(){const aaDirect=calculateAdvancedAirDirect();if(aaDirect)return
   }else r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:W+m.w,openH:H+m.h,opening:`${fmt0(W+m.w)} × ${fmt0(H+m.h)} mm`,damper:`${fmt0(W)} × ${fmt0(H)} mm`,rule:`Width +${m.w} mm; height +${m.h} mm`,reference:m.reference}
  }
  else if(productKey!=="SPAN"){const dia=parseFloat($("fdDiameter").value)||0;r={shape:"circle",manufacturer:man.label,product:productKey,method:methodKey,dia,damper:`Ø ${fmt0(dia)} mm`,reference:m.reference};
-  if(m.type==="bsb-circle-dry-lined"){
+  if(m.type==="bsb-fd-c-af-dry" || m.type==="bsb-fd-c-af-solid"){
+    const b=parseFloat($("fdBoardThickness").value)||12.5;
+    const g=bsbFdSeriesCircularAfGeometry(p,m,dia,b);
+    if(!g.valid){
+      r.opening="Size outside BSB FD Series Type C range";r.rule="Enter a whole-millimetre circular duct diameter from Ø100 to Ø1000.";r.range="BSB publishes the FD Series Type C circular connection from Ø100 to Ø1000 in millimetre increments.";r.invalidSize=true;r.sourceStatus="Manufacturer range check required";r.statusType="warning";
+    }else{
+      r.shape="rect";r.nomW=g.diameter;r.nomH=g.diameter;r.openW=g.cutW;r.openH=g.cutH;r.finishedW=g.finishedW;r.finishedH=g.finishedH;r.cutW=g.cutW;r.cutH=g.cutH;
+      r.opening=`${fmt0(g.cutW)} × ${fmt0(g.cutH)} mm ${g.lined?"nominal structural cut":"nominal aperture"}`;
+      r.damper=`Ø ${fmt0(g.diameter)} mm nominal FD Series Type C circular spigot with rectangular casing and Angle Frame`;
+      r.rule=`Spigot O.D. Ø${fmt0(g.spigotOutside)} mm → rectangular casing ${fmt0(g.casingW)} × ${fmt0(g.casingH)} mm → ${fmt0(g.gap)} ±${fmt0(g.tolerance)} mm gap all around${g.lined?` → one ${fmt(g.board)} mm aperture-lining board at each internal edge`:""}.`;
+      const structuralMinW=g.finishedMinW+(g.lined?2*g.board:0),structuralMinH=g.finishedMinH+(g.lined?2*g.board:0),structuralMaxW=g.finishedMaxW+(g.lined?2*g.board:0),structuralMaxH=g.finishedMaxH+(g.lined?2*g.board:0);
+      r.range=`BSB FD Series Type C supports Ø${fmt0(g.diameter)} mm. The 10 ±5 mm casing-gap tolerance gives ${g.lined?"a structural-cut":"an aperture"} range of ${fmt0(structuralMinW)}–${fmt0(structuralMaxW)} mm wide × ${fmt0(structuralMinH)}–${fmt0(structuralMaxH)} mm high; VentTools shows the 10 mm nominal-gap result.`;
+      r.nominalStage=`Ø ${fmt0(g.diameter)} mm nominal circular duct → Ø ${fmt0(g.spigotOutside)} mm circular spigot O.D.`;
+      r.casingStage=`${fmt0(g.casingW)} × ${fmt0(g.casingH)} mm rectangular curtain-damper casing; bottom casing edge is ${fmt(g.casingProjectionBottom)} mm below the nominal duct edge`;
+      r.finishedStage=`${fmt0(g.finishedW)} × ${fmt0(g.finishedH)} mm nominal finished aperture around the casing`;
+      r.cutStage=g.lined?`Width: ${fmt0(g.finishedW)} + 2 × ${fmt(g.board)} mm lining = ${fmt0(g.cutW)} mm; height: ${fmt0(g.finishedH)} + 2 × ${fmt(g.board)} mm lining = ${fmt0(g.cutH)} mm`:`${fmt0(g.cutW)} × ${fmt0(g.cutH)} mm nominal structural aperture`;
+      r.visualOpen=Math.max(g.cutW,g.cutH);r.openD=r.visualOpen;r.apertureShape="square";r.sourceStatus="Verified from BSB FD Series V12607 Type C dimensions and selected FD-AF method";r.statusType="verified";
+      r.includesLining=g.lined;r.liningMapped=g.lined;r.structuralLiningBottom=g.lined?g.board:0;r.settingOut={...m.settingOut,casingProjectionBottom:g.casingProjectionBottom,casingProjectionTop:g.casingProjectionTop,bottomClearance:g.gap,topClearance:g.gap};
+      r.criticalRules=[`Supporting construction: ${m.wall}.`,`The photographed/product-code geometry is FD-C-AF: FD Series curtain blades, Type C circular spigot and Angle Frame. It is not the FD-C Series single-blade product.`,`Nominal duct, actual Ø${fmt0(g.spigotOutside)} mm spigot and ${fmt0(g.casingW)} × ${fmt0(g.casingH)} mm rectangular casing are separate setting-out stages.`,`Manufacturer aperture clearance: ${fmt0(g.gap)} ±${fmt0(g.tolerance)} mm all around the rectangular casing; the result shown uses the nominal ${fmt0(g.gap)} mm gap.`,`Angle Frame overall size for this nominal diameter: ${fmt0(g.frameW)} × ${fmt0(g.frameH)} mm; the frame overlaps the supporting construction and is not used as the hole size.`,g.lined?`Opening treatment: line each internal edge with one ${fmt(g.board)} mm fire-rated board after forming the structural cut.`:"Opening treatment: no aperture lining is added for this selected masonry method.",`Certified fixing arrangement: ${m.seal}.`,`Use break-away joints with aluminium rivets on connecting ductwork.`,`Minimum clear structural separation: 200 mm between separate damper casings.`,`Minimum distance from casing to adjacent wall, floor or ceiling: 75 mm.`,m.note,"Other services must not share the damper opening."];
+    }
+  }
+  else if(m.type==="bsb-fsd-td-c-dry" || m.type==="bsb-fsd-td-c-solid"){
+    const b=parseFloat($("fdBoardThickness").value)||12.5;
+    const g=bsbFsdTdCircularGeometry(p,m,dia,b);
+    if(!g.valid){
+      r.opening="Diameter not listed by BSB";r.rule="Select a diameter explicitly listed in the FSD-TD-C manufacturer table.";r.range="Verified listed diameters: Ø100 to Ø1000 mm in 50 mm steps. Values between the listed sizes are not extrapolated.";r.invalidSize=true;r.sourceStatus="Manufacturer size verification required";r.statusType="warning";
+    }else{
+      r.shape="rect";r.nomW=g.diameter;r.nomH=g.diameter;r.openW=g.cutW;r.openH=g.cutH;r.finishedW=g.finishedW;r.finishedH=g.finishedH;r.cutW=g.cutW;r.cutH=g.cutH;
+      r.opening=`${fmt0(g.cutW)} × ${fmt0(g.cutH)} mm ${g.lined?"structural cut":"finished aperture"}`;
+      r.damper=`Ø ${fmt0(g.diameter)} mm nominal circular duct on a rectangular multiblade casing`;
+      r.rule=`The circular spigot is Ø${fmt0(g.spigotOutside)} mm outside diameter, but the opening is controlled by the rectangular FSD-TD casing. BSB ${m.reference} publishes nominal diameter +${fmt0(m.finishedW)} mm width and +${fmt0(m.finishedH)} mm height${g.lined?`; the structural cut then adds one ${fmt(g.board)} mm aperture-lining board at each opposite edge`:""}.`;
+      r.range=`BSB FSD-TD-C listed size confirmed: Ø${fmt0(g.diameter)} mm (dimension A ${fmt0(g.dimensions.a)} mm; dimension B ${fmt0(g.dimensions.b)} mm).`;
+      r.nominalStage=`Ø ${fmt0(g.diameter)} mm nominal circular duct → Ø ${fmt0(g.spigotOutside)} mm circular spigot O.D.`;
+      r.casingStage=`${fmt0(g.casingW)} × ${fmt0(g.casingH)} mm rectangular casing envelope, derived from the IOM's stated casing clearances and published opening allowances`;
+      r.finishedStage=`${fmt0(g.finishedW)} × ${fmt0(g.finishedH)} mm finished aperture around the rectangular casing`;
+      r.cutStage=g.lined?`Width: ${fmt0(g.finishedW)} + 2 × ${fmt(g.board)} mm lining = ${fmt0(g.cutW)} mm; height: ${fmt0(g.finishedH)} + 2 × ${fmt(g.board)} mm lining = ${fmt0(g.cutH)} mm`:`${fmt0(g.cutW)} × ${fmt0(g.cutH)} mm finished structural aperture`;
+      r.visualOpen=Math.max(g.cutW,g.cutH);r.openD=r.visualOpen;r.apertureShape="square";r.sourceStatus="Verified from BSB FSD-TD-C dimensions and selected FSD-TD installation method";r.statusType="verified";
+      r.includesLining=g.lined;r.liningMapped=g.lined;r.structuralLiningBottom=g.lined?g.board:0;r.settingOut=m.settingOut;
+      r.criticalRules=[`Supporting construction: ${m.wall}.`,`Nominal circular duct/spigot and rectangular damper casing are different geometries: never form the opening from Ø${fmt0(g.diameter)} mm or the Ø${fmt0(g.spigotOutside)} mm spigot alone.`,`Method casing envelope used for setting-out: ${fmt0(g.casingW)} × ${fmt0(g.casingH)} mm; finished aperture: ${fmt0(g.finishedW)} × ${fmt0(g.finishedH)} mm.`,`Manufacturer casing clearances: ${fmt0(m.clearanceLeft)} mm non-actuator side, ${fmt0(m.clearanceRight)} mm actuator side, ${fmt0(m.clearanceBottom)} mm below and ${fmt0(m.clearanceTop)} mm above.`,g.lined?`Opening treatment: line each internal edge with one ${fmt(g.board)} mm fire-rated board after forming the structural cut.`:"Opening treatment: do not add aperture lining unless the selected BSB drawing requires it.",`Certified sealing/fixing arrangement: ${m.seal}.`,`BSB series table entry: Ø${fmt0(g.diameter)} mm, A ${fmt0(g.dimensions.a)} mm, B ${fmt0(g.dimensions.b)} mm.`,`Minimum clear structural separation: 200 mm between separate damper casings.`,`Minimum distance from casing to adjacent wall, floor or ceiling: 75 mm.`,m.note,"Other services must not share the damper opening."];
+    }
+  }
+  else if(m.type==="bsb-circle-dry-lined"){
     const b=parseFloat($("fdBoardThickness").value)||12.5,finished=dia+m.add,cut=finished+2*b;r.visualOpen=r.openD=cut;r.apertureShape="square";r.opening=`${fmt0(cut)} × ${fmt0(cut)} mm structural cut`;r.rule=`Finished square aperture ${fmt0(finished)} mm; cut adds 2 × ${fmt(b)} mm lining board`;r.nominalStage=`Ø ${fmt0(dia)} mm`;r.casingStage=`Ø ${fmt0(dia)} mm nominal damper`;r.finishedStage=`${fmt0(finished)} × ${fmt0(finished)} mm`;r.cutStage=`${fmt0(finished)} + 2 × ${fmt(b)} mm aperture lining = ${fmt0(cut)} mm each way`;r.sourceStatus="Verified from manufacturer method";r.statusType="verified";r.includesLining=true;r.liningMapped=true;r.structuralLiningBottom=b;r.finishedW=finished;r.finishedH=finished;r.cutW=cut;r.cutH=cut;r.criticalRules=[`Supporting construction: ${m.wall}.`,`The drywall opening must be lined with one fire-rated board around each internal edge; wall-face board layers are not added again.`,`Certified sealing/fixing arrangement: ${m.seal}.`,`Minimum clear structural separation: 200 mm between separate damper casings.`,`Minimum distance from casing to adjacent construction: 75 mm.`,m.note,"Provide adjacent access for commissioning, servicing and cleaning."];
   }
   else if(m.type==="bsb-circle-solid"){
@@ -1654,7 +1749,7 @@ async function buildFDSiteSheet(){
 .verification-stamp{margin:12px 0;padding:12px 14px;border:2px solid #27845a;border-radius:12px;background:#eefaf3;display:flex;justify-content:space-between;gap:10px}.verification-stamp.partial{border-color:#c99312;background:#fff8df}.verification-stamp.draft{border-color:#bd3535;background:#fff0f0}</style></head><body>
 <div class="toolbar"><button class="primary" onclick="window.print()">Print / Save PDF</button><button class="secondary" onclick="shareSheet()">Share</button><button class="secondary" onclick="window.close()">Close</button></div>
 <main class="sheet">
-<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.2.7 · Independent site aid</span></div></header>
+<header class="report-header"><div class="brand"><div class="mark">VT</div><div><div class="eyebrow">VentTools engineering output</div><h1>Site Instruction Sheet</h1></div></div><div class="doc-meta"><span class="eyebrow">Generated</span><strong>${esc(generated)}</strong><span>V1.3.0 · Independent site aid</span></div></header>
 <section class="verification-stamp ${verification.status}"><strong>${verification.icon} ${esc(verification.label.toUpperCase())}</strong><span>${esc(verification.issueLabel)}</span></section>
 <section class="identity"><div class="field"><span class="label">Drawing reference / tag</span><strong>${esc(ref)}</strong></div><div class="field"><span class="label">Location</span><strong>${esc(loc)}</strong></div><div class="field"><span class="label">Manufacturer / product</span><strong>${esc(man.label)} ${esc(r.product)}</strong></div><div class="field"><span class="label">Tested method / reference</span><strong>${esc(r.reference)}</strong></div></section>
 <section class="hero"><span class="label">Structural opening / required aperture</span><span class="value">${esc(r.opening)}</span><p>${esc(r.finishedStage||"Finished opening required for the selected verified installation method.")}</p></section>
@@ -1665,7 +1760,7 @@ async function buildFDSiteSheet(){
 <section class="section"><div class="section-head"><h2>Engineering traceability</h2><span class="verified">${verification.icon} ${esc(verification.label)}</span></div><div class="grid engineering-grid"><div class="cell"><span class="label">Manufacturer</span><strong>${esc(verification.traceability.manufacturer)}</strong></div><div class="cell"><span class="label">Product</span><strong>${esc(verification.traceability.product)}</strong></div><div class="cell"><span class="label">Installation method</span><strong>${esc(verification.traceability.installationMethod)}</strong></div><div class="cell"><span class="label">Source document</span><strong>${esc(verification.traceability.sourceDocument)}</strong></div><div class="cell"><span class="label">Source revision</span><strong>${esc(verification.traceability.sourceRevision)}</strong></div><div class="cell"><span class="label">VentTools database</span><strong>${esc(verification.traceability.databaseVersion)}</strong></div></div></section>
 <div class="warning"><strong>Important:</strong> This sheet is an independent site aid. The current ${esc(man.label)} manual, tested installation drawing, project fire strategy and approved supporting construction take precedence. Do not substitute unverified dimensions or installation methods.</div>
 <div class="signoff"><div class="sign">Issued / explained by</div><div class="sign">Date</div><div class="sign">Accepted by</div></div>
-<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.1.0</span></footer>
+<footer><span>Source: ${esc(p.guide)} — ${esc(p.revision)}</span><span>Generated by VentTools V1.3.0</span></footer>
 </main><script>async function shareSheet(){const safeName='VentTools-${esc(ref)}-Site-Instruction.html'.replace(/[^a-z0-9._-]+/gi,'-');const file=new File(['<!doctype html>'+document.documentElement.outerHTML],[safeName],{type:'text/html'});try{if(navigator.share&&navigator.canShare&&navigator.canShare({files:[file]})){await navigator.share({title:document.title,text:'VentTools Site Instruction Sheet — ${esc(ref)}',files:[file]});return}}catch(e){if(e&&e.name==='AbortError')return}const a=document.createElement('a');a.href=URL.createObjectURL(file);a.download=safeName;a.click();setTimeout(()=>URL.revokeObjectURL(a.href),1500)}</script></body></html>`;
 
   try{
@@ -1708,6 +1803,8 @@ function resetFD(){$("fdDatumLevel")&&( $("fdDatumLevel").value=2400);$("fdManuf
 
 const FD_OFFICIAL_RESOURCES={
   "BSB::FSD-TD":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",title:"BSB FSD-TD Installation, Operation and Maintenance Instructions",revision:"V62904"},
+  "BSB::FSD-TD-C":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",title:"BSB FSD-TD-C dimensions and FSD-TD Installation, Operation and Maintenance Instructions",revision:"FSD-TD Series V12607 • IOM V62904"},
+  "BSB::FD-C-AF":{url:BSB_FD_SERIES_URL,title:"BSB FD Series dimensions and verified FD-AF installation method drawings",revision:"V12607",buttonLabel:"Open Official BSB FD Series Method Drawings"},
   "BSB::FD-C":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_c_series_iom.pdf",title:"BSB FD-C Installation, Operation and Maintenance Instructions",revision:"V62904"},
   "BSB::FSD-C":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_c_iom_11zon.pdf",title:"BSB FSD-C Installation, Operation and Maintenance Instructions",revision:"V62904"},
   "BSB::MFD-IC":{url:"https://www.bsb-dampers.co.uk/wp-content/uploads/2026/06/MFD-IC-IOM.pdf",title:"BSB MFD-IC Installation, Operation and Maintenance Instructions",revision:"V012606"},
@@ -1764,6 +1861,7 @@ function resolveFDOfficialResource(){
 function updateFDManualButtonLabel(){
   const link=$("fdManualLink");
   const titleEl=$("fdManualTitle");
+  const brochureLink=$("fdBrochureLink");
   if(!link||!titleEl)return;
 
   // Clear first. A failed lookup can never leave the previous damper visible.
@@ -1772,6 +1870,7 @@ function updateFDManualButtonLabel(){
   link.setAttribute("aria-disabled","true");
   link.innerHTML='<span aria-hidden="true">📄</span> Official manual not mapped';
   titleEl.textContent="Official documentation not yet mapped for this product.";
+  if(brochureLink){brochureLink.hidden=true;brochureLink.removeAttribute("href");}
 
   const resource=resolveFDOfficialResource();
   if(!resource?.man||!resource.url)return;
@@ -1780,10 +1879,11 @@ function updateFDManualButtonLabel(){
   link.target="_blank";
   link.rel="noopener noreferrer";
   link.removeAttribute("aria-disabled");
-  link.innerHTML=`<span aria-hidden="true">📄</span> Open ${resource.offline?"Offline ":"Official "}${resource.man.label} ${productLabel} IOM`;
-  link.setAttribute("aria-label",`Open official ${resource.man.label} ${productLabel} installation manual`);
+  link.innerHTML=`<span aria-hidden="true">📄</span> ${resource.buttonLabel||`Open ${resource.offline?"Offline ":"Official "}${resource.man.label} ${productLabel} IOM`}`;
+  link.setAttribute("aria-label",resource.buttonLabel||`Open official ${resource.man.label} ${productLabel} installation manual`);
   titleEl.textContent=`${resource.man.label} • ${resource.title} • ${resource.revision}${resource.offline?" • bundled offline copy":""}`;
   link.dataset.resourceKey=`${resource.manufacturerKey}::${resource.productKey}`;
+  if(brochureLink&&resource.product?.brochure){brochureLink.href=resource.product.brochure;brochureLink.hidden=false;brochureLink.setAttribute("aria-label",`Open official ${resource.man.label} ${productLabel} product dimensions`);}
 }
 
 function refreshFDManualResource(){
@@ -1890,7 +1990,7 @@ window.addEventListener('appinstalled',()=>{
 });
 
 if(installBtn){
-  if(isIOSDevice() && !isStandaloneMode()) installBtn.hidden=false;
+  if(!isStandaloneMode()) installBtn.hidden=false;
   installBtn.addEventListener('click',async()=>{
     if(deferredInstallPrompt){
       deferredInstallPrompt.prompt();
