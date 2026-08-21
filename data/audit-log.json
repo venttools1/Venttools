@@ -31,9 +31,43 @@
       "family": "All",
       "issue": "Nominal duct and casing/frame dimensions are not interchangeable.",
       "decision": "Every setting-out calculation must identify its geometry reference explicitly."
+    },
+    {
+      "manufacturer": "BSB",
+      "family": "FSD-TD",
+      "issue": "FSD-TD-C uses circular spigots on a rectangular multiblade casing, while FSD-TD-O lacks an explicit orderable flat-oval size/configuration table in the supplied series document.",
+      "decision": "Enable FSD-TD-C only for the listed circular diameter table and calculate through the rectangular casing/method chain. Keep FSD-TD-O verification-required and do not extrapolate flat-oval configurations."
+    },
+    {
+      "manufacturer": "BSB",
+      "family": "FD Series Type C with Angle Frame",
+      "issue": "The product code FD-C-AF can be confused with the separate FD-C Series circular single-blade damper. A site label confirms an FD-C-AF at Ø355.",
+      "decision": "Create a distinct FD-C-AF product path. Apply the FD Series Type C circular-spigot and rectangular-casing geometry before the selected FD-AF method's 10 ±5 mm casing gap. Do not add Ø355 or Ø560 to FSD-TD-C."
     }
   ],
   "entries": [
+    {
+      "date": "2026-08-21",
+      "manufacturer": "BSB",
+      "release": "V2.0.5-BSB-FD-C-AF",
+      "summary": "Added the BSB FD Series FD-C-AF curtain-blade circular-spigot product as a separate calculator family, including verified Ø355 and Ø560 geometry.",
+      "controls": [
+        "FD-C-AF is not conflated with FD-C Series or FSD-TD-C",
+        "Nominal diameter, D-3 spigot, rectangular casing, Angle Frame and aperture remain separate",
+        "FD M9/M10/M11 retain the published 10 ±5 mm casing-gap tolerance"
+      ]
+    },
+    {
+      "date": "2026-08-21",
+      "manufacturer": "BSB",
+      "release": "V2.0.4-BSB-FSD-TD-FAMILY",
+      "summary": "Added listed-diameter FSD-TD-C calculations, explicitly structured FSD-TD-S/C/O variants, and preserved nominal spigot to rectangular casing to clearance to structural opening geometry.",
+      "controls": [
+        "No opening calculated from circular spigot diameter alone",
+        "No diameter extrapolation outside the FSD-TD-C table",
+        "FSD-TD-O remains disabled pending an explicit size/configuration table"
+      ]
+    },
     {
       "date": "2026-07-19",
       "manufacturer": "Lindab",

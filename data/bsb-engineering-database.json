@@ -1,13 +1,19 @@
 {
-  "schemaVersion": "1.2.0",
-  "generated": "2026-07-19",
+  "schemaVersion": "1.4.0",
+  "generated": "2026-08-21",
   "status": "final method audit complete for enabled calculations",
   "manufacturer": "BSB",
   "qualityRule": "Only manufacturer-published dimensions and requirements are enabled. Missing values remain manual-check items.",
   "documents": {
     "FSD-TD": {
       "iom": "V62904",
-      "brochure": "V52404"
+      "brochure": "V12607",
+      "iomUrl": "https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_iom.pdf",
+      "brochureUrl": "https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fsd_td_series.pdf"
+    },
+    "FD-Series": {
+      "brochureAndMethodDrawings": "V12607",
+      "url": "https://www.bsb-dampers.co.uk/wp-content/uploads/2024/07/fd_series.pdf"
     },
     "FD-C": {
       "iom": "V13904",
@@ -38,7 +44,48 @@
   },
   "families": {
     "FSD-TD": {
-      "shape": "rectangular",
+      "shape": "multiblade rectangular casing with S, C or O duct connections",
+      "variants": {
+        "FSD-TD-S": {
+          "connection": "square/rectangular spigot",
+          "calculatorStatus": "verified",
+          "publishedRange": "100 x 100 mm to 1000 x 1000 mm in single section",
+          "spigotGeometry": "duct width -4 mm x duct height -4 mm"
+        },
+        "FSD-TD-C": {
+          "connection": "circular spigot on rectangular multiblade casing",
+          "calculatorStatus": "verified-listed-diameters-only",
+          "spigotGeometry": "outside diameter = nominal circular duct diameter -3 mm",
+          "selectionRule": "Diameter alone must not be used as the casing or opening size.",
+          "dimensionTable": {
+            "100": {"A": 84, "B": 41},
+            "150": {"A": 109, "B": 41},
+            "200": {"A": 84, "B": 41},
+            "250": {"A": 159, "B": 41},
+            "300": {"A": 184, "B": 41},
+            "350": {"A": 159, "B": 41},
+            "400": {"A": 184, "B": 55},
+            "450": {"A": 259, "B": 55},
+            "500": {"A": 284, "B": 55},
+            "550": {"A": 259, "B": 55},
+            "600": {"A": 284, "B": 55},
+            "650": {"A": 359, "B": 55},
+            "700": {"A": 384, "B": 55},
+            "750": {"A": 359, "B": 55},
+            "800": {"A": 384, "B": 55},
+            "850": {"A": 459, "B": 55},
+            "900": {"A": 484, "B": 55},
+            "950": {"A": 459, "B": 55},
+            "1000": {"A": 484, "B": 55}
+          }
+        },
+        "FSD-TD-O": {
+          "connection": "flat oval spigot",
+          "calculatorStatus": "verification-required",
+          "publishedGeometry": "duct width -3 mm x duct height -3 mm",
+          "reasonNotEnabled": "The supplied series document identifies the O geometry but does not provide an explicit orderable flat-oval size/configuration table suitable for validating arbitrary fitter-entered width and height pairs."
+        }
+      },
       "methods": {
         "M5": {
           "construction": "Drywall, non-cleated frameless",
@@ -46,6 +93,8 @@
             "widthAdd": 121,
             "heightAdd": 96
           },
+          "casingEnvelopeFromIomChain": {"widthAdd": 76, "heightAdd": 76},
+          "casingClearance": {"nonActuatorSide": 10, "actuatorSide": 35, "bottom": 10, "top": 10},
           "lined": true,
           "settingOut": {
             "bottomFromNominal": 48,
@@ -60,6 +109,8 @@
             "widthAdd": 156,
             "heightAdd": 96
           },
+          "casingEnvelopeFromIomChain": {"widthAdd": 76, "heightAdd": 76},
+          "casingClearance": {"nonActuatorSide": 40, "actuatorSide": 40, "bottom": 10, "top": 10},
           "lined": true,
           "settingOut": {
             "bottomFromNominal": 48,
@@ -74,6 +125,8 @@
             "widthAdd": 122,
             "heightAdd": 99
           },
+          "casingEnvelopeFromIomChain": {"widthAdd": 77, "heightAdd": 79},
+          "casingClearance": {"nonActuatorSide": 10, "actuatorSide": 35, "bottom": 10, "top": 10},
           "lined": true,
           "settingOut": {
             "bottomFromNominal": 49.5,
@@ -88,6 +141,8 @@
             "widthAdd": 122,
             "heightAdd": 99
           },
+          "casingEnvelopeFromIomChain": {"widthAdd": 77, "heightAdd": 79},
+          "casingClearance": {"nonActuatorSide": 10, "actuatorSide": 35, "bottom": 10, "top": 10},
           "lined": false,
           "ductConnection": "Aluminium rivets; DW144/DW145",
           "source": "IOM masonry method"
@@ -98,9 +153,71 @@
             "widthAdd": 122,
             "heightAdd": 99
           },
+          "casingEnvelopeFromIomChain": {"widthAdd": 77, "heightAdd": 79},
+          "casingClearance": {"nonActuatorSide": 10, "actuatorSide": 35, "bottom": 10, "top": 10},
           "lined": false,
           "ductConnection": "Aluminium rivets; DW144/DW145",
           "source": "IOM floor method"
+        }
+      }
+    },
+    "FD-C-AF": {
+      "shape": "FD Series rectangular curtain-blade casing with Type C circular spigot and Angle Frame",
+      "calculatorStatus": "verified-whole-millimetre-range",
+      "publishedRange": "100 mm to 1000 mm circular nominal diameter, in millimetre increments",
+      "spigotGeometry": "outside diameter = nominal circular duct diameter -3 mm, tolerance ±1 mm",
+      "casingGeometry": {
+        "width": "spigot O.D. +31 mm left +31 mm right",
+        "height100To300": "spigot O.D. +31 mm bottom +31 mm top",
+        "height301To500": "spigot O.D. +31 mm bottom +55 mm top",
+        "height501To750": "spigot O.D. +31 mm bottom +75 mm top",
+        "height751To1000": "spigot O.D. +31 mm bottom +95 mm top"
+      },
+      "angleFrameGeometry": {
+        "width": "nominal diameter +180 mm",
+        "height100To300": "nominal diameter +180 mm",
+        "height301To500": "nominal diameter +204 mm",
+        "height501To750": "nominal diameter +224 mm",
+        "height751To1000": "nominal diameter +244 mm",
+        "openingRule": "Angle Frame outside dimensions are not the aperture dimensions. The tested aperture gap is applied around the rectangular damper casing."
+      },
+      "methods": {
+        "M9": {
+          "construction": "Drywall, Angle Frame, lined opening",
+          "casingGap": "10 ±5 mm all around",
+          "lined": true,
+          "ductConnection": "Break-away joint using aluminium rivets",
+          "source": "FD Series V12607 pages 6 and 10-11"
+        },
+        "M10": {
+          "construction": "150 mm masonry wall, density 650 kg/m³, Angle Frame",
+          "casingGap": "10 ±5 mm all around",
+          "lined": false,
+          "ductConnection": "Break-away joint using aluminium rivets",
+          "source": "FD Series V12607 pages 6 and 12"
+        },
+        "M11": {
+          "construction": "150 mm masonry floor, density 580 kg/m³, Angle Frame",
+          "casingGap": "10 ±5 mm around casing",
+          "lined": false,
+          "ductConnection": "Break-away joint using aluminium rivets",
+          "source": "FD Series V12607 pages 6 and 13"
+        }
+      },
+      "verifiedExamples": {
+        "355": {
+          "spigotOutsideDiameter": 352,
+          "casing": {"width": 414, "height": 438},
+          "angleFrame": {"width": 535, "height": 559},
+          "nominalFinishedAperture": {"width": 434, "height": 458},
+          "M9StructuralCutWith12_5mmLining": {"width": 459, "height": 483}
+        },
+        "560": {
+          "spigotOutsideDiameter": 557,
+          "casing": {"width": 619, "height": 663},
+          "angleFrame": {"width": 740, "height": 784},
+          "nominalFinishedAperture": {"width": 639, "height": 683},
+          "M9StructuralCutWith12_5mmLining": {"width": 664, "height": 708}
         }
       }
     },
@@ -234,7 +351,7 @@
     }
   },
   "audit": {
-    "auditDate": "2026-07-19",
+    "auditDate": "2026-08-21",
     "scope": "All BSB methods exposed by VentTools",
     "rule": "A green calculation requires a published opening rule plus a complete finished-opening/structural-cut and setting-out chain. Drawing-led methods remain amber.",
     "enabledVerified": [
@@ -243,6 +360,14 @@
       "FSD-TD M9",
       "FSD-TD M10",
       "FSD-TD M11",
+      "FSD-TD-C M5",
+      "FSD-TD-C M6",
+      "FSD-TD-C M9",
+      "FSD-TD-C M10",
+      "FSD-TD-C M11",
+      "FD-C-AF M9",
+      "FD-C-AF M10",
+      "FD-C-AF M11",
       "FD-C M9",
       "FD-C M10",
       "FD-C M11",
@@ -258,7 +383,9 @@
       "AT-FSD M9",
       "AT-FSD M10"
     ],
-    "manualOnly": [],
+    "manualOnly": [
+      "FSD-TD-O — connection geometry recorded; orderable size/configuration table requires manufacturer verification before calculator enablement"
+    ],
     "notes": [
       "For lined drywall methods, structural cut is calculated only after the finished aperture is established.",
       "No generic duct-edge datum is substituted where the method is casing-based."
