@@ -217,18 +217,20 @@ function drawOffset(d){
     <text x="${riseX-8}" y="${(v1.y+v2.y)/2+12}" text-anchor="end" font-size="14" class="label">${fmt(d.V)} mm</text>
 
     <line x1="${cutA.x}" y1="${cutA.y}" x2="${cutB.x}" y2="${cutB.y}" class="dimension"/>
-    <text x="${(cutA.x+cutB.x)/2+nDiag.x*18}" y="${(cutA.y+cutB.y)/2+nDiag.y*18}" text-anchor="middle" font-size="15" class="label blue">L ${fmt(d.straight)} mm</text>
+    <text x="${(cutA.x+cutB.x)/2+nDiag.x*18}" y="${(cutA.y+cutB.y)/2+nDiag.y*18}" text-anchor="middle" font-size="15" class="label blue">Straight ${fmt(d.straight)} mm</text>
 
     <text x="${v1.x+10}" y="${v1.y-62}" font-size="14" class="label">${fmt(A)}°</text>
     <text x="${v2.x-20}" y="${v2.y+62}" font-size="14" class="label">${fmt(A)}°</text>
     <text x="380" y="30" text-anchor="middle" font-size="18" class="label">Roll ${fmt(d.roll)}°</text>
   `;
 }
+function getDiameter(){return $('dia').value==='custom'?(parseFloat($('diaCustom').value)||0):(parseFloat($('dia').value)||0)}
+function diameterUI(){const custom=$('dia').value==='custom';$('diaCustom').style.display=custom?'block':'none'}
 function calculateOffset(){
   const V=parseFloat($('up').value)||0;
   const H=parseFloat($('over').value)||0;
   const A=getAngle();
-  const D=parseFloat($('dia').value)||0;
+  const D=getDiameter();
   const minS=parseFloat($('minStraight').value)||0;
   const rmF=parseFloat($('rmFactor').value)||1;
 
@@ -273,7 +275,7 @@ Inputs:
   Minimum straight       = ${fmt(minS)} mm
 
 Results:
-  Cut straight L         = ${fmt(straight)} mm
+  Straight between bends = ${fmt(straight)} mm
   Roll angle             = ${fmt(roll)}°
   Resultant offset R     = ${fmt(R)} mm
   Travel T               = ${fmt(T)} mm
@@ -304,18 +306,18 @@ Results:
   }
   return result;
 }
-function angleUI(){let c=$('angle').value==='custom';$('angleCustom').style.display=c?'block':'none';if(!c)$('angleCustom').value=$('angle').value}function resetOffset(){$('up').value=300;$('over').value=250;$('angle').value='45';$('angleCustom').value=45;$('dia').value=315;$('minStraight').value=120;$('rmFactor').value=1;angleUI();calculateOffset()}async function copyOffset(){let r=calculateOffset();try{await navigator.clipboard.writeText(r);setMsg('ok','✅ Result copied.')}catch(e){setMsg('warn','Could not copy automatically. Long-press working text and copy manually.')}}function toggleWorking(){let o=$('out'),show=o.style.display==='block';o.style.display=show?'none':'block';$('workingBtn').textContent=show?'Show working':'Hide working'}
+function angleUI(){let c=$('angle').value==='custom';$('angleCustom').style.display=c?'block':'none';if(!c)$('angleCustom').value=$('angle').value}function resetOffset(){$('up').value=300;$('over').value=250;$('angle').value='45';$('angleCustom').value=45;$('dia').value='315';$('diaCustom').value=315;$('minStraight').value=120;$('rmFactor').value=1;angleUI();diameterUI();calculateOffset()}async function copyOffset(){let r=calculateOffset();try{await navigator.clipboard.writeText(r);setMsg('ok','✅ Result copied.')}catch(e){setMsg('warn','Could not copy automatically. Long-press working text and copy manually.')}}function toggleWorking(){let o=$('out'),show=o.style.display==='block';o.style.display=show?'none':'block';$('workingBtn').textContent=show?'Show working':'Hide working'}
 function initOffsetCalculator(){
  if(!$('up'))return;
- ['up','over','dia','minStraight','rmFactor','angle','angleCustom'].forEach(id=>{
+ ['up','over','dia','diaCustom','minStraight','rmFactor','angle','angleCustom'].forEach(id=>{
   const el=$(id);if(!el)return;
-  el.addEventListener('input',()=>{angleUI();calculateOffset()});
-  el.addEventListener('change',()=>{angleUI();calculateOffset()});
+  el.addEventListener('input',()=>{angleUI();diameterUI();calculateOffset()});
+  el.addEventListener('change',()=>{angleUI();diameterUI();calculateOffset()});
  });
  $('resetBtn')?.addEventListener('click',resetOffset);
  $('copyBtn')?.addEventListener('click',copyOffset);
  $('workingBtn')?.addEventListener('click',toggleWorking);
- angleUI();calculateOffset();
+ angleUI();diameterUI();calculateOffset();
 }
 const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450,500,560,600,630,710,800,900,1000,1120,1250,1400,1500,1600];
 function nearestStandard(d){let best=standardSpiral[0];for(const size of standardSpiral){if(Math.abs(size-d)<Math.abs(best-d))best=size}return best}

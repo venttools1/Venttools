@@ -47,6 +47,18 @@
   ],
   "entries": [
     {
+      "date": "2026-08-26",
+      "manufacturer": "VentTools",
+      "release": "V2.0.6-OFFSET-UX",
+      "summary": "Improved the mobile offset-calculator controls and site wording without changing the calculation engine.",
+      "controls": [
+        "Straight-cut result is labelled as the cut straight between bends",
+        "Standard circular duct sizes use a quick selector with a custom-size fallback",
+        "Existing bend take-off tables, offset formulae and 120 mm editable swedge-limit warning are unchanged",
+        "The fit warning is displayed immediately below the primary result"
+      ]
+    },
+    {
       "date": "2026-08-21",
       "manufacturer": "BSB",
       "release": "V2.0.5-BSB-FD-C-AF",
