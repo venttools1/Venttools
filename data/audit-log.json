@@ -1,5 +1,5 @@
 {
-  "version": "2.0.7",
+  "version": "2.0.8",
   "blockingPrinciple": "A calculator is disabled where the controlling geometry or installation rule cannot be established from the supplied documents.",
   "items": [
     {
@@ -46,6 +46,19 @@
     }
   ],
   "entries": [
+    {
+      "date": "2026-08-29",
+      "manufacturer": "VentTools",
+      "release": "V2.0.8-FD-USABILITY-AND-LINING-CONTROL",
+      "summary": "Improved independent product identification, made the complete opening chain permanently visible and prevented alternative reveal-lining thicknesses from being presented as manufacturer-verified.",
+      "controls": [
+        "Original VentTools line diagrams are generic identification aids and are not manufacturer photographs or scale drawings",
+        "Nominal duct, casing, finished aperture and structural cut remain visible without expanding a disclosure",
+        "12.5 mm remains the recorded reference reveal lining where the selected mapped method includes one layer at each internal edge",
+        "A 15 mm reveal-lining selection recalculates the structural cut but is explicitly marked review required",
+        "Wall-face board layers remain separate from the aperture reveal-lining calculation"
+      ]
+    },
     {
       "date": "2026-08-29",
       "manufacturer": "VentTools",

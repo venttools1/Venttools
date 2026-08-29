@@ -514,7 +514,7 @@ function getFDVerification(r){
     sourceRevision:{pass:taught.sourceRevisionVerified===true && !!p?.revision,label:"Source revision recorded",reason:p?.revision||"No revision recorded."},
     openingCalculation:{pass:taught.openingRuleVerified===true && !!r && !r.error && !r.invalidSize && !r.isLinkOnly && r.statusType!=="manual",label:"Opening calculation verified",reason:r?.sourceStatus||"No calculated result."},
     finishedOpening:{pass:(r?.noBuilderOpening===true || r?.noSeparateFinishedOpening===true || !!r?.finishedStage) && !r?.invalidSize && !r?.isLinkOnly,label:"Finished opening verified",reason:r?.noSeparateFinishedOpening===true?"Manufacturer publishes one structural D-hole and a sealing/infill detail inside it; no separate finished clear-opening dimension is specified.":(r?.finishedStage||"The formed/finished aperture is not separately recorded.")},
-    apertureLining:{pass:!r?.includesLining || (r?.liningMapped===true && Number(r?.structuralLiningBottom)>0 && !!r?.cutStage && !!r?.finishedStage),label:"Aperture lining build-up verified",reason:!r?.includesLining?"Selected method does not add a separate aperture lining.":(r?.liningMapped===true&&Number(r?.structuralLiningBottom)>0?`One ${r.structuralLiningBottom} mm fire-rated lining layer is accounted for at each internal edge; opposite edges add ${2*Number(r.structuralLiningBottom)} mm per dimension.`:"Lining is required but its thickness/build-up is not mapped.")},
+    apertureLining:{pass:!r?.includesLining || (r?.liningMapped===true && Number(r?.structuralLiningBottom)>0 && !!r?.cutStage && !!r?.finishedStage && !r?.requiresLiningApproval),label:"Aperture lining build-up verified",reason:!r?.includesLining?"Selected method does not add a separate aperture lining.":r?.requiresLiningApproval?`${r.structuralLiningBottom} mm changes the geometry but is not confirmed by the recorded tested method; manufacturer, fire-strategy or accepting-authority review is required.`:(r?.liningMapped===true&&Number(r?.structuralLiningBottom)>0?`One ${r.structuralLiningBottom} mm fire-rated lining layer is accounted for at each internal edge; opposite edges add ${2*Number(r.structuralLiningBottom)} mm per dimension.`:"Lining is required but its thickness/build-up is not mapped.")},
     structuralCut:{pass:(r?.noBuilderOpening===true || !!r?.cutStage) && (!r?.includesLining || (r?.liningMapped===true && Number(r?.cutW)>Number(r?.finishedW) && Number(r?.cutH)>Number(r?.finishedH))),label:"Structural cut verified separately",reason:r?.cutStage||"The structural builder cut is not separately recorded."},
     builderSettingOut:{pass:(r?.noBuilderOpening===true || (taught.builderSettingOutVerified===true && settingMapped)) && !r?.invalidSize && !r?.isLinkOnly,label:"Builder setting-out verified",reason:activeSetting?.source||"Nominal duct → casing → clearance → lining chain is not fully mapped."}
   };
@@ -821,6 +821,71 @@ function currentFD(){
   const m=p?.methods?.[methodKey];
   return{man,p,m,manKey,productKey,methodKey};
 }
+const FD_PRODUCT_IDENTITIES={
+  "BSB::FSD-TD":{kind:"rect-motor",description:"Rectangular-spigot motorised multiblade fire/smoke damper.",cue:"rectangular duct spigots, a rectangular multiblade casing and an external actuator."},
+  "BSB::FSD-TD-C":{kind:"round-rect-motor",description:"Circular-spigot version of the motorised FSD-TD multiblade family. The circular duct does not mean the casing is circular.",cue:"round spigots attached to a rectangular multiblade casing with an external actuator."},
+  "BSB::FD-C-AF":{kind:"round-rect-curtain",description:"Mechanical curtain-blade FD Series damper with Type C circular spigots and a rectangular Angle Frame casing.",cue:"round spigots, a rectangular curtain-blade body and the perimeter angle frame; confirm FD-C-AF on the label."},
+  "BSB::FD-C":{kind:"round-manual",description:"Compact circular single-blade fire damper with external reset mechanism.",cue:"a circular body and manual reset mechanism; do not confuse it with the rectangular-casing FD-C-AF."},
+  "BSB::FSD-C":{kind:"round-motor",description:"Circular single-blade fire/smoke damper with an external actuator.",cue:"a circular body, one internal blade and a motor or actuator mounted outside."},
+  "BSB::MFD-IC":{kind:"round-motor",description:"Motorised insulated circular fire damper with a circular casing and external actuator.",cue:"the MFD-IC model code, insulated circular body and actuator arrangement."},
+  "BSB::AT-FSD":{kind:"air-transfer",description:"Unducted rectangular air-transfer fire/smoke damper for a prepared wall opening.",cue:"a rectangular sleeved frame without ordinary duct spigots; confirm the AT-FSD label."},
+  "ACTIONAIR::CSS":{kind:"round-motor",description:"Circular Actionair fire/smoke damper family. Selection depends on casing reference and tested construction.",cue:"the exact CSS model label, overall casing diameter and actuator arrangement."},
+  "ACTIONAIR::DWFX-F":{kind:"rect-motor",description:"Rectangular damper family using method-specific casing, opening and frame rules.",cue:"the SmokeShield or FireShield label, rectangular casing and any PTC shroud or actuator-side projection."},
+  "ACTIONAIR::HEVAC-IF":{kind:"installation-frame",description:"Rectangular damper fitted through a separate HEVAC/HVCA installation frame.",cue:"the damper casing inside a larger installation-frame upstand; measure the reference stated by the method."},
+  "ACTIONAIR::SPAN":{kind:"installation-frame",description:"SmokeShield PTC SPAN arrangement with a large builder opening and fire-protection infill zone.",cue:"the 501 rectangular or 601 circular format and the overall case outside the nominal duct."},
+  "LINDAB::FNC1":{kind:"round-motor",description:"Circular fire damper family with method-specific wall or floor opening allowances.",cue:"the FNC1 code, circular casing and the selected tested sealing detail."},
+  "LINDAB::FNC1U":{kind:"round-motor",description:"Circular FNC1U family retained as a separate product record.",cue:"the complete FNC1U label; this must not inherit the FNC1 opening rule automatically."},
+  "LINDAB::WH25":{kind:"rect-motor",description:"Rectangular fire/smoke damper family with installation-specific opening geometry.",cue:"the WH25 code, rectangular casing and actuator position."},
+  "LINDAB::WH45":{kind:"rect-motor",description:"Rectangular fire/smoke damper family retained separately from WH25.",cue:"the WH45 code and the exact tested wall or floor method."},
+  "LINDAB::WK25":{kind:"rect-motor",description:"Rectangular damper family that can include approved single or paired assemblies.",cue:"the WK25 code, measured joined assembly where paired and the blade-axis arrangement."},
+  "LINDAB::WK45":{kind:"rect-motor",description:"Rectangular damper family with method-specific fixed or ranged openings.",cue:"the WK45 code and the opening type shown by the selected installation drawing."},
+  "LINDAB::WKS25":{kind:"rect-motor",description:"Rectangular smoke-control damper with different rigid, light, gypsum and shaft-wall details.",cue:"the WKS25 code and the exact supporting-construction type."},
+  "ADVANCED_AIR::0160":{kind:"rect-curtain",description:"Rectangular curtain fire damper with AFS or panel-specific installation methods.",cue:"the 0160 code, curtain-blade casing and the approved AFS or Trimoterm detail."},
+  "ADVANCED_AIR::2530":{kind:"rect-motor",description:"Motorised rectangular fire damper with AFS or HEVAC installation options.",cue:"the 2530 code, actuator and whether an AFS or HEVAC frame is supplied."},
+  "ADVANCED_AIR::26SCD":{kind:"rect-motor",description:"Rectangular smoke-control damper with wall-mounted and remote duct-mounted methods.",cue:"the 26SCD label and whether the damper is in the wall, in-line or side-mounted remotely."},
+  "ADVANCED_AIR::0400MAN":{kind:"round-manual",description:"Manual circular fire damper in the Advanced Air 0400 family.",cue:"the 0400MAN code and manual release/reset arrangement."},
+  "ADVANCED_AIR::0400FME":{kind:"round-motor",description:"Motorised circular fire damper in the Advanced Air 0400 family.",cue:"the 0400FME code and external motor arrangement."},
+  "ADVANCED_AIR::0500MAN":{kind:"round-manual",description:"Manual circular fire damper in the Advanced Air 0500 family.",cue:"the 0500MAN code and manual release/reset arrangement."},
+  "ADVANCED_AIR::0500FME":{kind:"round-motor",description:"Motorised circular fire damper in the Advanced Air 0500 family.",cue:"the 0500FME code and external motor arrangement."}
+};
+function fdProductSketchMarkup(kind){
+  const line='stroke="#164b6b" stroke-width="4" stroke-linecap="round" stroke-linejoin="round"';
+  const fill='fill="#dbeaf3"';
+  const motor='<rect x="164" y="22" width="34" height="30" rx="5" fill="#ffb566" stroke="#9a4d00" stroke-width="3"/><line x1="164" y1="48" x2="150" y2="64" stroke="#9a4d00" stroke-width="3"/>';
+  if(kind==="round-rect-motor"||kind==="round-rect-curtain")return `<ellipse cx="42" cy="75" rx="25" ry="43" ${fill} ${line}/><rect x="42" y="32" width="118" height="86" rx="7" ${fill} ${line}/><ellipse cx="160" cy="75" rx="25" ry="43" fill="#eef6fb" ${line}/>${kind==="round-rect-curtain"?'<path d="M68 45v60M86 45v60M104 45v60M122 45v60M140 45v60" '+line+'/>':'<path d="M55 52h92M55 68h92M55 84h92M55 100h92" '+line+'/>'}${kind==="round-rect-motor"?motor:'<rect x="86" y="12" width="31" height="20" rx="4" fill="#ffb566" stroke="#9a4d00" stroke-width="3"/>'}`;
+  if(kind==="round-motor"||kind==="round-manual")return `<circle cx="104" cy="76" r="51" ${fill} ${line}/><circle cx="104" cy="76" r="40" fill="#eef6fb" ${line}/><line x1="73" y1="76" x2="135" y2="76" ${line}/>${kind==="round-motor"?motor:'<path d="M104 25V10M104 10h25" '+line+'/><circle cx="132" cy="10" r="6" fill="#ffb566" stroke="#9a4d00" stroke-width="3"/>'}`;
+  if(kind==="installation-frame")return `<rect x="20" y="19" width="180" height="108" rx="8" fill="#eef6fb" ${line}/><rect x="49" y="40" width="122" height="66" rx="5" ${fill} ${line}/><path d="M61 55h98M61 70h98M61 85h98" ${line}/>${motor}`;
+  if(kind==="air-transfer")return `<rect x="24" y="24" width="172" height="102" rx="7" fill="#eef6fb" ${line}/><rect x="45" y="42" width="130" height="66" rx="4" ${fill} ${line}/><path d="M56 53h108M56 66h108M56 79h108M56 92h108" ${line}/>`;
+  const curtain=kind==="rect-curtain"?'<path d="M53 38v78M72 38v78M91 38v78M110 38v78M129 38v78M148 38v78" '+line+'/>':'<path d="M45 48h118M45 66h118M45 84h118M45 102h118" '+line+'/>';
+  return `<rect x="32" y="27" width="144" height="98" rx="7" ${fill} ${line}/>${curtain}${kind==="rect-motor"?motor:''}`;
+}
+function updateFDProductIdentity(){
+  const {man,p,m,manKey,productKey}=currentFD();
+  if(!man||!p)return;
+  const identity=FD_PRODUCT_IDENTITIES[`${manKey}::${productKey}`]||{kind:p.shape==="circle"?"round-motor":"rect-motor",description:"Manufacturer-specific fire damper record with a separate tested installation method.",cue:"the complete model code on the damper label, schedule and current official manual."};
+  if($("fdProductIdentityTitle"))$("fdProductIdentityTitle").textContent=`${man.label} · ${p.label}`;
+  if($("fdProductIdentityDescription"))$("fdProductIdentityDescription").textContent=identity.description;
+  if($("fdProductIdentityCue"))$("fdProductIdentityCue").textContent=`${identity.cue}${m?.label?` Selected method: ${m.label}.`:""}`;
+  if($("fdProductSketchLayer"))$("fdProductSketchLayer").innerHTML=fdProductSketchMarkup(identity.kind);
+}
+function syncFDLiningReviewNotices(){
+  const main=Number($("fdBoardThickness")?.value||0)!==12.5;
+  const dwfx=Number($("fdDwfxBoard")?.value||0)!==12.5;
+  if($("fdLiningReviewNote"))$("fdLiningReviewNote").hidden=!main;
+  if($("fdDwfxLiningReviewNote"))$("fdDwfxLiningReviewNote").hidden=!dwfx;
+}
+function applyFDLiningApprovalState(result){
+  if(!result?.includesLining)return result;
+  const board=Number(result.structuralLiningBottom);
+  if(!Number.isFinite(board)||board<=0)return result;
+  if(Math.abs(board-12.5)>0.01){
+    result.requiresLiningApproval=true;
+    result.sourceStatus=`Review required — ${fmt(board)} mm reveal lining is not confirmed by the recorded tested method`;
+    result.statusType="warning";
+    result.criticalRules=[`Alternative reveal lining: the ${fmt(board)} mm selection changes the calculated structural cut but must be confirmed against the current manufacturer method, approved fire strategy or accepting authority before issue.`,...(result.criticalRules||[])];
+  }
+  return result;
+}
 function fillFDProducts(){
   const manKey=String($("fdManufacturer")?.value||"").trim();
   const man=FD_MANUFACTURERS[manKey],s=$("fdSeries");
@@ -847,6 +912,8 @@ function fillFDMethods(){
   Object.entries(p?.methods||{}).forEach(([k,v])=>{const o=document.createElement("option");o.value=String(k);o.textContent=v.label;sel.appendChild(o)});
   if(previous&&p?.methods?.[previous])sel.value=previous;
   if(!sel.value&&sel.options.length)sel.selectedIndex=0;
+  if($("fdBoardThickness"))$("fdBoardThickness").value="12.5";
+  if($("fdDwfxBoard"))$("fdDwfxBoard").value="12.5";
   if(!p||!sel.options.length){
     window.__lastFDResult=null;updateFDManualButtonLabel();
     const answer=$("fdSettingAnswer"),status=$("fdSettingStatus");
@@ -878,6 +945,8 @@ function configureDwfx(m){const variant=$("fdDwfxVariant").value;const isSmoke=v
      :'Enter the measured overall casing width and height. For SmokeShield, the measured width must include the 28 mm PTC shroud. Do not include the peripheral flange.';
 }
 function updateFDInputs(){const {p,m,productKey}=currentFD(),circle=p.shape==="circle",dwfx=productKey==="DWFX-F",hevac=productKey==="HEVAC-IF",span=productKey==="SPAN",wk25=productKey==="WK25";
+  updateFDProductIdentity();
+  syncFDLiningReviewNotices();
   $("fdRectInputs").style.display=p.shape==="rect"?"block":"none";
   $("fdCircularInputs").style.display=circle?"block":"none";
   $("fdDwfxWrap").style.display=dwfx?"block":"none";
@@ -1181,7 +1250,7 @@ function calcFD(){const aaDirect=calculateAdvancedAirDirect();if(aaDirect)return
         const breakdown=automatic
           ?`Nominal duct ${fmt0(W)} × ${fmt0(H)} mm. Spigot ${fmt0(spigotW)} × ${fmt0(spigotH)} mm. Base casing ${fmt0(baseCasingW)} × ${fmt0(baseCasingH)} mm. PTC shroud adds 28 mm on the actuator side, giving the opening-measurement casing ${fmt0(casingW)} × ${fmt0(casingH)} mm. Overall peripheral flange ${fmt0(flangeW)} × ${fmt0(flangeH)} mm (not included in the opening calculation). Minimum actuator removal clearance: 120 mm.`
           :`Measured casing used directly: ${fmt0(casingW)} × ${fmt0(casingH)} mm${actualVariant==="SMOKE"?" including the PTC shroud":""}, excluding the peripheral flange.`;
-        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm${hasBoards?" cut size":""}`,damper:automatic?`${fmt0(W)} × ${fmt0(H)} mm nominal duct`:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening ${fmt0(finishedW)} × ${fmt0(finishedH)} mm: casing +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${hasBoards?`; cut size adds ${m.boardsW||0} × ${fmt0(board)} mm board to width and ${m.boardsH||0} × ${fmt0(board)} mm board to height`:""}`,reference:ref,variant:actualVariant,range:`${breakdown} Minimum separation: 200 mm between dampers in separate ducts and 75 mm from a damper to an adjacent wall or floor.`,nominalStage:automatic?`${fmt0(W)} × ${fmt0(H)} mm`:"Measured casing input",casingStage:automatic?`${fmt0(casingW)} × ${fmt0(casingH)} mm incl. PTC shroud`:`${fmt0(casingW)} × ${fmt0(casingH)} mm measured`,finishedStage:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm`,cutStage:`${fmt0(cutW)} × ${fmt0(cutH)} mm`,sourceStatus:automatic?"Verified from Actionair DWFX-F dimensional data pages 14–15":"Manual casing measurement required",statusType:automatic?"verified":"manual",settingOut:automatic?{basis:"casing-edge",casingProjectionBottom:autoDims.bottomProjection,casingProjectionTop:autoDims.topProjection,bottomClearance:ha/2,topClearance:ha/2,source:`Actionair DWFX-F LNNN00354 v6.0 pages 3–9 and 14–15: SmokeShield casing derived from nominal duct size; selected finished-opening allowance split equally above and below the casing.`}:null,structuralLiningBottom:hasBoards?board:0,criticalRules:[`Permitted finished-opening allowance selected: +${fmt0(wa)} mm width and +${fmt0(ha)} mm height.`,`Include the 28 mm PTC shroud in the casing width; exclude the peripheral flange.`,hasBoards?`Structural cut includes the certified board build-up (${m.boardsW||0} board thicknesses in width and ${m.boardsH||0} in height).`:"No additional board build-up is applied by this selected method.",`Minimum spacing: 200 mm between separate dampers and 75 mm from adjacent wall/floor for this Actionair method.`,`Allow at least 120 mm actuator removal clearance.`]};
+        r={shape:"rect",manufacturer:man.label,product:productKey,method:methodKey,nomW:W,nomH:H,openW:cutW,openH:cutH,opening:`${fmt0(cutW)} × ${fmt0(cutH)} mm${hasBoards?" cut size":""}`,damper:automatic?`${fmt0(W)} × ${fmt0(H)} mm nominal duct`:`${fmt0(W)} × ${fmt0(H)} mm measured casing`,rule:`Finished opening ${fmt0(finishedW)} × ${fmt0(finishedH)} mm: casing +${fmt0(wa)} mm width / +${fmt0(ha)} mm height${hasBoards?`; cut size adds ${m.boardsW||0} × ${fmt0(board)} mm board to width and ${m.boardsH||0} × ${fmt0(board)} mm board to height`:""}`,reference:ref,variant:actualVariant,range:`${breakdown} Minimum separation: 200 mm between dampers in separate ducts and 75 mm from a damper to an adjacent wall or floor.`,nominalStage:automatic?`${fmt0(W)} × ${fmt0(H)} mm`:"Measured casing input",casingStage:automatic?`${fmt0(casingW)} × ${fmt0(casingH)} mm incl. PTC shroud`:`${fmt0(casingW)} × ${fmt0(casingH)} mm measured`,finishedStage:`${fmt0(finishedW)} × ${fmt0(finishedH)} mm`,cutStage:`${fmt0(cutW)} × ${fmt0(cutH)} mm`,sourceStatus:automatic?"Verified from Actionair DWFX-F dimensional data pages 14–15":"Manual casing measurement required",statusType:automatic?"verified":"manual",settingOut:automatic?{basis:"casing-edge",casingProjectionBottom:autoDims.bottomProjection,casingProjectionTop:autoDims.topProjection,bottomClearance:ha/2,topClearance:ha/2,source:`Actionair DWFX-F LNNN00354 v6.0 pages 3–9 and 14–15: SmokeShield casing derived from nominal duct size; selected finished-opening allowance split equally above and below the casing.`}:null,includesLining:!!hasBoards,liningMapped:!!hasBoards,structuralLiningBottom:hasBoards?board:0,criticalRules:[`Permitted finished-opening allowance selected: +${fmt0(wa)} mm width and +${fmt0(ha)} mm height.`,`Include the 28 mm PTC shroud in the casing width; exclude the peripheral flange.`,hasBoards?`Structural cut includes the certified board build-up (${m.boardsW||0} board thicknesses in width and ${m.boardsH||0} in height).`:"No additional board build-up is applied by this selected method.",`Minimum spacing: 200 mm between separate dampers and 75 mm from adjacent wall/floor for this Actionair method.`,`Allow at least 120 mm actuator removal clearance.`]};
       }
     }
   }else if(productKey==="HEVAC-IF"){
@@ -1438,6 +1507,11 @@ function calcFD(){const aaDirect=calculateAdvancedAirDirect();if(aaDirect)return
    }
  }
 
+ if(r&&!r.error){
+   r=applyFDLiningApprovalState(r);
+   syncFDLiningReviewNotices();
+ }
+
  const nominalStage=r.nominalStage||(r.shape==="circle"?r.damper:(r.damper||"—"));
  const casingStage=r.casingStage||(r.damper||"—");
  const finishedStage=r.finishedStage||(r.opening||"—");
@@ -1515,6 +1589,7 @@ function calcFD(){const aaDirect=calculateAdvancedAirDirect();if(aaDirect)return
  try{refreshFDManualResource();}catch(err){console.error("VentTools manual resource",err);}
  const range=r.range?` ${r.range}`:"";if(r.invalidSize)fdMsg("bad",`⚠ Size is outside the range recorded from the uploaded ${p.guide}.`);
 else if(r.isLinkOnly)fdMsg("warn",`⚠ This product has multiple installation-specific opening rules. Select and verify the applicable official ${man.label} drawing before construction.`);
+else if(r.requiresLiningApproval)fdMsg("warn",`⚠ The structural hole has been calculated using ${fmt(r.structuralLiningBottom)} mm aperture reveal lining, but that thickness is not confirmed by the recorded tested method. Obtain manufacturer, fire-strategy or accepting-authority confirmation before issue or construction.`);
 else fdMsg("ok",`✅ Verified from the selected ${man.label} tested installation method.${hasStructuredRange?" Permitted minimum and maximum openings are shown below.":range} The stated opening includes the manufacturer-specified casing build-up and installation/expansion gaps where published. Verify the current official manual before construction.`);return r}
 
 function renderFDInstallationRequirements(rules,selectionToken=""){

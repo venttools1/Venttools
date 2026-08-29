@@ -6,7 +6,7 @@
 <title>Fire Damper Opening Calculator — VentTools</title><meta name="description" content="Calculate manufacturer-specific fire damper finished apertures, structural openings and setting-out levels from verified installation methods."><meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"><link rel="canonical" href="https://venttools.com/fire-damper-opening-calculator/">
 <meta property="og:type" content="website"><meta property="og:site_name" content="VentTools"><meta property="og:title" content="Fire Damper Opening Calculator — VentTools"><meta property="og:description" content="Calculate manufacturer-specific fire damper finished apertures, structural openings and setting-out levels from verified installation methods."><meta property="og:url" content="https://venttools.com/fire-damper-opening-calculator/"><meta property="og:image" content="https://venttools.com/assets/site-fire-damper.webp">
 <meta name="twitter:card" content="summary"><meta name="twitter:title" content="Fire Damper Opening Calculator — VentTools"><meta name="twitter:description" content="Calculate manufacturer-specific fire damper finished apertures, structural openings and setting-out levels from verified installation methods."><meta name="twitter:image" content="https://venttools.com/assets/site-fire-damper.webp">
-<link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/style.css?v=2.0.7"><link rel="stylesheet" href="/v2.css?v=2.0.7">
+<link rel="icon" href="/icon-192.png"><link rel="apple-touch-icon" href="/icon-192.png"><link rel="manifest" href="/manifest.webmanifest"><link rel="stylesheet" href="/style.css?v=2.0.8"><link rel="stylesheet" href="/v2.css?v=2.0.8">
 <script type="application/ld+json">{"@context":"https://schema.org","@type":"WebApplication","name":"Fire Damper Opening Calculator — VentTools","url":"https://venttools.com/fire-damper-opening-calculator/","description":"Calculate manufacturer-specific fire damper finished apertures, structural openings and setting-out levels from verified installation methods.","isAccessibleForFree":true,"inLanguage":"en-GB","publisher":{"@type":"Organization","name":"VentTools","url":"https://venttools.com/","logo":{"@type":"ImageObject","url":"https://venttools.com/assets/venttools-k-fan-logo.webp"}}}</script>
 </head>
 <body data-page="fire">
@@ -47,6 +47,16 @@
 <div><label for="fdSeries">Product / series</label><select id="fdSeries"></select></div>
 </div>
 <label for="fdMethod">Select Certified Installation Method</label><select id="fdMethod"></select>
+<section aria-live="polite" class="fd-product-identity" id="fdProductIdentity">
+<div aria-hidden="true" class="fd-product-sketch"><svg id="fdProductSketch" role="img" viewbox="0 0 220 145" xmlns="http://www.w3.org/2000/svg"><g id="fdProductSketchLayer"></g></svg></div>
+<div class="fd-product-identity-copy">
+<span class="fd-section-kicker">Product identification aid</span>
+<strong id="fdProductIdentityTitle">Select a manufacturer and product</strong>
+<p id="fdProductIdentityDescription">A VentTools-generated line sketch and identifying features will appear here.</p>
+<p class="fd-product-cue"><strong>Look for:</strong> <span id="fdProductIdentityCue">the exact model code on the damper label and approved schedule.</span></p>
+<small>Original VentTools schematic · not a manufacturer photograph · not to scale</small>
+</div>
+</section>
 <div class="fd-manual-banner" role="note">
 <div class="fd-manual-banner-copy">
 <span class="fd-section-kicker">Official manufacturer instructions</span>
@@ -72,7 +82,7 @@
 <div><label for="fdDwfxInputBasis">Dimensions entered</label><select id="fdDwfxInputBasis"><option value="NOMINAL">Nominal duct size — calculate SmokeShield casing</option><option value="MEASURED">Measured overall casing size</option></select></div>
 </div>
 <div class="row">
-<div><label for="fdDwfxBoard">Aperture lining-board thickness (mm)</label><input id="fdDwfxBoard" min="0" step="0.5" type="number" value="12.5"/></div>
+<div><label for="fdDwfxBoard">Aperture reveal-lining thickness — not wall-face boards</label><select id="fdDwfxBoard"><option selected value="12.5">12.5 mm — recorded reference</option><option value="15">15 mm — review required</option></select><div class="hint" id="fdDwfxBoardPolicyHint">12.5 mm is the recorded reference. A 15 mm reveal recalculates the cut but requires confirmation for the selected tested method.</div><div class="fd-lining-review-note" hidden id="fdDwfxLiningReviewNote">15 mm changes the structural cut but is not automatically a verified substitution for this tested method. Confirm it with the manufacturer, approved fire strategy or accepting authority.</div></div>
 <div class="fd-dimension-key" id="fdDwfxDimensionKey">
 <strong>SmokeShield automatic dimensions</strong>
 <span>Nominal duct → casing → 28 mm PTC shroud → finished opening.</span>
@@ -121,7 +131,7 @@
 </div>
 <div id="fdCircularInputs" style="display:none">
 <label for="fdDiameter" id="fdDiameterLabel">Nominal damper diameter (mm)</label><input id="fdDiameter" min="1" type="number" value="250"/><div class="hint" hidden id="fdCircularProductHint"></div>
-<div id="fdBoardWrap" style="display:none"><label for="fdBoardThickness">Single board thickness lining each internal edge of the cut aperture (mm)</label><input id="fdBoardThickness" min="0" step="0.5" type="number" value="12.5"/><div class="hint">The cut size adds one lining-board thickness at each opposite edge: two thicknesses overall in width and two overall in height. Wall-face boards are not added again.</div></div>
+<div id="fdBoardWrap" style="display:none"><label for="fdBoardThickness">Aperture reveal-lining thickness — not wall-face boards</label><select id="fdBoardThickness"><option selected value="12.5">12.5 mm — recorded reference</option><option value="15">15 mm — review required</option></select><div class="hint" id="fdBoardPolicyHint">The structural cut adds one reveal-lining thickness at each opposite edge. Wall-face layers are not added again. A 15 mm reveal remains review-required unless the selected method explicitly confirms it.</div><div class="fd-lining-review-note" hidden id="fdLiningReviewNote">15 mm changes the structural cut but is not automatically a verified substitution for this tested method. Confirm it with the manufacturer, approved fire strategy or accepting authority.</div></div>
 <div id="fdWallBuildWrap" style="display:none"><label for="fdWallBuild">Plasterboard wall method</label><select id="fdWallBuild"><option value="AA/F13440">AA/F13440 — 1 × Type F board each wall face</option><option value="AA/F12820">AA/F12820 — 2 × Type F boards each wall face</option></select></div>
 <div id="fdShapeWrap" style="display:none"><label for="fdApertureShape">Aperture shape</label><select id="fdApertureShape"><option value="square">Square opening</option><option value="circular">Circular opening</option></select></div>
 <div id="fdAllowanceWrap" style="display:none"><label for="fdAllowance">Total clearance added to casing diameter (mm)</label><select id="fdAllowance"></select><div class="hint" id="fdAllowanceHint"></div></div>
@@ -149,8 +159,8 @@
 <div class="fd-section-kicker">Certified Installation Method</div>
 <div class="fd-method-value" id="fdMethodBig">—</div>
 </div>
-<details class="fd-calculation-details fd-damper-details">
-<summary>Damper &amp; Opening Details</summary>
+<section aria-labelledby="fdVisibleCalculationTitle" class="fd-calculation-details fd-damper-details fd-calculation-always-visible">
+<div class="fd-visible-summary-heading"><span class="fd-section-kicker">Full dimension chain</span><strong id="fdVisibleCalculationTitle">Damper &amp; Opening Details</strong></div>
 <div aria-label="Damper and opening calculation breakdown" class="fd-build-flow">
 <div class="fd-flow-card">
 <span class="fd-flow-label">Nominal Damper Size</span>
@@ -184,7 +194,7 @@
 <div class="fd-trust-note">
         Shows the nominal size, casing or frame build-up, tested opening allowance, lining and final structural cut.
       </div>
-</details>
+</section>
 <details class="fd-reference-details fd-installation-details">
 <summary>Installation Requirements</summary>
 <div class="fd-critical-rules">
@@ -303,9 +313,9 @@
 </div>
 <footer class="vt-site-footer">
   <div class="vt-site-footer-inner">
-    <div><strong class="footer-live-note">VentTools V2.0.7</strong><p>Independent ventilation tools built from site experience.</p><p>Fire-damper results must be checked against the current manufacturer IOM and project fire strategy.</p></div>
+    <div><strong class="footer-live-note">VentTools V2.0.8</strong><p>Independent ventilation tools built from site experience.</p><p>Fire-damper results must be checked against the current manufacturer IOM and project fire strategy.</p></div>
     <nav class="vt-footer-links" aria-label="Site information">
       <a href="/guides/">Guides</a><a href="/engineering">Engineering verification</a><a href="/about">About</a><a href="/contact">Contact</a><a href="/privacy">Privacy</a><a href="/cookies">Cookies</a><a href="/terms">Terms</a><a href="/disclaimer">Disclaimer</a><button onclick="openCookiePreferences()" type="button">Cookie preferences</button>
     </nav>
   </div>
-</footer><script src="/script.js?v=2.0.7"></script></body></html>
+</footer><script src="/script.js?v=2.0.8"></script></body></html>
