@@ -1,5 +1,5 @@
 {
-  "version": "7.0.0-beta.1",
+  "version": "2.0.7",
   "blockingPrinciple": "A calculator is disabled where the controlling geometry or installation rule cannot be established from the supplied documents.",
   "items": [
     {
@@ -46,6 +46,18 @@
     }
   ],
   "entries": [
+    {
+      "date": "2026-08-29",
+      "manufacturer": "VentTools",
+      "release": "V2.0.7-PUBLIC-VERIFICATION",
+      "summary": "Published the engineering verification method and author accountability as static public content while preserving the V2.0.6 calculation baseline.",
+      "controls": [
+        "The V2.0.6 bend take-off tables and common offset arithmetic remain unchanged",
+        "A measured one-bend take-off can be entered for delivered fittings that differ from the recorded table",
+        "Fire-damper calculation code and structured manufacturer rules remain unchanged",
+        "Public guides distinguish nominal duct, casing, finished aperture, structural opening and reveal lining"
+      ]
+    },
     {
       "date": "2026-08-26",
       "manufacturer": "VentTools",

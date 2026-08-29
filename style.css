@@ -900,6 +900,50 @@ button:focus-visible,.toolbtn:focus-visible,input:focus-visible,select:focus-vis
 .standalone-home-link{display:inline-block;text-decoration:none;color:inherit}
 .standalone-legal .contact-home-btn{text-align:center;text-decoration:none}
 
+/* V2.0.7 — public expertise, guides and engineering verification */
+.guide-shell{max-width:920px;margin:0 auto;padding:18px 14px 52px}
+.guide-topbar{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:14px}
+.guide-topbar a{color:#075d9a;font-weight:850;text-decoration:none}
+.guide-hero{padding:28px;border-radius:22px;background:linear-gradient(135deg,#062d4f,#0b5e98);color:#fff;box-shadow:0 14px 34px rgba(6,45,79,.16)}
+.guide-hero .eyebrow{color:#ffb067}
+.guide-hero h1{max-width:760px;margin:7px 0 10px;color:#fff;font-size:clamp(30px,6vw,48px);line-height:1.08}
+.guide-hero p{max-width:760px;margin:0;color:#e7f4ff;font-size:1.04rem;line-height:1.65}
+.guide-byline{display:flex;flex-wrap:wrap;gap:8px 14px;margin-top:16px;color:#cfe6f6;font-size:.9rem;font-weight:750}
+.guide-card{margin:16px 0;padding:22px;border:1px solid #d7e2ea;border-radius:18px;background:#fff;box-shadow:0 8px 24px rgba(15,23,42,.05)}
+.guide-card h2{margin:0 0 11px;color:#14324d;font-size:1.55rem}
+.guide-card h3{margin:20px 0 8px;color:#193e5c}
+.guide-card p,.guide-card li{color:#40576a;line-height:1.72}
+.guide-card ul,.guide-card ol{padding-left:22px}
+.guide-card li+li{margin-top:7px}
+.guide-photo{margin:16px 0;overflow:hidden;border:1px solid #cbdde8;border-radius:18px;background:#edf4f8}
+.guide-photo img{display:block;width:100%;max-height:520px;object-fit:cover}
+.guide-photo figcaption{padding:12px 15px;color:#496274;background:#f7fbfd;font-size:.9rem;line-height:1.5}
+.guide-callout{margin:16px 0;padding:16px;border:1px solid #a9cdec;border-left:6px solid #0b5e98;border-radius:13px;background:#edf7fd;color:#17324a;line-height:1.6}
+.guide-warning{border-color:#f2c078;border-left-color:#c55a05;background:#fff8ec}
+.guide-formula{margin:14px 0;padding:14px;border-radius:12px;background:#071f34;color:#fff;font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;line-height:1.65;overflow:auto}
+.guide-table-wrap{overflow-x:auto;margin:14px 0}
+.guide-table{width:100%;border-collapse:collapse;background:#fff;font-size:.94rem}
+.guide-table th,.guide-table td{padding:11px 12px;border:1px solid #d7e2ea;text-align:left;vertical-align:top}
+.guide-table th{background:#eaf4fa;color:#14324d}
+.guide-status{display:inline-block;padding:5px 8px;border-radius:999px;font-size:.78rem;font-weight:900}
+.guide-status.verified{background:#e4f7ec;color:#12633f}
+.guide-status.review{background:#fff3c9;color:#765000}
+.guide-status.locked{background:#ffe1e1;color:#8c2020}
+.guide-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px;margin-top:16px}
+.guide-link-card{display:block;padding:18px;border:1px solid #d7e2ea;border-radius:15px;background:#fff;color:#14324d;text-decoration:none;box-shadow:0 6px 18px rgba(15,23,42,.04)}
+.guide-link-card:hover{border-color:#8bbbd7;transform:translateY(-2px)}
+.guide-link-card strong{display:block;margin-bottom:6px;color:#075d9a;font-size:1.05rem}
+.guide-link-card span{color:#52697a;line-height:1.5}
+.guide-action{display:inline-flex;align-items:center;justify-content:center;margin-top:10px;padding:11px 15px;border-radius:10px;background:#ff7a00;color:#06192b!important;font-weight:900;text-decoration:none}
+.guide-source-list a{overflow-wrap:anywhere}
+.guide-footer{margin-top:28px;padding-top:18px;border-top:1px solid #d7e2ea;color:#667085;font-size:.88rem;line-height:1.55}
+@media(max-width:620px){
+  .guide-hero{padding:23px 18px}
+  .guide-card{padding:18px}
+  .guide-grid{grid-template-columns:1fr}
+  .guide-topbar{align-items:flex-start;flex-direction:column}
+}
+
 /* V6.4.2 fire-damper manual and setting-out layout */
 .fd-manual-banner{margin-top:16px;padding:16px;border:1px solid var(--line,#d7e0e8);border-left:5px solid #064b82;border-radius:14px;background:#f6f9fc;display:grid;grid-template-columns:minmax(0,1fr) auto;gap:16px;align-items:center}
 .fd-manual-banner-copy strong{display:block;margin:4px 0 6px;font-size:1rem;color:#142033}.fd-manual-banner-copy p{margin:0;color:#465568;line-height:1.45}.fd-manual-banner .fd-manual-primary{margin:0;white-space:normal;text-align:center;max-width:310px}

@@ -13,8 +13,8 @@ const $=id=>document.getElementById(id);function showPage(id){
 function ductPath(x1,y1,x2,y2,w){let vx=x2-x1,vy=y2-y1,L=Math.hypot(vx,vy)||1,nx=-vy/L*w/2,ny=vx/L*w/2;return`M ${x1+nx} ${y1+ny} L ${x2+nx} ${y2+ny} L ${x2-nx} ${y2-ny} L ${x1-nx} ${y1-ny} Z`}function spiralLines(x1,y1,x2,y2,w,count){let vx=x2-x1,vy=y2-y1,L=Math.hypot(vx,vy)||1,ux=vx/L,uy=vy/L,nx=-uy,ny=ux,s='';for(let i=1;i<count;i++){let t=i/count*L,cx=x1+ux*t,cy=y1+uy*t,a=18;s+=`<line x1="${cx+nx*w*.42-ux*a}" y1="${cy+ny*w*.42-uy*a}" x2="${cx-nx*w*.42+ux*a}" y2="${cy-ny*w*.42+uy*a}" stroke="#9aa4b2" stroke-width="1.4"/>`}return s}
 function annularSectorPath(cx,cy,rO,rI,a1,a2){const p=(r,a)=>[cx+r*Math.cos(a),cy+r*Math.sin(a)],A=p(rO,a1),B=p(rO,a2),C=p(rI,a2),D=p(rI,a1),sw=a2>a1?1:0;return `M ${A[0]} ${A[1]} A ${rO} ${rO} 0 0 ${sw} ${B[0]} ${B[1]} L ${C[0]} ${C[1]} A ${rI} ${rI} 0 0 ${1-sw} ${D[0]} ${D[1]} Z`}
 
-// Manufacturer bend take-off l (mm), transcribed from the supplied data sheets.
-// BU pressed 45° covers the smaller sizes. BFU lockseamed tables cover 250–1250 mm.
+// Published bend take-off l (mm), transcribed from Lindab BU/BFU data sheets.
+// The numeric tables and the offset arithmetic are unchanged from VentTools V2.0.6.
 const BEND_TAKEOFF_DATA = {
   BU: {
     45: {
@@ -52,6 +52,21 @@ const BEND_TAKEOFF_DATA = {
 };
 
 function getBendTakeoff(angle, diameter, rmFactor){
+  const method=$('bendTakeoffMethod')?.value||'published';
+  if(method==='measured'){
+    const measured=parseFloat($('measuredTakeoff')?.value);
+    const valid=Number.isFinite(measured)&&measured>=0;
+    return {
+      l:valid?measured:NaN,
+      valid,
+      exact:valid,
+      measured:true,
+      family:'Measured bend',
+      source:'User-entered site measurement',
+      status:'Measured dimension'
+    };
+  }
+
   const roundedAngle = Math.round(angle * 10) / 10;
   const roundedDiameter = Math.round(diameter);
 
@@ -60,7 +75,7 @@ function getBendTakeoff(angle, diameter, rmFactor){
   if(roundedAngle === 45 && roundedDiameter <= 250){
     const exact = BEND_TAKEOFF_DATA.BU[45][roundedDiameter];
     if(Number.isFinite(exact)){
-      return {l:exact, exact:true, family:'BU pressed', source:'Manufacturer table'};
+      return {l:exact, valid:true, exact:true, family:'Pressed bend', source:'Lindab BU published table', status:'Published table dimension'};
     }
   }
 
@@ -68,16 +83,18 @@ function getBendTakeoff(angle, diameter, rmFactor){
   if(angleTable){
     const exact = angleTable[roundedDiameter];
     if(Number.isFinite(exact)){
-      return {l:exact, exact:true, family:'BFU lockseamed', source:'Manufacturer table'};
+      return {l:exact, valid:true, exact:true, family:'Segmented / lockseamed bend', source:'Lindab BFU published table', status:'Published table dimension'};
     }
   }
 
   const estimated = (rmFactor * diameter) * Math.tan(rad(angle) / 2);
   return {
     l:estimated,
+    valid:Number.isFinite(estimated),
     exact:false,
-    family:diameter <= 250 ? 'Pressed-style estimate' : 'Lockseamed-style estimate',
-    source:'Geometric estimate: rm × tan(θ/2)'
+    family:diameter <= 250 ? 'Pressed-bend estimate' : 'Lockseamed-bend estimate',
+    source:'Calculated estimate: rm × tan(θ/2)',
+    status:'Estimated dimension'
   };
 }
 
@@ -226,6 +243,7 @@ function drawOffset(d){
 }
 function getDiameter(){return $('dia').value==='custom'?(parseFloat($('diaCustom').value)||0):(parseFloat($('dia').value)||0)}
 function diameterUI(){const custom=$('dia').value==='custom';$('diaCustom').style.display=custom?'block':'none'}
+function takeoffUI(){const measured=$('bendTakeoffMethod')?.value==='measured';if($('measuredTakeoffWrap'))$('measuredTakeoffWrap').style.display=measured?'block':'none';if($('estimateFactorWrap'))$('estimateFactorWrap').style.display=measured?'none':'block'}
 function calculateOffset(){
   const V=parseFloat($('up').value)||0;
   const H=parseFloat($('over').value)||0;
@@ -243,6 +261,19 @@ function calculateOffset(){
   const bend=getBendTakeoff(A,D,rmF);
   const l=bend.l;
   const straight=T-(2*l);
+
+  if(!bend.valid){
+    $('straightBig').textContent='—';
+    $('rollBig').textContent=fmt(roll)+'°';
+    if($('minRiseBig'))$('minRiseBig').textContent='—';
+    if($('riseChangeBig'))$('riseChangeBig').textContent='—';
+    if($('minRiseSub'))$('minRiseSub').textContent='Enter the take-off of one delivered bend.';
+    if($('riseChangeSub'))$('riseChangeSub').textContent='No adjustment calculated yet.';
+    if($('fittingChip'))$('fittingChip').textContent='Measured take-off required';
+    $('out').textContent='';
+    setMsg('bad','⚠ Enter the measured take-off of one bend.');
+    return '';
+  }
 
   // Work backwards from the selected minimum straight.
   // Required resultant offset R = sin(angle) × (minimum straight + two bend take-offs).
@@ -290,7 +321,7 @@ Results:
 
   const chip=$('fittingChip');
   if(chip){
-    chip.textContent=`${bend.family} • Ø${fmt0(D)} mm • ${bend.exact?'Exact table dimension':'Estimated dimension'}`;
+    chip.textContent=`${bend.family} • Ø${fmt0(D)} mm • ${bend.status}`;
   }
 
   if(!Number.isFinite(straight)){
@@ -306,18 +337,18 @@ Results:
   }
   return result;
 }
-function angleUI(){let c=$('angle').value==='custom';$('angleCustom').style.display=c?'block':'none';if(!c)$('angleCustom').value=$('angle').value}function resetOffset(){$('up').value=300;$('over').value=250;$('angle').value='45';$('angleCustom').value=45;$('dia').value='315';$('diaCustom').value=315;$('minStraight').value=120;$('rmFactor').value=1;angleUI();diameterUI();calculateOffset()}async function copyOffset(){let r=calculateOffset();try{await navigator.clipboard.writeText(r);setMsg('ok','✅ Result copied.')}catch(e){setMsg('warn','Could not copy automatically. Long-press working text and copy manually.')}}function toggleWorking(){let o=$('out'),show=o.style.display==='block';o.style.display=show?'none':'block';$('workingBtn').textContent=show?'Show working':'Hide working'}
+function angleUI(){let c=$('angle').value==='custom';$('angleCustom').style.display=c?'block':'none';if(!c)$('angleCustom').value=$('angle').value}function resetOffset(){$('up').value=300;$('over').value=250;$('angle').value='45';$('angleCustom').value=45;$('dia').value='315';$('diaCustom').value=315;$('minStraight').value=120;$('rmFactor').value=1;$('bendTakeoffMethod').value='published';$('measuredTakeoff').value='';angleUI();diameterUI();takeoffUI();calculateOffset()}async function copyOffset(){let r=calculateOffset();try{await navigator.clipboard.writeText(r);setMsg('ok','✅ Result copied.')}catch(e){setMsg('warn','Could not copy automatically. Long-press working text and copy manually.')}}function toggleWorking(){let o=$('out'),show=o.style.display==='block';o.style.display=show?'none':'block';$('workingBtn').textContent=show?'Show working':'Hide working'}
 function initOffsetCalculator(){
  if(!$('up'))return;
- ['up','over','dia','diaCustom','minStraight','rmFactor','angle','angleCustom'].forEach(id=>{
+ ['up','over','dia','diaCustom','minStraight','rmFactor','bendTakeoffMethod','measuredTakeoff','angle','angleCustom'].forEach(id=>{
   const el=$(id);if(!el)return;
-  el.addEventListener('input',()=>{angleUI();diameterUI();calculateOffset()});
-  el.addEventListener('change',()=>{angleUI();diameterUI();calculateOffset()});
+  el.addEventListener('input',()=>{angleUI();diameterUI();takeoffUI();calculateOffset()});
+  el.addEventListener('change',()=>{angleUI();diameterUI();takeoffUI();calculateOffset()});
  });
  $('resetBtn')?.addEventListener('click',resetOffset);
  $('copyBtn')?.addEventListener('click',copyOffset);
  $('workingBtn')?.addEventListener('click',toggleWorking);
- angleUI();diameterUI();calculateOffset();
+ angleUI();diameterUI();takeoffUI();calculateOffset();
 }
 const standardSpiral=[80,100,125,150,160,180,200,224,250,280,300,315,355,400,450,500,560,600,630,710,800,900,1000,1120,1250,1400,1500,1600];
 function nearestStandard(d){let best=standardSpiral[0];for(const size of standardSpiral){if(Math.abs(size-d)<Math.abs(best-d))best=size}return best}

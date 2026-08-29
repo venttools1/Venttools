@@ -9,7 +9,16 @@
 /pack-builder.html
   X-Robots-Tag: noindex, follow
 
+/pack-builder
+  X-Robots-Tag: noindex, follow
+
 /site-sheet.html
+  X-Robots-Tag: noindex, follow
+
+/site-sheet
+  X-Robots-Tag: noindex, follow
+
+/data/*
   X-Robots-Tag: noindex, follow
 
 https://:version.:subdomain.workers.dev/*

@@ -1,7 +1,7 @@
 {
-  "schemaVersion": "6.5.0-rc.12-main-candidate",
-  "generated": "2026-08-21",
-  "releaseStatus": "main-candidate",
+  "schemaVersion": "6.5.0",
+  "generated": "2026-08-29",
+  "releaseStatus": "controlled-release",
   "qualityRule": "No method may invent a position, clearance, opening, lining or support requirement not stated by the controlling manufacturer document.",
   "manufacturers": [
     {

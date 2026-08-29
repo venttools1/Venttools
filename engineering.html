@@ -1,15 +1,92 @@
-<!DOCTYPE html>
-<html lang="en-GB"><head><meta content="ca-pub-6160116893773400" name="google-adsense-account"/><meta charset="utf-8"/><meta content="width=device-width,initial-scale=1" name="viewport"/><title>Engineering Database and Verification — VentTools</title><link href="https://venttools.com/engineering.html" rel="canonical"/><link href="style.css?v=2.0.6" rel="stylesheet"/><meta content="Review VentTools engineering data, manufacturer-document references, verification status and calculation-method notes." name="description"/><meta content="Engineering Database and Verification — VentTools" property="og:title"/><meta content="Review VentTools engineering data, manufacturer-document references, verification status and calculation-method notes." property="og:description"/><meta content="website" property="og:type"/><meta content="https://venttools.com/engineering.html" property="og:url"/><meta content="VentTools" property="og:site_name"/><meta content="https://venttools.com/icon-512.png" property="og:image"/><meta content="summary" name="twitter:card"/><meta content="Engineering Database and Verification — VentTools" name="twitter:title"/><meta content="Review VentTools engineering data, manufacturer-document references, verification status and calculation-method notes." name="twitter:description"/><meta content="https://venttools.com/icon-512.png" name="twitter:image"/></head><body>
-<div class="app-shell"><main class="page active" style="display:block;max-width:980px;margin:auto;padding:24px">
-<a class="footer-link-btn" href="/">← Back to VentTools</a>
-<div class="hero" style="margin-top:18px"><h1>Engineering database</h1><p>Four original manufacturers consolidated into one verified, method-led structure.</p></div>
-<div class="card"><h2>Database status</h2><div id="registry">Loading…</div></div>
-<div class="card"><h2>Audit rules</h2><p>VentTools does not invent installation positions. It separates nominal duct size, casing or frame geometry, tested aperture, lining and structural opening. Any unresolved conflict remains visible or disables the affected calculator.</p><div id="audit"></div></div>
-<div class="card"><h2>Release status</h2><p>This is an engineering database beta for regression testing. The current manufacturer IOM, Declaration of Performance, project fire strategy and approved supporting construction remain controlling.</p></div>
-<section class="card"><h2>BSB engineering database</h2><p>The structured BSB database covers FSD-TD-S and FSD-TD-C, FD-C-AF, FD-C, FSD-C, MFD-IC and AT-FSD by tested installation method. FD-C-AF is kept distinct from the similarly named FD-C Series. FSD-TD-O remains verification-required until an explicit orderable flat-oval size/configuration table is available.</p><p><a href="data/bsb-engineering-database.json">View structured BSB database (JSON)</a></p></section><p class="footer-note">VentTools V2.0.6</p></main></div>
-<script>
-Promise.all([fetch('data/manufacturer-registry.json').then(r=>r.json()),fetch('data/audit-log.json').then(r=>r.json())]).then(([reg,audit])=>{
- document.getElementById('registry').innerHTML=reg.manufacturers.map(m=>`<section style="margin:18px 0"><h3>${m.id}</h3><p><strong>Status:</strong> ${m.status}</p><p><strong>Families:</strong> ${m.families.join(', ')}</p><p>${m.notes.join(' ')}</p></section>`).join('');
- document.getElementById('audit').innerHTML='<ul>'+audit.items.map(i=>`<li><strong>${i.manufacturer} ${i.family}:</strong> ${i.issue} <em>${i.decision}</em></li>`).join('')+'</ul>';
-}).catch(()=>document.getElementById('registry').textContent='Database files could not be loaded.');
-</script></body></html>
+<!doctype html>
+<html lang="en-GB"><head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="theme-color" content="#06192b">
+<meta name="google-adsense-account" content="ca-pub-6160116893773400">
+<title>How VentTools Verifies Engineering Data</title>
+<meta name="description" content="See how VentTools maps manufacturer documents, separates duct and casing geometry, records limitations and disables unsupported fire-damper calculations.">
+<meta name="robots" content="index,follow,max-image-preview:large,max-snippet:-1,max-video-preview:-1"><link rel="canonical" href="https://venttools.com/engineering">
+<link rel="icon" href="/icon-192.png"><link rel="stylesheet" href="/style.css?v=2.0.7"><link rel="stylesheet" href="/v2.css?v=2.0.7">
+<meta property="og:type" content="website"><meta property="og:site_name" content="VentTools"><meta property="og:title" content="How VentTools Verifies Engineering Data"><meta property="og:description" content="A public record of supported product families, audit controls, limitations and source handling."><meta property="og:url" content="https://venttools.com/engineering"><meta property="og:image" content="https://venttools.com/assets/venttools-k-fan-logo.webp">
+<script type="application/ld+json">{"@context":"https://schema.org","@type":"TechArticle","headline":"How VentTools verifies engineering data","datePublished":"2026-08-29","dateModified":"2026-08-29","author":{"@type":"Person","name":"Matthew Kirby","jobTitle":"Ventilation duct fitter"},"publisher":{"@type":"Organization","name":"VentTools","url":"https://venttools.com/"},"mainEntityOfPage":"https://venttools.com/engineering"}</script>
+</head><body>
+<main class="guide-shell">
+  <nav class="guide-topbar" aria-label="Breadcrumb"><a href="/">← VentTools home</a><a href="/fire-damper-opening-calculator/">Open fire damper calculator</a></nav>
+  <header class="guide-hero">
+    <span class="eyebrow">ENGINEERING VERIFICATION</span><h1>How VentTools controls manufacturer data</h1>
+    <p>Every enabled fire-damper calculation must identify its product, tested method, dimension reference and source status. Where those cannot be established, VentTools shows a review warning or refuses to calculate.</p>
+    <div class="guide-byline"><span>Maintained by Matthew Kirby</span><span>Database status: controlled release</span><span>Reviewed 29 August 2026</span></div>
+  </header>
+
+  <section class="guide-card">
+    <h2>What “verified” means here</h2>
+    <p>A verified VentTools method has enough published information to follow the complete path from the selected damper to the opening result. It does not mean that VentTools has certified the product or replaced the manufacturer. It means the calculation record identifies the controlling geometry and keeps the official source available for checking.</p>
+    <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Status</th><th>Meaning</th></tr></thead><tbody>
+      <tr><td><span class="guide-status verified">Verified</span></td><td>The selected product and method have a mapped source, size rule and opening chain suitable for the displayed result.</td></tr>
+      <tr><td><span class="guide-status review">Review required</span></td><td>Some guidance is available, but a source conflict, missing casing datum or method-specific detail prevents a fully issueable record.</td></tr>
+      <tr><td><span class="guide-status locked">Calculation locked</span></td><td>VentTools will not create an opening from another product's rule or from an unsupported extrapolation.</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="guide-card">
+    <h2>The verification chain</h2>
+    <ol>
+      <li><strong>Identify the exact family:</strong> similar product codes remain separate records.</li>
+      <li><strong>Select the tested installation method:</strong> wall, floor, batt, mortar, frame and remote methods are not interchangeable.</li>
+      <li><strong>Establish the geometry reference:</strong> nominal duct, outside casing, PTC shroud or installation frame.</li>
+      <li><strong>Apply the published opening rule:</strong> fixed allowance, permitted range or exact table.</li>
+      <li><strong>Map lining and setting out:</strong> reveal lining is separated from face pattress, batt and infill.</li>
+      <li><strong>Attach source and limitations:</strong> the result carries the document reference, revision status and critical installation notes.</li>
+    </ol>
+    <div class="guide-callout"><strong>Blocking principle:</strong> no method may invent a position, clearance, opening, lining or support requirement that is not established by the controlling manufacturer document.</div>
+  </section>
+
+  <section class="guide-card">
+    <h2>Manufacturer and product coverage</h2>
+    <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Manufacturer</th><th>Mapped product families</th><th>Current position</th></tr></thead><tbody>
+      <tr><td><strong>BSB</strong></td><td>FSD-TD-S, FSD-TD-C, FD-C-AF, FD-C, FSD-C, MFD-IC, AT-FSD</td><td><span class="guide-status verified">Structured</span> Methods are separated by product and tested construction. FSD-TD-O remains review-required without a complete orderable flat-oval table.</td></tr>
+      <tr><td><strong>Actionair</strong></td><td>CSS, DWFX-F, HEVAC/HVCA installation frame, SPAN</td><td><span class="guide-status review">Method-specific</span> Measured casing, PTC-shroud and installation-frame references are kept distinct. Unsupported masonry rules remain guidance-only.</td></tr>
+      <tr><td><strong>Lindab</strong></td><td>FNC1, FNC1U, WH25, WH45, WK25, WK45, WKS25</td><td><span class="guide-status review">Controlled</span> FNC1U remains locked pending its controlling manual. A WKS25 source discrepancy stays visible in the audit.</td></tr>
+      <tr><td><strong>Advanced Air</strong></td><td>0160, 0400MAN/FME, 0500MAN/FME, 2530, 26SCD</td><td><span class="guide-status review">In progress</span> Opening tables and AFS ranges are mapped, but Project Pack enablement remains method-specific until every setting-out datum is established.</td></tr>
+    </tbody></table></div>
+  </section>
+
+  <section class="guide-card">
+    <h2>Examples of controls that prevent a wrong result</h2>
+    <h3>Similar BSB circular product names</h3><p>FD-C-AF, FD-C Series and FSD-TD-C are separate calculation paths. FD-C-AF uses a circular spigot through a rectangular curtain-blade casing and Angle Frame. It must not inherit the FSD-TD-C multiblade casing table simply because a diameter is the same.</p>
+    <h3>Nominal duct versus casing edge</h3><p>The bottom structural cut is calculated from the selected method's casing projection, clearance and lining—not from an assumption that the casing ends at the nominal duct edge.</p>
+    <h3>Published ranges versus invented centre positions</h3><p>Where a manufacturer permits a range of edge clearances or non-central positioning, VentTools stores those constraints separately. A convenient midpoint is not presented as a manufacturer requirement.</p>
+    <h3>Conflicting source documents</h3><p>The Lindab WKS25 Type A opening is shown differently in two supplied documents. VentTools retains the conflict and identifies which controlling installation booklet supports the live provisional method rather than hiding the discrepancy.</p>
+  </section>
+
+  <section class="guide-card">
+    <h2>What each calculation record should show</h2>
+    <ul>
+      <li>Manufacturer, product family and selected tested method.</li>
+      <li>Nominal duct or entered measured reference.</li>
+      <li>Overall casing or installation-frame stage where published.</li>
+      <li>Finished aperture and permitted range.</li>
+      <li>Structural hole and any separately added reveal lining.</li>
+      <li>Bottom and top setting-out offsets only where the source supports them.</li>
+      <li>Supporting construction, penetration seal, duct connection, supports and access notes.</li>
+      <li>Official manufacturer source link and verification status.</li>
+    </ul>
+  </section>
+
+  <section class="guide-card">
+    <h2>Release and correction record</h2>
+    <div class="guide-table-wrap"><table class="guide-table"><thead><tr><th>Date</th><th>Release</th><th>Engineering change</th></tr></thead><tbody>
+      <tr><td>29 Aug 2026</td><td>V2.0.7</td><td>Published the verification method as static, crawlable content; retained V2.0.6 calculation logic and added author accountability.</td></tr>
+      <tr><td>26 Aug 2026</td><td>V2.0.6</td><td>Improved offset controls and wording without changing recorded bend tables or calculation formulae.</td></tr>
+      <tr><td>21 Aug 2026</td><td>V2.0.5</td><td>Added the separate BSB FD-C-AF path, including verified Ø355 and Ø560 geometry.</td></tr>
+    </tbody></table></div>
+    <p>The underlying structured records remain available for technical inspection:</p>
+    <ul class="guide-source-list"><li><a href="/data/manufacturer-registry.json">Manufacturer registry</a></li><li><a href="/data/audit-log.json">Engineering audit log</a></li><li><a href="/data/bsb-engineering-database.json">BSB structured database</a></li></ul>
+  </section>
+
+  <section class="guide-card">
+    <h2>Controlling documents and corrections</h2>
+    <p>VentTools is independent and does not certify products or installations. The current manufacturer IOM, Declaration of Performance, approved fire strategy, supporting construction and project-specific detail always take precedence.</p>
+    <p>Report a possible error to <a href="mailto:info@venttools.com">info@venttools.com</a> with the damper label, product, selected method, source revision and entered dimensions.</p>
+  </section>
+  <footer class="guide-footer">VentTools V2.0.7 · <a href="/guides/">Site guides</a> · <a href="/about">About Matthew Kirby</a> · <a href="/disclaimer">Technical disclaimer</a></footer>
+</main></body></html>

@@ -1,14 +1,20 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-  <url><loc>https://venttools.com/</loc><lastmod>2026-08-16</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
-  <url><loc>https://venttools.com/ductwork-offset-calculator/</loc><lastmod>2026-08-16</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://venttools.com/round-rectangular-duct-converter/</loc><lastmod>2026-08-16</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://venttools.com/fire-damper-opening-calculator/</loc><lastmod>2026-08-21</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
-  <url><loc>https://venttools.com/about.html</loc><lastmod>2026-08-16</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://venttools.com/contact.html</loc><lastmod>2026-08-16</lastmod><changefreq>monthly</changefreq><priority>0.6</priority></url>
-  <url><loc>https://venttools.com/privacy.html</loc><lastmod>2026-08-16</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://venttools.com/cookies.html</loc><lastmod>2026-08-16</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://venttools.com/terms.html</loc><lastmod>2026-08-16</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://venttools.com/disclaimer.html</loc><lastmod>2026-08-16</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
-  <url><loc>https://venttools.com/engineering.html</loc><lastmod>2026-08-21</lastmod><changefreq>monthly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://venttools.com/</loc><lastmod>2026-08-29</lastmod><changefreq>weekly</changefreq><priority>1.0</priority></url>
+  <url><loc>https://venttools.com/ductwork-offset-calculator/</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://venttools.com/round-rectangular-duct-converter/</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://venttools.com/fire-damper-opening-calculator/</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.9</priority></url>
+  <url><loc>https://venttools.com/guides/</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://venttools.com/guides/measuring-ductwork-offsets/</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://venttools.com/guides/bend-takeoff-pressed-lockseamed/</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://venttools.com/guides/fire-damper-opening-setting-out/</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://venttools.com/guides/round-to-rectangular-duct-conversion/</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://venttools.com/guides/fire-damper-installation-qa-checklist/</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.8</priority></url>
+  <url><loc>https://venttools.com/engineering</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://venttools.com/about</loc><lastmod>2026-08-29</lastmod><changefreq>monthly</changefreq><priority>0.7</priority></url>
+  <url><loc>https://venttools.com/contact</loc><lastmod>2026-08-29</lastmod><changefreq>yearly</changefreq><priority>0.5</priority></url>
+  <url><loc>https://venttools.com/privacy</loc><lastmod>2026-08-29</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://venttools.com/cookies</loc><lastmod>2026-08-29</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://venttools.com/terms</loc><lastmod>2026-08-29</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
+  <url><loc>https://venttools.com/disclaimer</loc><lastmod>2026-08-29</lastmod><changefreq>yearly</changefreq><priority>0.4</priority></url>
 </urlset>
